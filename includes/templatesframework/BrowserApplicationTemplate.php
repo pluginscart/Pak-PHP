@@ -79,7 +79,7 @@ abstract class BrowserApplicationTemplate
     function ExtractTemplateFileTags($template_category, $template_name)
     {        
         $template_path     = ApplicationConfiguration::GetConfig("template_path") . DIRECTORY_SEPARATOR . $template_category . DIRECTORY_SEPARATOR . $template_name;
-        $template_contents = ApplicationConfiguration::GetComponent("utilities")->ReadLocalFile($template_path);
+        $template_contents = ApplicationConfiguration::GetComponent("filesystem")->ReadLocalFile($template_path);
         
         /** All template tags of the form {} are extracted from the template file */
         preg_match_all("/\{(.+)\}/iU", $template_contents, $matches);

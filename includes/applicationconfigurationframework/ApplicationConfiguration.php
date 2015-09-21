@@ -78,7 +78,7 @@ class ApplicationConfiguration extends DefaultApplicationConfiguration
         foreach (static::$configuration['required_frameworks'] as $framework_name => $object_information) {
         	/** The class parameters are initialized **/
         	if(!isset($object_information['parameters']))$object_information['parameters']="";
-			 
+			
             /** The name of the framework class **/
             $framework_class_name = $object_information['class_name'];
             /** 
@@ -171,7 +171,7 @@ class ApplicationConfiguration extends DefaultApplicationConfiguration
         $this->InitializeFrameworkObjects();
         /** All required classes are included **/
         $this->IncludeRequiredClasses();
-        
+       
         /** 
          * If http authentication is required and application is called from browser
          * Then the http authentication callback is called and user is asked to authenticate 

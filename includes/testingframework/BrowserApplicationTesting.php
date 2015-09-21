@@ -154,7 +154,7 @@ abstract class BrowserApplicationTesting extends ApplicationTesting
      */
     private function ValidateHTML($html_content)
     {
-        $utilities_obj          = ApplicationConfiguration::GetComponent("utilities");
+        $filesystem_obj          = ApplicationConfiguration::GetComponent("filesystem");
         $is_browser_application = ApplicationConfiguration::GetConfig("is_browser_application");
         $test_parameters        = ApplicationConfiguration::GetConfig("testing");
         
@@ -177,7 +177,7 @@ abstract class BrowserApplicationTesting extends ApplicationTesting
             "Content-type: multipart/form-data; boundary=---------------------------" . strlen($html_content)
         );
         
-        $validation_results = $utilities_obj->GetFileContent($validator_url, "POST", $content, $headers);
+        $validation_results = $filesystem_obj->GetFileContent($validator_url, "POST", $content, $headers);
         if ($is_browser_application)
             $validation_results = str_replace("style.css", $validator_url . "style.css", $validation_results);
         

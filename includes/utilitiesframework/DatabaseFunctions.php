@@ -723,7 +723,7 @@ class DatabaseFunctions
      * @return boolean $is_valid returns true if database connection succeeded. throws exeption otherwise 
      */
     private function internal_df_connect($srv, $uid, $pwd, $db)
-    {        
+    {
         $Id = @mysqli_connect($srv, $uid, $pwd);
         if (($Id !== false) and ($db !== '')) {
             if (!@mysqli_select_db($Id, $db))

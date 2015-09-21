@@ -35,7 +35,7 @@ abstract class DefaultApplicationConfiguration
         $option                                  = isset($_REQUEST['option']) ? $_REQUEST['option'] : '';
         /** Used to indicate if application is a browser application **/
         $configuration['is_browser_application'] = (isset($_SERVER['HTTP_HOST'])) ? true : false;
-        
+       
         /** The application option and the option parameters are saved to application configuration **/
         $configuration['default_option']        = "";
         $configuration['option']                = $option;
@@ -167,16 +167,14 @@ abstract class DefaultApplicationConfiguration
         );
         
         /** The utilities class parameters are set **/
-        $utilities_parameters['table_prefix']            = "";
-        $utilities_parameters['function_cache_duration'] = array();
-        $utilities_parameters['upload_folder']           = $configuration['tmp_folder_path'];
-        $utilities_parameters['allowed_extensions']      = array(
+        $filesystem_parameters['upload_folder']           = $configuration['tmp_folder_path'];
+        $filesystem_parameters['allowed_extensions']      = array(
             "xls",
             "xlsx",
             "txt"
         );
-        $utilities_parameters['max_allowed_file_size']   = "2048";
-        $utilities_parameters['link']                    = '';        
+        $filesystem_parameters['max_allowed_file_size']   = "2048";
+     
         /** The required framework objects are defined **/
         $configuration['required_frameworks'] = array(
             "errorhandler" => array(
@@ -193,7 +191,7 @@ abstract class DefaultApplicationConfiguration
             ),
             "filesystem" => array(                
                 "class_name" => "\UtilitiesFramework\FileSystem",
-                "parameters" => array()
+                "parameters" => $filesystem_parameters
             )
         );
         
@@ -268,7 +266,7 @@ abstract class DefaultApplicationConfiguration
         error_reporting(E_ALL);
         date_default_timezone_set('Europe/Berlin');
         if (static::$configuration['development_mode']) {
-            ini_set('display_errors', E_ALL);
+            ini_set('display_errors', true);
             ini_set('display_startup_errors', true);
         } else {
             ini_set('display_errors', 0);

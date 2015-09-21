@@ -195,8 +195,6 @@ abstract class ApplicationTesting
         $test_classes   = $configuration["testing"]['test_classes'];
         /** Start time for the unit tests **/
         $start_time     = time();
-        /** The function count is set **/
-        $function_count = 0;
         /** For each class all functions that start with Test are called **/
         for ($count = 0; $count < count($test_classes); $count++) {
             $object_name   = $test_classes[$count];
@@ -214,8 +212,7 @@ abstract class ApplicationTesting
                         $test_object,
                         $class_function
                     );
-                    try {
-                        $function_count++;
+                    try {                        
                         $current_assert_count = $this->valid_assert_count;
                         if (is_callable($testing_callback))
                             call_user_func($testing_callback);
@@ -225,7 +222,8 @@ abstract class ApplicationTesting
                         if ($this->invalid_assert_count > 0)
                             throw new \Exception("Assert failed in function: " . $class_function);
                         
-                        $test_results .= ($count + 1) . ") Testing function: " . $class_name . "::" . $class_function . ". result: passed. number of asserts: " . ($this->valid_assert_count - $current_assert_count) . $configuration['line_break'];
+                        $test_results .= ($test_count + 1) . ") Testing function: " . $class_name . "::" . $class_function . ". result: passed. number of asserts: " . ($this->valid_assert_count - $current_assert_count) . $configuration['line_break'];
+						$test_count++;
                     }
                     catch (Exception $e) {
                         $errorhandler_obj = ApplicationConfiguration::GetComponent("errorhandler");
@@ -241,7 +239,7 @@ abstract class ApplicationTesting
         $test_results .= $configuration['line_break'] . $configuration['line_break'];
         $test_results .= "Result of unit testing: ";
         $test_results .= $configuration['line_break'] . $configuration['line_break'];
-        $test_results .= "Number of functions tested: " . $function_count . $configuration['line_break'];
+        $test_results .= "Number of functions tested: " . $test_count . $configuration['line_break'];
         $test_results .= "Number of asserts: " . $this->valid_assert_count . $configuration['line_break'];
         $test_results .= "Number of failed asserts: " . $this->invalid_assert_count . $configuration['line_break'];
         $test_results .= "Time taken: " . ($end_time - $start_time) . " sec";
@@ -335,15 +333,7 @@ abstract class ApplicationTesting
                         if (is_callable($testing_callback))
                             call_user_func($testing_callback);
                         else
-                            throw new \Exception("Testing function : " . $function_name . " was not found for test object: " . $option_data['testing']['object_name']);
-                        
-                        if ($this->invalid_assert_count > 0)
-                            throw new \Exception("Assert failed in function: " . $class_function);
-                        
-                        $test_result .= ($count + 1) . ") Testing function: " . $option_data['testing']['object_name'] . "::" . $class_function . ". result: passed. " . ($this->valid_assert_count - $current_assert_count) . " valid asserts" . $configuration['line_break'];
-                        echo $test_result;
-                        flush();
-                        $test_results .= $test_result;
+                            throw new \Exception("Testing function : " . $function_name . " was not found for test object: " . $option_data['testing']['object_name']);                                               
                     }
                     catch (Exception $e) {
                         $errorhandler_obj = ApplicationConfiguration::GetComponent("errorhandler");
@@ -371,19 +361,30 @@ abstract class ApplicationTesting
                 throw new \Exception("Functional test for url: " . $option . " returned invalid response", 60);
             /** If the result of testing a function is error then the function displays an error message **/
             if ($test_result['result'] == 'error')
-                $test_result = "URL: " . $option . ". -> Error. Details: " . $test_result['message'] . $configuration['line_break'];
-            /** Otherwise the function displays not error message **/
+                {
+                	$test_result = "URL: " . $option . ". -> Error. Details: " . $test_result['message'] . $configuration['line_break'];
+					$this->invalid_assert_count++;
+				}
+            /** Otherwise the function displays no error message **/
             else
-                $test_result = "URL: " . $option . " -> No Errors!" . $configuration['line_break'];
+                {
+                	$test_result = "URL: " . $option . " -> No Errors!" . $configuration['line_break'];
+					$this->valid_assert_count++;					
+				}
+			 if ($this->invalid_assert_count > 0)throw new \Exception("Assert failed in function: " . $function_name);
+                        
+			$test_count++;
+            echo $test_result;
+            flush();            
         }
         
         /** End time for the unit tests **/
         $end_time = time();
         
-        $test_results .= $configuration['line_break'] . $configuration['line_break'];
+        $test_results = $configuration['line_break'] . $configuration['line_break'];
         $test_results .= "Result of unit testing: ";
         $test_results .= $configuration['line_break'] . $configuration['line_break'];
-        $test_results .= "Number of functions tested: " . $function_count . $configuration['line_break'];
+        $test_results .= "Number of functions tested: " . $test_count . $configuration['line_break'];
         $test_results .= "Number of asserts: " . $this->valid_assert_count . $configuration['line_break'];
         $test_results .= "Number of failed asserts: " . $this->invalid_assert_count . $configuration['line_break'];
         $test_results .= "Time taken: " . ($end_time - $start_time) . " sec";
