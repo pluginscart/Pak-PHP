@@ -1,0 +1,19 @@
+1) Database password encryption
+2) Custom version control using database. It should allow automatic code backup
+3) Add code coverage to test results
+4) Create deployment script for deploying the application
+5) Read about xdebug remote debugging with breakpoints
+6) Rename businessobjectframework to objectframework
+7) Create a application template generator script that creates the right application template depending on user input
+8) Create tools to extract important business logic functions
+9) Use a design pattern to separate the user interface from the data. e.g data can be used in text and graphical user interfaces
+10) Use one render function per layout
+11) Create a tools framework that provides gui and command line tools. user should be able to use the tools from the applications tools page. e.g tools for deploying application, testing application (clear database and test data, run functional tests, run unit tests), edit class diagram, edit database diagram, edit business rules, create new application from template, edit templates, create new templates, simple database editor, workflow task list depending on selected work, simple task editor, mantis bugtracker integration (e.g total number of hours)
+12) Update code so it conforms to psr standards including auto loading standard and logging standard
+13) Create simple template function for displaying html output. e.g for logging function output
+
+Reference:
+
+1) http://www.php-fig.org/
+2) http://beta.phpformatter.com/
+3) https://help.github.com/articles/adding-a-file-to-a-repository-from-the-command-line/

@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html>
+   <head>
+      <meta charset="UTF-8">
+      <title>{title}</title>      
+      <link rel="stylesheet" href="{web_vendor_path}/dropzonejs/dropzone.css">  
+      <script type="text/javascript" src="{web_vendor_path}/dropzonejs/dropzone.js"></script>
+      <script>
+      	Dropzone.options.uploadForm = {
+		  addRemoveLinks: true,
+		  paramName: "excel_file",
+		  init: function() {
+		    this.on("success", function(file, response) {
+		    try
+		    	{
+			      response=JSON.parse(response);
+			      if(response.result!="success")alert("An error occured while uploading the file. Details: ".response.message);
+			      else 
+			      	{
+			      		alert("File was successfully uploaded. Script will now display file contents");
+			      		location.href=response.message;
+			      	}
+			     }
+			  catch(err)
+			  	{
+			  		alert("File could not be uploaded. Please try again");
+			  	}
+		    });
+		  }
+		};
+      </script>         
+   </head>
+   <body>
+      <form id="upload_form" action="{web_application_url}?option={upload_handler_option}" class="dropzone">
+      	
+      </form>
+   </body>
+</html>
