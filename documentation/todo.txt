@@ -11,6 +11,8 @@
 11) Create a tools framework that provides gui and command line tools. user should be able to use the tools from the applications tools page. e.g tools for deploying application, testing application (clear database and test data, run functional tests, run unit tests), edit class diagram, edit database diagram, edit business rules, create new application from template, edit templates, create new templates, simple database editor, workflow task list depending on selected work, simple task editor, mantis bugtracker integration (e.g total number of hours)
 12) Update code so it conforms to psr standards including auto loading standard and logging standard
 13) Create simple template function for displaying html output. e.g for logging function output
+14) Add qunit test runner
+15) Add support for local and global templates
 
 Reference:
 
