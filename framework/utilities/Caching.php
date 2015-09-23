@@ -126,10 +126,11 @@ class Caching
      * @since 1.0.0
      * @param string $function_name name of the function whoose output is required
      * @param array $parameters function parameters		 
-     * 
+     * @param boolean $check_cache_duration used to indicate if the function cache duration should be checked
+	 * 
      * @return mixed the function data is returned or false if data was not found in cache
      */
-    public function GetCachedData($function_name, $parameters)
+    public function GetCachedData($function_name, $parameters, $check_cache_duration)
     {
         /** The string object is fetched **/
         $string_obj     = new String();
@@ -138,7 +139,7 @@ class Caching
         /** The function parameters are encoded **/
         $parameters     = $this->EncodeFunctionData($parameters);
         /** The cached data is fetched from database **/
-        if ($cache_duration != -1)
+        if ($cache_duration != -1 && $check_cache_duration)
             $select_str = "SELECT * FROM " . $this->table_prefix . "cached_data WHERE function_name='" . mysqli_escape_string($this->db_link, $function_name) . "' AND function_parameters='" . mysqli_escape_string($this->db_link, $parameters) . "' AND (created_on+" . mysqli_escape_string($this->db_link, $cache_duration) . ")>=" . time();
         else
             $select_str = "SELECT * FROM " . $this->table_prefix . "cached_data WHERE function_name='" . mysqli_escape_string($this->db_link, $function_name) . "' AND function_parameters='" . mysqli_escape_string($this->db_link, $parameters) . "'";
@@ -148,9 +149,9 @@ class Caching
         if (mysqli_num_rows($result) == 1) {
             $row  = mysqli_fetch_assoc($result);
             $data = base64_decode($row['data']);
-            $data = ($string_obj->IsJson($data)) ? json_decode($data, true) : $data;
+            $data = ($string_obj->IsJson($data)) ? json_decode($data, true) : $data;				
             return $data;
-        }
+        }	
         /** If it is not found then false is returned **/
         else
             return false;
@@ -176,7 +177,7 @@ class Caching
         /** The function data is encoded **/
         $encoded_data       = $this->EncodeFunctionData($data);
         /**	The data is fetched from cache. If it exists in cache then it is updated **/
-        if ($this->GetCachedData($function_name, $parameters)) {
+        if ($this->GetCachedData($function_name, $parameters, false)) {
             $update_str = "UPDATE " . $this->table_prefix . "cached_data SET created_on='" . time() . "',data='" . mysqli_escape_string($this->db_link, $encoded_data) . "' WHERE function_name='" . mysqli_escape_string($this->db_link, $function_name) . "' AND function_parameters='" . mysqli_escape_string($this->db_link, $encoded_parameters) . "'";
             mysqli_query($this->db_link, $update_str);
         }
