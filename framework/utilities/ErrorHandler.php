@@ -172,14 +172,14 @@ class ErrorHandler
      */
     public function ErrorHandler($error_level, $error_message, $error_file, $error_line, $error_context)
     {        
-        /** The object error properties are set to the error information **/
+        /** The object error properties are set to the error information */
         $this->error_level   = $error_level;
         $this->error_message = $error_message;
         $this->error_file    = $error_file;
         $this->error_line    = $error_line;
         $this->error_context = $error_context;
         $this->type          = "Error";
-        /** The error message is logged **/
+        /** The error message is logged */
         $this->LogError();        
     }
     
@@ -193,16 +193,16 @@ class ErrorHandler
      * @param object $exception_obj the exception object that contains the error information
      */
     public function ExceptionHandler($exception_obj)
-    {        
-        /** The last exception object is set to the exception_obj property **/
+    {        echo 'sdfds';exit;
+        /** The last exception object is set to the exception_obj property */
         $this->exception_obj = $exception_obj;
-        /** The first object that raised the exception is fetched **/
+        /** The first object that raised the exception is fetched */
         $temp_exception_obj  = $exception_obj;
         while ($e = $temp_exception_obj->getPrevious())
             $temp_exception_obj = $e;
         $this->first_exception_obj = $temp_exception_obj;
         
-        /** The exception properties of the class are set **/
+        /** The exception properties of the class are set */
         $log_message         = "";
         $response            = array(
             "result" => "error",
@@ -215,7 +215,7 @@ class ErrorHandler
         $this->error_line    = $temp_exception_obj->getLine();
         $this->error_context = $temp_exception_obj->getTrace();
         $this->type          = "Exception";
-        /** The exception is logged **/
+        /** The exception is logged */
         $this->LogError();        
     }
     
@@ -228,9 +228,9 @@ class ErrorHandler
      */
     public function ShutdownFunction()
     {        
-        /** The last error message is fetched **/
+        /** The last error message is fetched */
         $error = error_get_last();
-        /** If there was an error then it is handled using the ErrorHandler function **/
+        /** If there was an error then it is handled using the ErrorHandler function */
         if (isset($error["type"]))
             $this->ErrorHandler($error["type"], $error["message"], $error["file"], $error["line"], "Fatal error in script");        
     }
@@ -251,12 +251,12 @@ class ErrorHandler
         $extra_error_message = array();
         
         for ($count = 0; $count < count($trace['args']); $count++) {
-            /** Gets function parameter value from stack trace **/
+            /** Gets function parameter value from stack trace */
             $parameter_value = $trace['args'][$count];
-            /** If parameter value is an array then it is converted to string **/
+            /** If parameter value is an array then it is converted to string */
             if (is_array($parameter_value))
                 $parameter_value = var_export($parameter_value, true);
-            /** Gets function parameter name from ReflectionParameter class **/
+            /** Gets function parameter name from ReflectionParameter class */
             $parameters_information = new \ReflectionParameter(array(
                 $class_name,
                 $function_name
@@ -264,16 +264,11 @@ class ErrorHandler
             $parameters_name        = $parameters_information->getName();
             if (is_object($parameter_value))
                 $parameter_value = "Object of class: " . get_class($parameter_value);
-            /** Adds the function parameter information to the error array **/
-            $extra_error_message[] = "\t\t" . ($count + 1) . ") " . $parameters_name . ": " . $parameter_value;
+            /** Adds the function parameter information to the error array */
+            if($this->is_browser_application)$extra_error_message[$count] = "<div style='color: blue;margin-left:2%;display:inline'>\t\t" . ($count + 1) . ") " . $parameters_name . ": " . $parameter_value."</div>";
+			else $extra_error_message[$count] = "\t\t" . ($count + 1) . ") " . $parameters_name . ": " . $parameter_value;
         }
-        /** The parameter information is formatted for browser **/
-        if ($this->is_browser_application && count($trace['args']) > 0) {
-            $parameter_div_start_index                       = (count($extra_error_message) - count($trace['args']));
-            $parameter_div_end_index                         = (count($extra_error_message));
-            $extra_error_message[$parameter_div_start_index] = "<div style='color: blue;margin-left:2%;'>" . $extra_error_message[$parameter_div_start_index];
-            $extra_error_message[$parameter_div_end_index - 1] .= "</div>";
-        }
+
         return $extra_error_message;        
     }
     
@@ -291,14 +286,14 @@ class ErrorHandler
         if (!is_object($exception_obj))
             throw new \Exception("Invalid exception parameter passed to FormatErrorMessage function", 100);
         
-        /** The function local variables are initialized **/
+        /** The function local variables are initialized */
         $extra_error_message      = array();
         $extra_error_message_text = "";
         $line_break               = ($this->is_browser_application) ? "<br/>" : "\n";
         
-        /** The stack trace of the first exception object is fetched. This object contains the entire stack trace **/
+        /** The stack trace of the first exception object is fetched. This object contains the entire stack trace */
         $stack_trace = $this->first_exception_obj->getTrace();
-        /** Information of each stack trace is added to an array. The information is formatted for web browsers **/
+        /** Information of each stack trace is added to an array. The information is formatted for web browsers */
         for ($count = 0; $count < count($stack_trace); $count++) {
             $trace = $stack_trace[$count];
             /** 
@@ -320,6 +315,7 @@ class ErrorHandler
                 $extra_error_message[] = "<div style='color: green;margin-left:2%;'>" . "\ta) File name: " . $short_file_name;
             else
                 $extra_error_message[] = "\ta) File name: " . $short_file_name;
+			
             $extra_error_message[] = "\tb) Line: " . $line;
             $extra_error_message[] = "\tc) Function: " . $function;
             $extra_error_message[] = "\td) Parameters: ";
@@ -332,11 +328,10 @@ class ErrorHandler
                 $parameter_information = $this->GetParameterInformation($trace, $class, $function);
                 $extra_error_message   = array_merge($extra_error_message, $parameter_information);
                 if ($this->is_browser_application)
-                    $extra_error_message[count($extra_error_message) - 1] = "\te) Class: " . $class . "</div>";
+                    $extra_error_message[count($extra_error_message)] = "\te) Class: " . $class . "</div>";
                 else
                     $extra_error_message[] = "\te) Class: " . $class;
             } else {
-                $extra_error_message[count($extra_error_message) - 1] .= "N.A";
                 if ($this->is_browser_application)
                     $extra_error_message[] = "\te) Class: N.A</div>";
                 else
@@ -360,7 +355,7 @@ class ErrorHandler
     public function LogError()
     {        
         $log_message = "";
-        /** The log message is formatted for web browsers **/
+        /** The log message is formatted for web browsers */
         if ($this->is_browser_application) {
             $log_message = "<b>Exception on:</b> <span style='color:red'>" . date("d-m-Y H:i:s") . "</span>";
             $log_message .= "<br/><b>Error Code:</b> <span style='color:red'>" . $this->error_level . "</span>";
@@ -378,10 +373,11 @@ class ErrorHandler
             if (is_object($this->exception_obj))
                 $log_message .= "\n\nStack Trace: \n\n" . $this->FormatErrorMessage($this->exception_obj);
         }
-        /** The log message is written to log file if log file name is given **/
+		
+        /** The log message is written to log file if log file name is given */
         if ($this->log_file_name != "")
             error_log($log_message, 3, $this->log_file_name);
-        /** The log message is sent as email if the email address is given **/
+        /** The log message is sent as email if the email address is given */
         if ($this->user_email != "")
             error_log($log_message, 1, $this->user_email, $this->log_email_header);
         /** 
@@ -403,17 +399,17 @@ class ErrorHandler
                     "error_type" => $this->type
                 );
                 
-                /** calls the user defined error handler if one is defined **/
+                /** calls the user defined error handler if one is defined */
                 call_user_func_array($this->custom_error_handler, array(
                     $log_message,
                     $error_parameters
                 ));
                 
             }
-            /** If the custom error handler is defined but is not valid then an exception is thrown **/
+            /** If the custom error handler is defined but is not valid then an exception is thrown */
             else if ($this->custom_error_handler != "")
                 throw new \Exception("Invalid custom error handler type given", 100);
-            /** If the custom error handling function is not defined then the log message is echoed **/
+            /** If the custom error handling function is not defined then the log message is echoed */
             else
                 echo $log_message;
         } else if ($this->is_browser_application)

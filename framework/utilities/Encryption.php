@@ -117,7 +117,7 @@ class Encryption
         # may remove 00h valued characters from end of plain text
         $plaintext_dec = mcrypt_decrypt(MCRYPT_RIJNDAEL_128, $this->key, $ciphertext_dec, MCRYPT_MODE_CBC, $iv_dec);
         
-        # remove null character from end of string and return the string **/			
+        # remove null character from end of string and return the string */			
         $decrypted_string = rtrim($plaintext_dec, "\0");
         
         return $decrypted_string;

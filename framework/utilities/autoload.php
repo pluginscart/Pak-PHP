@@ -2,7 +2,7 @@
 
 namespace Framework\Utilities;
 
-/** All errors are reported and displayed **/
+/** All errors are reported and displayed */
 ini_set("display_errors",true);
 error_reporting(E_ALL);
 
@@ -19,13 +19,13 @@ error_reporting(E_ALL);
  */
 function autoload_framework_classes($class_name)
 	{
-		/** The class name is split into namespace and short class name **/
+		/** The class name is split into namespace and short class name */
 		$temp_arr=explode("\\",$class_name);
-		/** The class file name should be same as class_name.php **/
+		/** The class file name should be same as class_name.php */
 		$class_name=($temp_arr[2]).".php";
-		/** The application folder is checked for file name **/				
+		/** The application folder is checked for file name */				
 		$file_name=realpath(dirname(__FILE__)).DIRECTORY_SEPARATOR.$class_name;
-		/** If the file exists then it is included **/						
+		/** If the file exists then it is included */						
 		if(is_file($file_name))include_once($file_name);
     }
 	

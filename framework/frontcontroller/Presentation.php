@@ -1,7 +1,8 @@
 <?php
 
-namespace Framework\Presentation;
-use Framework\ApplicationConfiguration\ApplicationConfiguration as ApplicationConfiguration;
+namespace Framework\FrontController;
+
+use Framework\Configuration\Configuration as Configuration;
 
 /**
  * Base presentation class for browser based applications
@@ -10,13 +11,13 @@ use Framework\ApplicationConfiguration\ApplicationConfiguration as ApplicationCo
  * Provides base functions for application presentation classes
  * 
  * @category   Framework
- * @package    Presentation
+ * @package    FrontController
  * @author     Nadir Latif <nadir@pakjiddat.com>
  * @license    https://www.gnu.org/licenses/gpl-2.0.html GNU General Public License, version 2
  * @version    1.0.0
  * @link       N.A
  */
-abstract class ApplicationPresentation
+abstract class Presentation
 {
     /**
      * The single static instance
@@ -54,8 +55,8 @@ abstract class ApplicationPresentation
     {        
         $template_parameters = array();
         
-        /** The presentation object is fetched from application configuration **/
-        $presentation_object = ApplicationConfiguration::GetComponent('presentation');
+        /** The presentation object is fetched from application configuration */
+        $presentation_object = Configuration::GetComponent('presentation');
         
         $function_name_suffix = ucwords(str_replace("_", " ", $option));
         $function_name_suffix = str_replace(" ", "", $function_name_suffix);
@@ -64,12 +65,12 @@ abstract class ApplicationPresentation
         $function_name                = ucwords(str_replace("_", " ", $function_name));
         $function_name                = str_replace(" ", "", $function_name);
         $function_name                = "Get" . $function_name . "ParametersFor" . $function_name_suffix;
-        /** The template parameters callback is defined **/
+        /** The template parameters callback is defined */
         $template_parameters_callback = array(
             $presentation_object,
             $function_name
         );
-        /** If the callback exists then it is called. Otherwise an exception is thrown **/
+        /** If the callback exists then it is called. Otherwise an exception is thrown */
         if (is_callable($template_parameters_callback))
             $template_parameters = call_user_func($template_parameters_callback);
         else

@@ -56,9 +56,9 @@ abstract class UtilitiesFramework
                 return $stored_object;
         }
         
-        /** If the object type matches a class alias then it is set to the class name **/
+        /** If the object type matches a class alias then it is set to the class name */
         $object_type               = (isset(self::$object_alias_list[$object_type])) ? self::$object_alias_list[$object_type] : $object_type;
-        /** Otherwise the class name is calculated **/
+        /** Otherwise the class name is calculated */
         $class_name                = '\Framework\Utilities\\' . ucfirst($object_type);
         /**
          * Used to check if utility class implments Singleton pattern
@@ -71,14 +71,14 @@ abstract class UtilitiesFramework
             "GetInstance"
         );
         if (is_callable($callable_singleton_method)) {
-            /** If the object parameters are associative then the parameters are considered as single parameter for the callback function **/
+            /** If the object parameters are associative then the parameters are considered as single parameter for the callback function */
             $is_associative = (bool) count(array_filter(array_keys($parameters), 'is_string'));
             //if($is_associative)$parameters=array($parameters);								
             $utility_object = call_user_func_array($callable_singleton_method, array(
                 $parameters
             ));
         }
-        /** Otherwise the utility object is created using new operator **/
+        /** Otherwise the utility object is created using new operator */
         else
             $utility_object = UtilitiesFramework::$object_list[$object_type][$object_hash] = new $class_name($parameters);
         

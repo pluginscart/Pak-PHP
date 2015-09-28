@@ -1,6 +1,6 @@
 <?php
 
-namespace Framework\ApplicationConfiguration;
+namespace Framework\FrontController;
 
 /**
  * Base configuration class for browser based applications
@@ -11,13 +11,13 @@ namespace Framework\ApplicationConfiguration;
  * Initializes objects and sets configuration
  * 
  * @category   Framework
- * @package    ApplicationConfiguration
+ * @package    FrontController
  * @author     Nadir Latif <nadir@pakjiddat.com>
  * @license    https://www.gnu.org/licenses/gpl-2.0.html GNU General Public License, version 2
  * @version    1.0.0
  * @link       N.A
  */
-class ApplicationConfiguration extends DefaultApplicationConfiguration
+class Configuration
 {
     /**
      * The single static instance
@@ -31,6 +31,7 @@ class ApplicationConfiguration extends DefaultApplicationConfiguration
      * List of objects that can be used by the application
      */
     protected static $component_list;
+    
     /**
      * Class constructor
      * Used to prevent creating an object of this class outside of the class using new operator
@@ -38,13 +39,13 @@ class ApplicationConfiguration extends DefaultApplicationConfiguration
      * Used to implement Singleton class
      * Sets default configuration values
      * 
-     * @since 1.0.0
-     * @param array $argv the command line parameters given by the user		  
+     * @since 1.0.0  
      */
-    protected function __construct($argv)
+    protected function __construct()
     {
-        static::$configuration = DefaultApplicationConfiguration::GetConfiguration($argv);
+        
     }
+    
     /**
      * Used to return a single instance of the class
      * 
@@ -58,12 +59,14 @@ class ApplicationConfiguration extends DefaultApplicationConfiguration
      * @return ApplicationConfiguration static::$instance name the instance of the correct child class is returned 
      */
     public static function GetInstance($argv)
-    {        
+    {
         if (static::$instance == null) {
             static::$instance = new static($argv);
         }
-        return static::$instance;       
+        
+        return static::$instance;
     }
+    
     /**
      * Used to create framework objects specified by the user
      * 
@@ -74,12 +77,13 @@ class ApplicationConfiguration extends DefaultApplicationConfiguration
      */
     private function InitializeFrameworkObjects()
     {
-        /** Each framework object is created an added to application configuration **/
+        /** Each framework object is created an added to application configuration */
         foreach (static::$configuration['required_frameworks'] as $framework_name => $object_information) {
-        	/** The class parameters are initialized **/
-        	if(!isset($object_information['parameters']))$object_information['parameters']="";
-			 
-            /** The name of the framework class **/
+            /** The class parameters are initialized */
+            if (!isset($object_information['parameters']))
+                $object_information['parameters'] = "";
+            
+            /** The name of the framework class */
             $framework_class_name = $object_information['class_name'];
             /** 
              * Used to check if class exists
@@ -102,13 +106,14 @@ class ApplicationConfiguration extends DefaultApplicationConfiguration
                 $framework_class_obj = call_user_func_array($callable_singleton_method, array(
                     $object_information['parameters']
                 ));
-            /** If it is not a Singleton class then an object of the class is created using new operator **/
+            /** If it is not a Singleton class then an object of the class is created using new operator */
             else
                 $framework_class_obj = new $framework_class_name($object_information['parameters']);
-            /** The object is saved to object list **/
+            /** The object is saved to object list */
             static::$component_list[$framework_name] = $framework_class_obj;
-        }       
+        }
     }
+    
     /**
      * Used to include required files
      * 
@@ -118,31 +123,32 @@ class ApplicationConfiguration extends DefaultApplicationConfiguration
      * @since 1.0.0		  
      */
     private function IncludeRequiredClasses()
-    {        
-        /** Test mode status is returned **/
+    {
+        /** Test mode status is returned */
         $test_mode = static::$configuration['testing']["test_mode"];
-        /** The list of files to be included for testing is fetched from configuration **/
+        /** The list of files to be included for testing is fetched from configuration */
         if ($test_mode)
             $test_include_files = static::$configuration['testing']['test_include_files'];
         else
             $test_include_files = array();
-        /** Each file that needs to be included for the current url is included **/
-        if (isset(static::$configuration['application_url_mappings'][static::$configuration['option']]['include_files']))
-            $files_to_include = static::$configuration['application_url_mappings'][static::$configuration['option']]['include_files'];
+        /** Each file that needs to be included for the current url is included */
+        if (isset(static::$configuration['general']['application_folder_mappings'][static::$configuration['general']['option']]['include_files']))
+            $files_to_include = static::$configuration['general']['application_url_mappings'][static::$configuration['general']['option']]['include_files'];
         else
             $files_to_include = array();
         
-        /** The files to include from test configuration are merged with the files to include from application configuration **/
+        /** The files to include from test configuration are merged with the files to include from application configuration */
         $files_to_include = array_merge($test_include_files, $files_to_include);
-        /** All files that need to be included are included **/
+        /** All files that need to be included are included */
         for ($count = 0; $count < count($files_to_include); $count++) {
             $file_name = $files_to_include[$count];
             if (is_file($file_name))
                 require_once($file_name);
             else
                 throw new \Exception("Invalid include file name: " . $file_name . " given for page option: " . static::$configuration['option'], 1);
-        }       
+        }
     }
+    
     /**
      * Used to initialize the application
      * 
@@ -150,16 +156,16 @@ class ApplicationConfiguration extends DefaultApplicationConfiguration
      * Sets application configuration
      * 
      * @since 1.0.0		 
+     * @param array $argv the command line parameters given by the user		
      * @param array $user_configuration an array containing application configuration information		 
      */
-    protected function Initialize($user_configuration)
-    {        
+    protected function Initialize($argv, $user_configuration)
+    {
         /**
          * User configuration settings are merged with default configuration settings
-         * Php settings such as display_error settings are set  
+         * Php settings such as display_error settings are set
          */
-        $this->SetApplicationSettings($user_configuration, static::$configuration);
-        
+        static::$configuration = DefaultConfiguration::GetConfiguration($argv, $user_configuration);
         /**
          * The required frameworks are loaded
          * For each required framework class, an object is created with the given parameters
@@ -169,16 +175,16 @@ class ApplicationConfiguration extends DefaultApplicationConfiguration
          * Autoload function should auto load all the class files
          */
         $this->InitializeFrameworkObjects();
-        /** All required classes are included **/
+        /** All required classes are included */
         $this->IncludeRequiredClasses();
         
         /** 
          * If http authentication is required and application is called from browser
          * Then the http authentication callback is called and user is asked to authenticate 
          */
-        if (static::$configuration['http_authentication']['enable'] && static::$configuration['is_browser_application']) {
-            if (is_callable(static::$configuration['http_authentication']['error_callback']))
-                call_user_func(static::$configuration['http_authentication']['error_callback']);
+        if (static::$configuration['http_auth']['enable'] && static::$configuration['general']['is_browser_application']) {
+            if (is_callable(static::$configuration['http_auth']['error_callback']))
+                call_user_func(static::$configuration['http_auth']['error_callback']);
             else
                 throw new \Exception("Please define a valid http authentication error callback", 1);
         }
@@ -186,22 +192,23 @@ class ApplicationConfiguration extends DefaultApplicationConfiguration
          * If the application needs session support and application is called from browser	then session_start() is called
          * And $_SESSION data is saved to session parameter
          */
-        if (isset(static::$configuration['use_sessions']) && static::$configuration['is_browser_application']) {
+        if (isset(static::$configuration['session_auth']['use_sessions']) && static::$configuration['general']['is_browser_application']) {
             session_start();
-            static::$configuration['parameters']['session'] = $_SESSION;
+            static::$configuration['general']['session'] = $_SESSION;
         }
         
         /** 
          * If session authentication is required and application is called from browser						 
          * Then session authentication callback is called
          */
-        if (static::$configuration['session_authentication']['enable'] && static::$configuration['is_browser_application']) {
-            if (is_callable(static::$configuration['session_authentication']['error_callback']))
-                call_user_func(static::$configuration['session_authentication']['error_callback']);
+        if (static::$configuration['session_auth']['enable'] && static::$configuration['general']['is_browser_application']) {
+            if (is_callable(static::$configuration['session_auth']['error_callback']))
+                call_user_func(static::$configuration['session_auth']['error_callback']);
             else
                 throw new \Exception("Please define a valid session authentication error callback", 1);
-        }        
+        }
     }
+    
     /**
      * Used to get components and configuration values
      * 
@@ -218,23 +225,23 @@ class ApplicationConfiguration extends DefaultApplicationConfiguration
      * second is the list of configuration values
      */
     public static function GetComponentsAndConfiguration($object_names, $configuration_names)
-    {        
+    {
         $component_objects_list    = array();
         $configuration_values_list = array();
         
-        /** The list of component objects is fetched **/
+        /** The list of component objects is fetched */
         for ($count = 0; $count < count($object_names); $count++) {
             $object_name = $object_names[$count];
             if (!isset(static::$component_list[$object_name]))
-                throw new \Exception("Application component object: " . $object_name . " could not be found", 10);
+                throw new \Exception("Application component object: " . $object_name . " could not be found");
             $component_objects_list[$object_name] = static::$component_list[$object_name];
         }
         
-        /** The list of configuration values is fetched **/
+        /** The list of configuration values is fetched */
         for ($count = 0; $count < count($configuration_names); $count++) {
             $configuration_name = $configuration_names[$count];
             if (!isset(static::$configuration[$configuration_name]))
-                throw new \Exception("Application configuration: " . $configuration_name . " could not be found", 10);
+                throw new \Exception("Application configuration: " . $configuration_name . " could not be found");
             $configuration_values_list[$configuration_name] = static::$configuration[$configuration_name];
         }
         
@@ -243,8 +250,9 @@ class ApplicationConfiguration extends DefaultApplicationConfiguration
             $configuration_values_list
         );
         
-        return $components_and_configuration;       
+        return $components_and_configuration;
     }
+    
     /**
      * Used to get the specified object
      * 
@@ -255,12 +263,27 @@ class ApplicationConfiguration extends DefaultApplicationConfiguration
      * @param object $object_name name of the required object
      */
     public static function GetComponent($object_name)
-    {        
+    {
         if (!isset(static::$component_list[$object_name]))
-            throw new \Exception("Application object: " . $object_name . " could not be found", 10);
+            throw new \Exception("Application object: " . $object_name . " could not be found");
         else
-            return static::$component_list[$object_name];       
+            return static::$component_list[$object_name];
     }
+    
+    /**
+     * Used to set the given session parameter
+     * 
+     * Sets the given session parameter value 		
+     * 		
+     * @since 1.0.0
+     * @param string $param_name name of the session parameter
+     * @param string $param_value value of the session parameter
+     */
+    public static function SetSession($param_name, $param_value)
+    {
+        $_SESSION[$param_name] = $param_value;
+    }
+    
     /**
      * Used to get the specified configuration setting
      * 
@@ -269,14 +292,23 @@ class ApplicationConfiguration extends DefaultApplicationConfiguration
      * 
      * @since 1.0.0
      * @param string $config_name name of the required configuration
+     * @param string $sub_config_name optional name of the required sub configuration
      */
-    public static function GetConfig($config_name)
-    {        
+    public static function GetConfig($config_name, $sub_config_name = "")
+    {
+        /** If the top level configuration could not be found then an exception is thrown */
         if (!isset(static::$configuration[$config_name]))
-            throw new \Exception("Application configuration could not be found for config name: " . $config_name, 10);
+            throw new \Exception("Application configuration could not be found for config name: " . $config_name);
+        /** If the second level configuration is given but its value could not be found then an exception is thrown */
+        if ($sub_config_name != "" && !isset(static::$configuration[$config_name][$sub_config_name]))
+            throw new \Exception("Application configuration could not be found for config name: " . $config_name);
+        /** The configuration value is returned */
+        if ($sub_config_name == "")
+            return static::$configuration[$config_name];
         else
-            return static::$configuration[$config_name];       
+            return static::$configuration[$config_name][$sub_config_name];
     }
+    
     /**
      * Used to set the specified configuration setting
      * 
@@ -288,9 +320,10 @@ class ApplicationConfiguration extends DefaultApplicationConfiguration
      * @param string $config_value value of the required configuration
      */
     public static function SetConfig($config_name, $config_value)
-    {        
-        static::$configuration[$config_name] = $config_value;       
+    {
+        static::$configuration[$config_name] = $config_value;
     }
+    
     /**
      * Used to run the application
      * 		 
@@ -300,8 +333,8 @@ class ApplicationConfiguration extends DefaultApplicationConfiguration
      * @since 1.0.0
      */
     public function RunApplication()
-    {        
+    {
         $application_object = static::$component_list['application'];
-        $application_object->HandleRequest();       
+        $application_object->HandleRequest();
     }
 }

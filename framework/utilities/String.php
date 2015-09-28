@@ -71,11 +71,12 @@ class String
      */
     public function IsJson($data)
     {
+    	$is_valid = false;
+		
         if (is_string($data)) {
             @json_decode($data);
             $is_valid = (json_last_error() === JSON_ERROR_NONE);
-        }
-        $is_valid = false;
+        }        
 		
 		return $is_valid;		
     }

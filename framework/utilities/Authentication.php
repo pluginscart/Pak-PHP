@@ -53,7 +53,7 @@ class Authentication
      */
     private function HttpDigestParse($digest_str)
     {
-        /** Contains default value for the digest data **/
+        /** Contains default value for the digest data */
         $needed_parts = array(
             'nonce' => 1,
             'nc' => 1,
@@ -92,13 +92,13 @@ class Authentication
      */
     public function AuthenticateUser($credentials, $authentication_box_title)
     {
-        /** If the application is run from browser then an exception is thrown **/
+        /** If the application is run from browser then an exception is thrown */
         if (!isset($_SERVER['HTTP_HOST']) && !isset($_SERVER['HTTPS_HOST']))
             throw new \Exception("Application must be run from browser!");
         
         $is_valid = true;
         $realm    = $authentication_box_title;
-        /** This implies user hit the cancel button **/
+        /** This implies user hit the cancel button */
         if (empty($_SERVER['PHP_AUTH_DIGEST'])) {
             header('HTTP/1.1 401 Unauthorized');
             header('WWW-Authenticate: Digest realm="' . $realm . '",qop="auth",nonce="' . uniqid() . '",opaque="' . md5($realm) . '"');
@@ -106,7 +106,7 @@ class Authentication
             return false;
         }
         if ($is_valid) {
-            /** Analyze the PHP_AUTH_DIGEST variable **/
+            /** Analyze the PHP_AUTH_DIGEST variable */
             if (!($data = $this->HttpDigestParse($_SERVER['PHP_AUTH_DIGEST'])))
                 $is_valid = false;
             
@@ -118,17 +118,17 @@ class Authentication
                     break;
                 }
             }
-            /** If the user does not exist then return false **/
+            /** If the user does not exist then return false */
             if (!$user_password)
                 $is_valid = false;
             
             if ($is_valid) {
-                /** Generate the valid response **/
+                /** Generate the valid response */
                 $A1             = md5($data['username'] . ':' . $realm . ':' . $user_password);
                 $A2             = md5($_SERVER['REQUEST_METHOD'] . ':' . $data['uri']);
                 $valid_response = md5($A1 . ':' . $data['nonce'] . ':' . $data['nc'] . ':' . $data['cnonce'] . ':' . $data['qop'] . ':' . $A2);
                 
-                /** If the response from user is not valid then function returns false **/
+                /** If the response from user is not valid then function returns false */
                 if ($data['response'] != $valid_response)
                     $is_valid = false;
             }

@@ -11,7 +11,7 @@ class ExampleClass
      */
     public function AuthenticationTest()
     {
-        /** List of valid user credentials. used to test the http digest authentication **/
+        /** List of valid user credentials. used to test the http digest authentication */
         $credentials              = array(
             array(
                 "user_name" => "admin",
@@ -22,9 +22,9 @@ class ExampleClass
                 "password" => "manager"
             )
         );
-        /** The custom text to use in the authentication box that shows in the browser **/
+        /** The custom text to use in the authentication box that shows in the browser */
         $authentication_box_title = "Protected Area!";
-        /** The authentication object is fetched **/
+        /** The authentication object is fetched */
         $authentication           = UtilitiesFramework::Factory("authentication");
         /** 
          * If the user presses the cancel button then following message is shown
@@ -32,7 +32,7 @@ class ExampleClass
          */
         if (!$authentication->AuthenticateUser($credentials, $authentication_box_title))
             echo "You pressed the cancel button!.";
-        /** If the user entered the correct login information then the following message is shown **/
+        /** If the user entered the correct login information then the following message is shown */
         else
             echo "You entered the correct login information!.";
     }
@@ -43,7 +43,7 @@ class ExampleClass
      */
     public function CachingTest()
     {
-        /** The database object is fetched **/
+        /** The database object is fetched */
         $database_parameters = array(
             "host" => "localhost",
             "user" => "nadir",
@@ -53,20 +53,20 @@ class ExampleClass
         );
         $database_obj        = UtilitiesFramework::Factory("database", $database_parameters);
         $db_link             = $database_obj->df_get_id();
-        /** The prefix of the table. e.g if prefix name is example_ then table name is example_cached_data **/
+        /** The prefix of the table. e.g if prefix name is example_ then table name is example_cached_data */
         $table_prefix        = "example_";
-        /** The caching object is fetched with given parameters **/
+        /** The caching object is fetched with given parameters */
         $caching_parameters  = array(
             "db_link" => $database_obj->df_get_id(),
             "table_prefix" => $table_prefix
         );
         $caching_obj         = UtilitiesFramework::Factory("caching", $caching_parameters);
-        /** The data is saved to cache **/
+        /** The data is saved to cache */
         $caching_obj->SaveDataToCache("TestFunction", array(
             "parameter 1",
             "parameter 2"
         ), "test data");
-        /** The data is fetched from cache **/
+        /** The data is fetched from cache */
         $cached_data = $caching_obj->GetCachedData("TestFunction", array(
             "parameter 1",
             "parameter 2"
@@ -80,15 +80,15 @@ class ExampleClass
      */
     public function EncryptionTest()
     {
-        /** The encryption object is fetched **/
+        /** The encryption object is fetched */
         $encryption_obj = UtilitiesFramework::Factory("encryption");
-        /** The text to be encrypted **/
+        /** The text to be encrypted */
         $original_text  = "test encryption";
-        /** The original text is encrypted **/
+        /** The original text is encrypted */
         $encrypted_text = $encryption_obj->EncryptText($original_text);
-        /** The encrypted text is decrypted **/
+        /** The encrypted text is decrypted */
         $decrypted_text = $encryption_obj->DecryptText($encrypted_text);
-        /** If the original text matches the decrypted text then following message is shown **/
+        /** If the original text matches the decrypted text then following message is shown */
         if ($original_text == $decrypted_text)
             echo "Text sucessfully decrypted";
         else
@@ -101,7 +101,7 @@ class ExampleClass
      */
     public function DatabaseTest()
     {
-        /** The database object is fetched **/
+        /** The database object is fetched */
         $database_parameters = array(
             "host" => "localhost",
             "user" => "nadir",
@@ -110,12 +110,12 @@ class ExampleClass
             "debug" => "1"
         );
         $database_obj        = UtilitiesFramework::Factory("database", $database_parameters);
-        /** The $database_obj is initialized and cleared **/
+        /** The $database_obj is initialized and cleared */
         $database_obj->df_initialize();
-        /** The select query is built **/
+        /** The select query is built */
         $main_query               = array();
         $main_query[0]['field']   = "*";
-        /** The where clause of the query is built **/
+        /** The where clause of the query is built */
         $where_clause             = array();
         $where_clause[0]['field'] = "function_name";
         $where_clause[0]['value'] = "TestFunction";
@@ -132,10 +132,10 @@ class ExampleClass
      */
     public function ExcelTest()
     {
-        /** The PhpExcel library is included **/
+        /** The PhpExcel library is included */
         $excel_file_path = DIRECTORY_SEPARATOR . "var" . DIRECTORY_SEPARATOR . "www" . DIRECTORY_SEPARATOR . "html" . DIRECTORY_SEPARATOR . "dev_pakphp" . DIRECTORY_SEPARATOR . "vendors" . DIRECTORY_SEPARATOR . 'phpexcel' . DIRECTORY_SEPARATOR . 'Classes' . DIRECTORY_SEPARATOR . 'PHPExcel' . DIRECTORY_SEPARATOR . 'IOFactory.php';
         include_once($excel_file_path);
-        /** The Excel class object is fetched **/
+        /** The Excel class object is fetched */
         $excel_obj = UtilitiesFramework::Factory("excel");
         $data_arr  = $excel_obj->ReadExcelFile("test.xls", "A2", "C13");
         print_R($data_arr);
@@ -177,28 +177,28 @@ class ExampleClass
     {
         /** The parameters from ErrorHandler object */
         $parameters                         = array();
-        /** Custom shutdown function. It is automatically called just before script exits **/
+        /** Custom shutdown function. It is automatically called just before script exits */
         $parameters['shutdown_function']    = array(
             $this,
             "CustomShutdown"
         );
-        /** Used to indicate if the error message should be displayed **/
+        /** Used to indicate if the error message should be displayed */
         $parameters['display_error']        = true;
-        /** The email address that will get the error message email **/
+        /** The email address that will get the error message email */
         $parameters['log_email']            = "";
-        /** The error log file name **/
+        /** The error log file name */
         $parameters['log_file_name']        = "";
-        /** The smtp mail headers to include with the error email. e.g array("Subject"=>"Error email") **/
+        /** The smtp mail headers to include with the error email. e.g array("Subject"=>"Error email") */
         $parameters['log_email_header']     = "";
-        /** Custom error handling function **/
+        /** Custom error handling function */
         $parameters['custom_error_handler'] = array(
             $this,
             "CustomErrorHandler"
         );
         
-        /** The ErrorHandling class object is fetched **/
+        /** The ErrorHandling class object is fetched */
         $errorhandling_obj = UtilitiesFramework::Factory("errorhandler", $parameters);
-        /** Throw an exception for testing the error handling **/
+        /** Throw an exception for testing the error handling */
         throw new \Exception("Test exception!", 10);
     }
     
@@ -257,7 +257,7 @@ class ExampleClass
      */
     public function StringTest()
     {
-        /** The String class object is fetched **/
+        /** The String class object is fetched */
         $string_obj = UtilitiesFramework::Factory("string");
         $main_url   = "https://pear.php.net/manual/en/";
         $rel_url    = "package.mail.mail.send.php";
@@ -289,5 +289,19 @@ class ExampleClass
         echo "Custom shudown function. Script has ended!";
     }
     
+	/**
+     * Template function testing
+     * Used to test template class
+     */
+    public function TemplateTest()
+    {
+        /** The Template class object is fetched */
+        $template_obj = UtilitiesFramework::Factory("template");
+		$template_path = "example.html";  
+		$tag_replacement_arr = array(array("title"=>"Page title","body"=>"Body title"));
+		/** The example template file is rendered */
+        $template_file_contents    = $template_obj->RenderTemplateFile($template_path, $tag_replacement_arr);
+        print_R($template_file_contents);
+    }
 }
 ?>

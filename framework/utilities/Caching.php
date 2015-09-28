@@ -71,11 +71,11 @@ class Caching
      */
     protected function __construct($parameters)
     {
-        /** The database connection link **/
+        /** The database connection link */
         $this->db_link                 = $parameters['db_link'];
-        /** The database table prefix **/
+        /** The database table prefix */
         $this->table_prefix            = $parameters['table_prefix'];
-        /** The duration in seconds for which each functon should be cached **/
+        /** The duration in seconds for which each functon should be cached */
         self::$function_cache_duration = array(
             "TestFunction" => (3600 * 24)
         );
@@ -108,10 +108,10 @@ class Caching
      */
     private function EncodeFunctionData($data)
     {
-        /** If the parameters is an array it is json encoded **/
+        /** If the parameters is an array it is json encoded */
         if (is_array($data))
             $data = base64_encode(json_encode($data));
-        /** The parameters are encoded to base64 in any case **/
+        /** The parameters are encoded to base64 in any case */
         $encoded_data = base64_encode($data);
         
         return $encoded_data;
@@ -132,27 +132,27 @@ class Caching
      */
     public function GetCachedData($function_name, $parameters, $check_cache_duration)
     {
-        /** The string object is fetched **/
+        /** The string object is fetched */
         $string_obj     = new String();
-        /** The duration for which function is to be cached **/
+        /** The duration for which function is to be cached */
         $cache_duration = self::$function_cache_duration[$function_name];
-        /** The function parameters are encoded **/
+        /** The function parameters are encoded */
         $parameters     = $this->EncodeFunctionData($parameters);
-        /** The cached data is fetched from database **/
+        /** The cached data is fetched from database */
         if ($cache_duration != -1 && $check_cache_duration)
             $select_str = "SELECT * FROM " . $this->table_prefix . "cached_data WHERE function_name='" . mysqli_escape_string($this->db_link, $function_name) . "' AND function_parameters='" . mysqli_escape_string($this->db_link, $parameters) . "' AND (created_on+" . mysqli_escape_string($this->db_link, $cache_duration) . ")>=" . time();
         else
             $select_str = "SELECT * FROM " . $this->table_prefix . "cached_data WHERE function_name='" . mysqli_escape_string($this->db_link, $function_name) . "' AND function_parameters='" . mysqli_escape_string($this->db_link, $parameters) . "'";
 		
         $result = mysqli_query($this->db_link, $select_str);
-        /** If the data is found then it is returned **/
+        /** If the data is found then it is returned */
         if (mysqli_num_rows($result) == 1) {
             $row  = mysqli_fetch_assoc($result);
             $data = base64_decode($row['data']);
             $data = ($string_obj->IsJson($data)) ? json_decode($data, true) : $data;				
             return $data;
         }	
-        /** If it is not found then false is returned **/
+        /** If it is not found then false is returned */
         else
             return false;
     }
@@ -172,16 +172,16 @@ class Caching
      */
     public function SaveDataToCache($function_name, $parameters, $data)
     {
-        /** The function parameters are encoded **/
+        /** The function parameters are encoded */
         $encoded_parameters = $this->EncodeFunctionData($parameters);
-        /** The function data is encoded **/
+        /** The function data is encoded */
         $encoded_data       = $this->EncodeFunctionData($data);
-        /**	The data is fetched from cache. If it exists in cache then it is updated **/
+        /**	The data is fetched from cache. If it exists in cache then it is updated */
         if ($this->GetCachedData($function_name, $parameters, false)) {
             $update_str = "UPDATE " . $this->table_prefix . "cached_data SET created_on='" . time() . "',data='" . mysqli_escape_string($this->db_link, $encoded_data) . "' WHERE function_name='" . mysqli_escape_string($this->db_link, $function_name) . "' AND function_parameters='" . mysqli_escape_string($this->db_link, $encoded_parameters) . "'";
             mysqli_query($this->db_link, $update_str);
         }
-        /** Otherwise it is added to database **/
+        /** Otherwise it is added to database */
         else {
             $insert_str = "INSERT INTO " . $this->table_prefix . "cached_data(function_name,function_parameters,data,created_on) VALUES('" . mysqli_escape_string($this->db_link, $function_name) . "','" . mysqli_escape_string($this->db_link, $encoded_parameters) . "','" . mysqli_escape_string($this->db_link, $encoded_data) . "','" . time() . "')";
             mysqli_query($this->db_link, $insert_str);

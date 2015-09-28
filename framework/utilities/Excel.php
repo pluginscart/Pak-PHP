@@ -64,13 +64,13 @@ class Excel
     {
         $input_file_type = 'Excel5';
         $input_file_name = $file_path;
-        /**  Create a new Reader of the type defined in $inputFileType  **/
+        /**  Create a new Reader of the type defined in $inputFileType  */
         $excel_reader    = \PHPExcel_IOFactory::createReader($input_file_type);
-        /**  Advise the Reader that we only want to load cell data  **/
+        /**  Advise the Reader that we only want to load cell data  */
         $excel_reader->setReadDataOnly(true);
-        /**  Load $inputFileName to a PHPExcel Object  **/
+        /**  Load $inputFileName to a PHPExcel Object  */
         $excel_file_obj = $excel_reader->load($input_file_name);
-        /** Read data from worksheet **/
+        /** Read data from worksheet */
         $excel_data     = $excel_file_obj->getActiveSheet()->rangeToArray($start_cell . ':' . $end_cell, // The worksheet range that we want to retrieve
             NULL, // Value that should be returned for empty cells
             TRUE, // Should formulas be calculated (the equivalent of getCalculatedValue() for each cell)

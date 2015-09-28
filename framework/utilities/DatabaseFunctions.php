@@ -124,9 +124,9 @@ class DatabaseFunctions
     public function DatabaseFunctionsFactory($parameters)
     {
         $this->id = 0;
-        /** The object variables are cleared **/
+        /** The object variables are cleared */
         $this->df_initialize();
-        /** Used to determine if application is running from browser or command line **/
+        /** Used to determine if application is running from browser or command line */
         $this->is_browser_application = (isset($_SERVER['HTTP_HOST'])) ? true : false;
         $this->debug                  = (isset($parameters['debug'])) ? $parameters['debug'] : 0; // 0=silent, 1=normal, 2=debug, 3=trace       	
         // Try to connect when instance is created
@@ -758,16 +758,16 @@ class DatabaseFunctions
      */
     private function internal_df_open($sql)
     {        
-        /** If debugging mode is set to 1 or greater then the start time is noted **/
+        /** If debugging mode is set to 1 or greater then the start time is noted */
         if ($this->debug >= 1)
             $start_time = microtime(true);
         
         $rsid = @mysqli_query($this->id, $sql);
         
         if ($this->debug >= 1) {
-            /** If debugging mode is set to 1 or greater then the end time is noted and the query is logged along with time taken **/
+            /** If debugging mode is set to 1 or greater then the end time is noted and the query is logged along with time taken */
             $end_time        = microtime(true);
-            /** The logging information is saved to array **/
+            /** The logging information is saved to array */
             $sql_log         = array(
                 array(
                     "sql" => $sql,

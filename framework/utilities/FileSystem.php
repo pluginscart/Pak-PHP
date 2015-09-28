@@ -8,8 +8,8 @@ namespace Framework\Utilities;
  * 
  * It includes functions such as reading files, writting files fetch remote file contents
  * 
- * @category   Framework
- * @package    Utilities
+ * @category   FileSystem
+ * @package    UtilitiesFramework
  * @author     Nadir Latif <nadir@pakjiddat.com>
  * @license    https://www.gnu.org/licenses/gpl-2.0.html GNU General Public License, version 2
  * @version    1.0.0
@@ -18,7 +18,18 @@ namespace Framework\Utilities;
  */
 class FileSystem
 {
-    
+    /**
+     * Location of upload folder
+     */
+    private $upload_folder;
+    /**
+     * Maximum size of file that can be uploaded
+     */
+    private $max_allowed_file_size;
+    /**
+     * Contains extensions for each file type that is permitted for uploading
+     */
+    private $allowed_extensions;
     /**
      * The single static instance
      */
@@ -32,7 +43,7 @@ class FileSystem
      * The instance is returned
      * 
      * @since 1.0.0
-	 * 
+     * 
      * @return FileSystem static::$instance name the instance of the correct child class is returned 
      */
     public static function GetInstance($parameters)
@@ -46,6 +57,24 @@ class FileSystem
     }
     
     /**
+     * Class constructor.
+     *
+     * @since 1.0.0	
+     * @param array $parameters an array with following keys:    
+     * upload_folder=> the location of the upload_folder
+     * allowed_extensions=> the file types that are allowed to be uploaded
+     * max_allowed_file_size=> the maximum allowed size for uploaded files
+     * 
+     * @return int returns the number of elements.
+     */
+    public function __construct($parameters)
+    {                                            
+        $this->upload_folder           = isset($parameters['upload_folder']) ? $parameters['upload_folder'] : '';
+        $this->allowed_extensions      = isset($parameters['allowed_extensions']) ? $parameters['allowed_extensions'] : '';
+        $this->max_allowed_file_size   = isset($parameters['max_allowed_file_size']) ? $parameters['max_allowed_file_size'] : '';        
+    }
+    
+    /**
      * Reads the contents of the given folder
      *
      * @since 1.0.0
@@ -56,14 +85,14 @@ class FileSystem
     public function GetFolderContents($folder_path)
     {
         
-        /** If the folder is not readable then an exception is thrown **/
+        /** If the folder is not readable then an exception is thrown */
         if (!is_dir($folder_path))
             throw new \Exception("Error in reading folder: " . $folder_path, 110);
-        /** The list of files in folder is fetched **/
+        /** The list of files in folder is fetched */
         $file_list = scandir($folder_path);
-        /** The . and .. entries are removed from list **/
+        /** The . and .. entries are removed from list */
         $file_list = array_slice($file_list, 2);
-        /** The file list is returned **/
+        /** The file list is returned */
         return $file_list;
         
     }
@@ -94,12 +123,12 @@ class FileSystem
      * @return string returns the contents of the file
      */
     public function WriteLocalFile($file_text, $file_path)
-    {        
+    {
         $fh = fopen($file_path, "w");
         if (!fwrite($fh, $file_text))
             throw new \Exception("Text could not be written to file", 110);
         else
-            fclose($fh);       
+            fclose($fh);
     }
     
     /**
@@ -111,11 +140,11 @@ class FileSystem
      * @return string returns the contents of the file
      */
     public function ReadLocalFile($file_path)
-    {        
+    {
         $fh       = fopen($file_path, "r");
         $contents = fread($fh, filesize($file_path));
         fclose($fh);
-        return $contents;       
+        return $contents;
     }
     
     /**
@@ -128,9 +157,9 @@ class FileSystem
      * @param string $target_file_name the target file name        
      */
     public function CopyFile($source_file_name, $target_file_name)
-    {        
+    {
         if (!copy($source_file_name, $target_file_name))
-            throw new \Exception("Source file: " . $source_file_name . " could not be copied to target file: " . $target_file_name);       
+            throw new \Exception("Source file: " . $source_file_name . " could not be copied to target file: " . $target_file_name);
     }
     
     /**
@@ -145,7 +174,7 @@ class FileSystem
      * @return string $path_of_uploaded_file full path to the uploaded file.		
      */
     public function UploadFile($file_data)
-    {       
+    {
         if (!isset($file_data["name"]))
             throw new \Exception("No file to upload", 110);
         
@@ -157,7 +186,7 @@ class FileSystem
         
         if ($size_of_uploaded_file > $max_allowed_file_size)
             throw new \Exception("Size of file should be less than " . $max_allowed_file_size . " Kb", 110);
-        
+         
         //------ Validate the file extension -----
         $allowed_ext = false;
         for ($i = 0; $i < sizeof($allowed_extensions); $i++) {
@@ -165,7 +194,7 @@ class FileSystem
                 $allowed_ext = true;
             }
         }
-        
+     
         if (!$allowed_ext)
             throw new \Exception("The uploaded file is not a supported file type. Only the following file types are supported: " . implode(',', $allowed_extensions), 110);
         
@@ -185,7 +214,7 @@ class FileSystem
             }
         }
         
-        return $path_of_uploaded_file;        
+        return $path_of_uploaded_file;
     }
     
     /**
@@ -200,39 +229,7 @@ class FileSystem
      * @return string $file_contents. the contents of the file
      */
     function GetFileContent($url, $method = "get", $parameters = "", $request_headers = "")
-    {        
-        $count = 0;
-        do {
-            $ch = curl_init();
-            
-            if (is_array($parameters)) {
-                curl_setopt($ch, CURLOPT_HEADER, 0);
-                if (is_array($request_headers))
-                    curl_setopt($ch, CURLOPT_HTTPHEADER, $request_headers);
-                curl_setopt($ch, CURLOPT_POST, count($parameters));
-                curl_setopt($ch, CURLOPT_POSTFIELDS, $parameters);
-            }
-            
-            curl_setopt($ch, CURLOPT_URL, $url);
-            curl_setopt($ch, CURLOPT_HEADER, 0);
-            curl_setopt($ch, CURLOPT_USERAGENT, "User-Agent: Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US; rv:1.8.1.14) Gecko/20080404 Firefox/3.0.0.0");
-            curl_setopt($ch, CURLOPT_TIMEOUT, 2000);
-            
-            ob_start();
-            
-            curl_exec($ch);
-            curl_close($ch);
-            $string = ob_get_clean();
-            
-            $temp_num = rand(3, 5);
-            
-            sleep($temp_num);
-            if ($count > 20)
-                break;
-            $count++;
-        } while (strlen($string) < 200);
-        
-        return $string;
-        
-    }    
+    {
+        return file_get_contents($url);        
+    }
 }
