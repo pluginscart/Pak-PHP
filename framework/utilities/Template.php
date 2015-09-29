@@ -12,7 +12,7 @@ namespace Framework\Utilities;
  * @package    Templates
  * @author     Nadir Latif <nadir@pakjiddat.com>
  * @license    https://www.gnu.org/licenses/gpl-2.0.html GNU General Public License, version 2
- * @version    Release: 1.0.0
+ * @version    Release: 1.0.1
  * @link       N.A
  */
 class Template
@@ -27,7 +27,7 @@ class Template
      * 
      * Used to implement Singleton class
      * 
-     * @since 1.0.0		  
+     * @since 1.0.1	  
      */
     protected function __construct()
     {
@@ -40,7 +40,7 @@ class Template
      * If it does not exist then it is created
      * The instance is returned
      * 
-     * @since 1.0.0
+     * @since 1.0.1
      * 
      * @return BrowserApplicationTemplate static::$instance name the instance of the correct child class is returned 
      */
@@ -56,7 +56,7 @@ class Template
      * 
      * It reads a template file and extracts all the tags in the template file
      * 
-     * @since 1.0.0     
+     * @since 1.0.1 
 	 * @param string $template_path absolute path to the template html file
      * 
      * @return array $template_information an array with 2 elements.
@@ -86,7 +86,7 @@ class Template
      * Each element of the array can be a simple value
      * Or it can be an array which will contain a template name and template value pair		
      * 
-     * @since 1.0.0
+     * @since 1.0.1
      * @param string $tag_name the name of the tag to replace
      * @param string $tag_value the value that will replace the tag name
      * 
@@ -122,7 +122,7 @@ class Template
      * It then replaces each tag with the correct value
      * From the $tag_replacement_arr parameter		  		 		 
      * 
-     * @since 1.0.0
+     * @since 1.0.1
 	 * @param string $template_path absolute path to the template html file
      * @param array $tag_replacement_arr tag replacement values
      * 
