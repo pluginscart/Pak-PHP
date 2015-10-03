@@ -11,7 +11,7 @@ namespace Framework\Utilities;
  * @package    Utilities
  * @author     Nadir Latif <nadir@pakjiddat.com>
  * @license    https://www.gnu.org/licenses/gpl-2.0.html GNU General Public License, version 2
- * @version    1.0.0
+ * @version    1.0.1
  * @link       N.A
  * @author 	   Nadir Latif <nadir@pakiddat.com>
  */
@@ -79,5 +79,43 @@ class String
         }        
 		
 		return $is_valid;		
+    }
+	/**
+     * Used to convert a string to camel case
+     *
+     * @since 1.0.1
+     * @param string $string text to be converted to camel case
+     * e.g part1_part2
+	 * 
+     * @return string $camelcase_text camel case string
+     */
+    public function CamelCase($string)
+    {
+    	$string = str_replace("_", " ", $string);
+		$string = ucwords($string);
+		$camelcase_text = str_replace(" ", "", $string); 
+    	
+		return $camelcase_text;	
+    }
+	/**
+     * Used to concatenate the given strings
+	 * 
+	 * The function supports variable number of arguments
+     *
+     * @since 1.0.1
+     * @param string $string text to be concatenated
+	 * @param string $string text to be concatenated
+	 * 
+     * @return string $concatenated_text the concatenated string
+     */
+    public function Concatenate()
+    {
+    	$concatenated_text = "";
+		
+    	for ($count=0; $count<func_num_args(); $count++) {
+            $text               = func_get_arg($count);
+			$concatenated_text .= $text;
+    	}
+    	return $concatenated_text;
     }
 }

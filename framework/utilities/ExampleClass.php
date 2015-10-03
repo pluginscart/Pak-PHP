@@ -70,7 +70,7 @@ class ExampleClass
         $cached_data = $caching_obj->GetCachedData("TestFunction", array(
             "parameter 1",
             "parameter 2"
-        ));
+        ),true);
         print_R($cached_data);
     }
     
@@ -133,11 +133,13 @@ class ExampleClass
     public function ExcelTest()
     {
         /** The PhpExcel library is included */
-        $excel_file_path = DIRECTORY_SEPARATOR . "var" . DIRECTORY_SEPARATOR . "www" . DIRECTORY_SEPARATOR . "html" . DIRECTORY_SEPARATOR . "dev_pakphp" . DIRECTORY_SEPARATOR . "vendors" . DIRECTORY_SEPARATOR . 'phpexcel' . DIRECTORY_SEPARATOR . 'Classes' . DIRECTORY_SEPARATOR . 'PHPExcel' . DIRECTORY_SEPARATOR . 'IOFactory.php';
+        $excel_file_path    = "Location of the IOFactory.php file in the PHPExcel package";
         include_once($excel_file_path);
         /** The Excel class object is fetched */
-        $excel_obj = UtilitiesFramework::Factory("excel");
-        $data_arr  = $excel_obj->ReadExcelFile("test.xls", "A2", "C13");
+        $excel_obj          = UtilitiesFramework::Factory("excel");
+		/** The path to the test excel file */
+		$test_xls_file_path = realpath(__DIR__.DIRECTORY_SEPARATOR."templates".DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR."test.xls";
+        $data_arr  = $excel_obj->ReadExcelFile($test_xls_file_path, "A2", "C13");
         print_R($data_arr);
     }
     
@@ -297,8 +299,8 @@ class ExampleClass
     {
         /** The Template class object is fetched */
         $template_obj = UtilitiesFramework::Factory("template");
-		$template_path = "example.html";  
-		$tag_replacement_arr = array(array("title"=>"Page title","body"=>"Body title"));
+		$template_path = realpath(__DIR__.DIRECTORY_SEPARATOR."templates".DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR."example.html";
+		$tag_replacement_arr = array(array("title"=>"Page title","body"=>"Body Contents"));
 		/** The example template file is rendered */
         $template_file_contents    = $template_obj->RenderTemplateFile($template_path, $tag_replacement_arr);
         print_R($template_file_contents);

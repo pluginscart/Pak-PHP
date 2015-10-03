@@ -1,9 +1,9 @@
 <?php
 
-namespace \Framework\FrontController;
+namespace Framework\FrontController;
 
 /**
- * This class implements the base BrowserApplicationTemplate class 
+ * This class implements the base Template class 
  * 
  * It contains functions that help in constructing the template widgets
  * The class is abstract and must be inherited by the template classes
@@ -73,10 +73,9 @@ abstract class Template
      * @param string $tag_name the name of a template tag
      * @throws Exception an object of type Exception is thrown if no template handling function was found for the given template and option
      * 
-     * @return array $template_information an array with 3 elements
-     * first is template category
-     * second is template name
-     * third is $tag_replacement_arr. this is a list of tags values that will replace the tags in the given template file 
+     * @return array $template_information an array with 2 elements     
+     * first is template file name
+     * second is $tag_replacement_arr. this is a list of tags values that will replace the tags in the given template file 
      */
     function GetTemplateTagsFromFunction($tag_name)
     {        
@@ -85,17 +84,15 @@ abstract class Template
             "presentation"
         );
         $configuration_names = array(
-            "option",
-            "parameters",
-            "application_url_mappings"
+            "general"
         );
         
-        list($components, $configuration) = Configuration::GetComponentsAndConfiguration($component_list, $configuration_names);
+        list($components, $configuration) = Configuration::GetComponentsAndConfiguration($component_list, $configuration_names);		
         /** If no url mapping is defined for the current url option then an exception is thrown */
-        if (!isset($configuration['application_url_mappings'][$configuration['option']]))
+        if (!isset($configuration['general']['application_url_mappings'][$configuration['general']['option']]))
             throw new \Exception("Invalid url request sent to application");
         /** The list of templates defined for the given url option */
-        $url_templates = $configuration['application_url_mappings'][$configuration['option']]["templates"];
+        $url_templates = $configuration['general']['application_url_mappings'][$configuration['general']['option']]["templates"];
         
         $tag_values_found    = false;
         $tag_replacement_arr = array();
@@ -104,19 +101,19 @@ abstract class Template
                 $ui_object_name      = $url_templates[$count]['object_name'];
                 $ui_object           = Configuration::GetComponent($ui_object_name);
                 $function_name       = $url_templates[$count]['function_name'];
-                $template_name       = $url_templates[$count]['template_name'];
-                $template_category   = $url_templates[$count]['template_path'];
-                $template_parameters = $components['presentation']->GetTemplateParameters($configuration['option'], $template_name);
+                $template_file_name  = $url_templates[$count]['template_file_name'];                
+                $template_parameters = $components['presentation']->GetTemplateParameters($configuration['general']['option'], $template_file_name);
                 
                 /** The template callback function is defined */
                 $template_callback = array(
                     $ui_object,
                     $function_name
                 );
+				
                 /** If the function is callable then it is called */
                 if (is_callable($template_callback))
                     $tag_replacement_arr = call_user_func_array($template_callback, array(
-                        $template_name,
+                        $template_file_name,
                         $template_parameters
                     ));
                 /** If it is not callable then an exception is thrown */
@@ -131,9 +128,8 @@ abstract class Template
         if (!$tag_values_found)
             throw new \Exception("Template information for the tag: " . $tag_name . " could not be found");
         else {
-            $template_information = array(
-                $template_category,
-                $template_name,
+            $template_information = array(               
+                $template_file_name,
                 $tag_replacement_arr
             );
             return $template_information;
@@ -155,21 +151,27 @@ abstract class Template
      */
     public function RenderApplicationTemplate($tag_name)
     {
-
+        /** The path to the application template folder is fetched */
+        $template_folder_path = Configuration::GetConfig("path","template_path");
         /** The template handling function is called with given option and parameters */
-        list($template_category, $template_name, $tag_replacement_arr) = $this->GetTemplateTagsFromFunction($tag_name);
+        list($template_file_name, $tag_replacement_arr) = $this->GetTemplateTagsFromFunction($tag_name);
         
         /** The tags in the template file are extracted */
-        list($template_contents, $template_tag_list) = $this->ExtractTemplateFileTags($template_category, $template_name);
+        list($template_contents, $template_tag_list) = \Framework\Utilities\UtilitiesFramework::Factory("template")->ExtractTemplateFileTags($template_folder_path. DIRECTORY_SEPARATOR . $template_file_name);
         
         /** For each extracted template tag the value for that tag is fetched */
         for ($count = 0; $count < count($template_tag_list); $count++) {
             /** First the tag value is checked in the tag replacement array returned by the template handling function */
             $tag_name  = $template_tag_list[$count];
-            $tag_value = (isset($tag_replacement_arr[$tag_name])) ? $tag_replacement_arr[$tag_name] : false;          
+            $tag_value = (isset($tag_replacement_arr[$tag_name])) ? $tag_replacement_arr[$tag_name] : '!not found!';
+			/** If the tag value is an array then the array is processed. This array can contain further template tags */          
             if (is_array($tag_value))
-                $tag_value = $this->ReplaceTagWithArray($tag_name, $tag_value);
-            
+                $tag_value = \Framework\Utilities\UtilitiesFramework::Factory("template")->ReplaceTagWithArray($tag_name, $tag_value);
+			/** If the tag value was not found then the function is called recursively */
+			else if ($tag_value=='!not found!')$tag_value = $this->RenderApplicationTemplate($tag_name);
+			/** If the tag value was not found then an exception is thrown */
+			if ($tag_value=='!not found!')throw new \Exception("Tag value for tag: ".$tag_name." could not be found");
+			/** The tag name is replaced with the tag contents */
             $template_contents = str_replace("{" . $tag_name . "}", $tag_value, $template_contents);
         }
         

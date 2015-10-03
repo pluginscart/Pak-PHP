@@ -88,7 +88,7 @@ abstract class Application
          $actions = $this->WP_Add($actions, $hook, $component, $callback, $priority, $accepted_args);
 		 /** The updated actions data is saved to the application configuration */
 		 $wordpress_configuration['actions']=$actions;
-		 Configuration::SetConfig("wordpress",$wordpress_configuration);
+		 Configuration::SetConfig("wordpress", "actions", $actions);
     }
     
     /**
@@ -115,7 +115,7 @@ abstract class Application
         $filters = $this->Add($filters, $hook, $component, $callback, $priority, $accepted_args);
 		/** The updated actions data is saved to the application configuration */
 		$wordpress_configuration['filters']=$filters;
-		Configuration::SetConfig("wordpress",$wordpress_configuration);
+		Configuration::SetConfig("wordpress", "filters", $filters);
     }
     
     /**

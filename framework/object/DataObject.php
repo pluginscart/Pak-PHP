@@ -1,6 +1,7 @@
 <?php
 
 namespace Framework\Object;
+
 use Framework\FrontController\Configuration as Configuration;
 
 /**

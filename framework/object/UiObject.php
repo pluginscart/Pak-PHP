@@ -1,6 +1,6 @@
 <?php
 
-namespace \Framework\Object;
+namespace Framework\Object;
 
 /**
  * This class implements the base UiObject class 

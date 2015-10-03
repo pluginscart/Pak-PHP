@@ -17,7 +17,7 @@ function autoload_framework_classes($class_name)
 	error_reporting(E_ALL);
     ini_set('display_errors', true);
     ini_set('display_startup_errors', true);
-	       
+	     
     /** If the required class is in the global namespace then no need to autoload the class */
     if (strpos($class_name, "\\") === false)
         return false;
@@ -34,12 +34,8 @@ function autoload_framework_classes($class_name)
 	/** .php is added to class name */
 	$class_name=$class_name.".php";
 	 /** The applications folder name */
-    $framework_folder_path = realpath(dirname(__FILE__));    
-    /** The templates folder path */
-    $templates_folder_path   = realpath(dirname(__FILE__)) . DIRECTORY_SEPARATOR . "templates" . DIRECTORY_SEPARATOR . $namespace_folder . DIRECTORY_SEPARATOR . "includes";
-    /** The path to the frameworks libraries folder */
-    $libraries_folder_path  = realpath(dirname(__FILE__)) . DIRECTORY_SEPARATOR ."includes" . DIRECTORY_SEPARATOR . $namespace_folder;
-    
+    $framework_folder_path = realpath(dirname(__FILE__));
+	
     /** The application folder is checked for file name */
     $file_name = $framework_folder_path . DIRECTORY_SEPARATOR . $namespace_folder . DIRECTORY_SEPARATOR . $class_name;	
     if (is_file($file_name))

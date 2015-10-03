@@ -135,7 +135,8 @@ class Template
         $final_tag_replacement_value = "";
         /** The tags in the template file are extracted */
         list($template_contents, $template_tag_list) = $this->ExtractTemplateFileTags($template_path);
-        
+        /** If the tag replacement array is an associative array then it is added to an array */
+        if (!isset($tag_replacement_arr[0])) $tag_replacement_arr = array($tag_replacement_arr);
         /** A template may be rendered multiple times. e.g table rows or table column templates */
         for ($count1 = 0; $count1 < count($tag_replacement_arr); $count1++) {
             $temp_template_contents = $template_contents;
@@ -148,14 +149,17 @@ class Template
                 /** If the tag value is an array then the array values are resolved to a string */
                 if (is_array($tag_value))
                     $tag_value = $this->ReplaceTagWithArray($tag_name, $tag_value);
-				else if ($tag_value=="!NOT SET!") throw new \Exception("Tag replacement value was not given for the tag: ".$tag_name);
+				else if ($tag_value=="!NOT SET!") throw new \Exception("Tag replacement value was not given for the tag: ".$tag_name." in the file: ".$template_path);
                 /** The tag name is replaced with the tag value */
                 $temp_template_contents = str_replace("{" . $tag_name . "}", $tag_value, $temp_template_contents);
             }
             /** The final template string is updated with the contents of the template */
             $final_tag_replacement_value .= $temp_template_contents;
         }
-        
+        /** Since template files can contain '{' and '}' these characters are replaced with '^' and '~' respectively */
+        $final_tag_replacement_value = str_replace("^","{",$final_tag_replacement_value);
+		$final_tag_replacement_value = str_replace("~","}",$final_tag_replacement_value);
+		
         return $final_tag_replacement_value;        
     }  
 }

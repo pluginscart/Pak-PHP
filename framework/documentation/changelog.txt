@@ -1,0 +1,23 @@
+Changelog:
+
+1.0.3 (October 1, 2015)
+    1) Renamed browser application folder to frontendcontroller. moved presentation, testing and template files to frontendcontroller folder
+    2) Created new framework module called api
+    3) Added new utilities class file Template.php
+    4) Added new framework module called wordpress
+    
+1.0.2 (September 22, 2015)
+	1) Changed file system structure so all fully qualified class names follow the file system structure
+	2) Updated namespaces of all the classes
+	3) Updated framework example application
+	4) Removed template and vendors folders. renamed include folder to framework
+	5) Updated file system structure so the example application, framework folder, index.php and autoload.php are at the base of the application folder at the same folder level.
+	
+1.0.1 (September 21, 2015)
+	1) Changed all files names and class names to CamelCase
+	2) Updated autoload.php so it complies with PSR-0 and PSR-4
+	3) Corrected minor bugs in FileSystem.php
+	4) Added asserts to ApplicationTesting.php file
+	
+1.0.0 (September 21, 2015)
+	1) Initial release

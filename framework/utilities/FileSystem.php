@@ -68,7 +68,7 @@ class FileSystem
      * @return int returns the number of elements.
      */
     public function __construct($parameters)
-    {                                            
+    {
         $this->upload_folder           = isset($parameters['upload_folder']) ? $parameters['upload_folder'] : '';
         $this->allowed_extensions      = isset($parameters['allowed_extensions']) ? $parameters['allowed_extensions'] : '';
         $this->max_allowed_file_size   = isset($parameters['max_allowed_file_size']) ? $parameters['max_allowed_file_size'] : '';        
@@ -230,6 +230,32 @@ class FileSystem
      */
     function GetFileContent($url, $method = "get", $parameters = "", $request_headers = "")
     {
-        return file_get_contents($url);        
+        if ($method == "get")
+            $file_contents = file_get_contents($url);
+		else {
+				$count = 0;
+		        $ch = curl_init();
+		            
+		        if (is_array($parameters)) {
+		                curl_setopt($ch, CURLOPT_HEADER, 0);
+		                if (is_array($request_headers))
+		                    curl_setopt($ch, CURLOPT_HTTPHEADER, $request_headers);
+		                curl_setopt($ch, CURLOPT_POST, count($parameters));
+		                curl_setopt($ch, CURLOPT_POSTFIELDS, $parameters);
+		        }
+		            
+		        curl_setopt($ch, CURLOPT_URL, $url);
+		        curl_setopt($ch, CURLOPT_HEADER, 0);
+		        curl_setopt($ch, CURLOPT_USERAGENT, "User-Agent: Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US; rv:1.8.1.14) Gecko/20080404 Firefox/3.0.0.0");
+		        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+		            
+		        ob_start();
+		            
+		        curl_exec($ch);
+		        curl_close($ch);
+		        $file_contents = ob_get_clean();
+		}        
+		
+		return $file_contents;
     }
 }

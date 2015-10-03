@@ -91,7 +91,7 @@ class Configuration
              * If it does not exist then an exception is thrown
              */
             if (!class_exists($framework_class_name, true))
-                throw new \Exception("Class: " . $framework_class_name . " does not exist", 1);
+                throw new \Exception("Class: " . $framework_class_name . " does not exist");
             /**
              * Used to check if class implments Singleton pattern
              * If it has a static function called GetInstance then
@@ -128,24 +128,26 @@ class Configuration
         $test_mode = static::$configuration['testing']["test_mode"];
         /** The list of files to be included for testing is fetched from configuration */
         if ($test_mode)
-            $test_include_files = static::$configuration['testing']['test_include_files'];
+            $test_include_files = static::$configuration['testing']['include_files'];
         else
-            $test_include_files = array();
+            $test_include_files = array();		
         /** Each file that needs to be included for the current url is included */
-        if (isset(static::$configuration['general']['application_folder_mappings'][static::$configuration['general']['option']]['include_files']))
+        if (isset(static::$configuration['general']['application_url_mappings'][static::$configuration['general']['option']]['include_files']))
             $files_to_include = static::$configuration['general']['application_url_mappings'][static::$configuration['general']['option']]['include_files'];
         else
             $files_to_include = array();
         
         /** The files to include from test configuration are merged with the files to include from application configuration */
         $files_to_include = array_merge($test_include_files, $files_to_include);
-        /** All files that need to be included are included */
+        /** All files that need to be included are included */        
         for ($count = 0; $count < count($files_to_include); $count++) {
             $file_name = $files_to_include[$count];
+			/** The {vendor_folder_path} string is replaced with the vendor folder path */
+			$file_name = str_replace('{vendor_folder_path}',static::$configuration['path']['vendor_folder_path'],$file_name);					
             if (is_file($file_name))
                 require_once($file_name);
             else
-                throw new \Exception("Invalid include file name: " . $file_name . " given for page option: " . static::$configuration['option'], 1);
+                throw new \Exception("Invalid include file name: " . $file_name . " given for page option: " . static::$configuration['option']);
         }
     }
     
@@ -183,17 +185,18 @@ class Configuration
          * Then the http authentication callback is called and user is asked to authenticate 
          */
         if (static::$configuration['http_auth']['enable'] && static::$configuration['general']['is_browser_application']) {
-            if (is_callable(static::$configuration['http_auth']['error_callback']))
-                call_user_func(static::$configuration['http_auth']['error_callback']);
+            if (is_callable(static::$configuration['http_auth']['auth_callback']))
+                call_user_func(static::$configuration['http_auth']['auth_callback']);
             else
-                throw new \Exception("Please define a valid http authentication error callback", 1);
+                throw new \Exception("Please define a valid http authentication error callback");
         }
         /** 
          * If the application needs session support and application is called from browser	then session_start() is called
          * And $_SESSION data is saved to session parameter
          */
-        if (isset(static::$configuration['session_auth']['use_sessions']) && static::$configuration['general']['is_browser_application']) {
-            session_start();
+         
+        if (isset(static::$configuration['general']['use_sessions']) && static::$configuration['general']['is_browser_application']) {
+            session_start();			
             static::$configuration['general']['session'] = $_SESSION;
         }
         
@@ -202,10 +205,10 @@ class Configuration
          * Then session authentication callback is called
          */
         if (static::$configuration['session_auth']['enable'] && static::$configuration['general']['is_browser_application']) {
-            if (is_callable(static::$configuration['session_auth']['error_callback']))
-                call_user_func(static::$configuration['session_auth']['error_callback']);
+            if (is_callable(static::$configuration['session_auth']['auth_callback']))
+                call_user_func(static::$configuration['session_auth']['auth_callback']);
             else
-                throw new \Exception("Please define a valid session authentication error callback", 1);
+                throw new \Exception("Please define a valid session authentication error callback");
         }
     }
     
@@ -301,7 +304,7 @@ class Configuration
             throw new \Exception("Application configuration could not be found for config name: " . $config_name);
         /** If the second level configuration is given but its value could not be found then an exception is thrown */
         if ($sub_config_name != "" && !isset(static::$configuration[$config_name][$sub_config_name]))
-            throw new \Exception("Application configuration could not be found for config name: " . $config_name);
+            throw new \Exception("Application configuration could not be found for config name: [" . $config_name."][".$sub_config_name."]");
         /** The configuration value is returned */
         if ($sub_config_name == "")
             return static::$configuration[$config_name];
@@ -317,11 +320,20 @@ class Configuration
      * 
      * @since 1.0.0
      * @param string $config_name name of the required configuration
+     * @param string $sub_config_name name of the required sub configuration	 
      * @param string $config_value value of the required configuration
      */
-    public static function SetConfig($config_name, $config_value)
+    public static function SetConfig($config_name, $sub_config_name, $config_value)
     {
-        static::$configuration[$config_name] = $config_value;
+    	/** If the top level configuration could not be found then an exception is thrown */
+        if (!isset(static::$configuration[$config_name]))
+            throw new \Exception("Application configuration could not be found for config name: " . $config_name);
+        /** The configuration value is saved */
+        if ($sub_config_name == "")
+            static::$configuration[$config_name] = $config_value;
+        else
+            static::$configuration[$config_name][$sub_config_name] = $config_value;
+        
     }
     
     /**

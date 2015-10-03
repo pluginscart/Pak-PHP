@@ -1,8 +1,6 @@
 <?php
 
-namespace \Framework\FrontController;
-
-use Framework\Configuration\Configuration as Configuration;
+namespace Framework\FrontController;
 
 /**
  * This class implements the base ApplicationTest class 
@@ -162,9 +160,9 @@ abstract class Testing
      */
     private function ValidateHTML($html_content)
     {
-        $utilities_obj          = Configuration::GetComponent("utilities");
-        $is_browser_application = Configuration::GetConfig("general","is_browser_application");
-        $test_parameters        = Configuration::GetConfig("testing");
+        $filesystem_obj          = \Framework\Utilities\UtilitiesFramework::Factory("filesystem");
+        $is_browser_application  = Configuration::GetConfig("general","is_browser_application");
+        $test_parameters         = Configuration::GetConfig("testing");
         
         $html_content = str_replace("\r", "", $html_content);
         $html_content = str_replace("\n", "", $html_content);
@@ -185,7 +183,7 @@ abstract class Testing
             "Content-type: multipart/form-data; boundary=---------------------------" . strlen($html_content)
         );
         
-        $validation_results = $utilities_obj->GetFileContent($validator_url, "POST", $content, $headers);
+        $validation_results = $filesystem_obj->GetFileContent($validator_url, "POST", $content, $headers);
         if ($is_browser_application)
             $validation_results = str_replace("style.css", $validator_url . "style.css", $validation_results);
         
@@ -231,17 +229,19 @@ abstract class Testing
      */
     public function SaveTestData()
     {
-        /** The application option */
-        $option          = Configuration::GetConfig('option');
+        /** The application custom options */
+        $custom_options          = Configuration::GetConfig('custom');
         /** The test parameters are fetched from application configuration */
-        $test_parameters = Configuration::GetConfig('testing');
+        $configuration           = Configuration::GetConfig('testing');		
         /** The test data file path */
         /** If the test data folder path is not defined then an exception is thrown */
-        if (!isset($configuration['testing']["test_data_folder"]))
+        if (!is_dir($configuration["test_data_folder"]))
             throw new \Exception("Invalid test data folder path");
-        $test_data_file_path = $test_parameters['test_data_folder'] . DIRECTORY_SEPARATOR . $option . ".json";
+        $test_data_file_path     = $configuration['test_data_folder'] . DIRECTORY_SEPARATOR . Configuration::GetConfig('general','option') . ".json";
         /** The application parameters are json encoded */
-        $test_data           = json_encode(Configuration::GetConfig('parameters'));
+        $test_data               = Configuration::GetConfig('general');
+		$test_data               = array("custom"=>$custom_options,"option"=>$test_data['option'],"parameters"=>$test_data['parameters'],"uploads"=>$test_data['uploads']);
+		$test_data               = json_encode($test_data);		
         /** The application parameters are written to test file */
         Configuration::GetComponent("filesystem")->WriteLocalFile($test_data, $test_data_file_path);
     }
@@ -306,7 +306,7 @@ abstract class Testing
         $configuration_names = array(
             "testing",
             "required_frameworks",
-            "line_break"
+            "general"
         );
         list($components, $configuration) = Configuration::GetComponentsAndConfiguration($object_names, $configuration_names);
         /** The number of unit tests run */
@@ -349,7 +349,7 @@ abstract class Testing
                         if ($this->invalid_assert_count > 0)
                             throw new \Exception("Assert failed in function: " . $class_function);
                         
-                        $test_results .= ($count + 1) . ") Testing function: " . $class_name . "::" . $class_function . ". result: passed. number of asserts: " . ($this->valid_assert_count - $current_assert_count) . $configuration['line_break'];
+                        $test_results .= ($count + 1) . ") Testing function: " . $class_name . "::" . $class_function . ". result: passed. number of asserts: " . ($this->valid_assert_count - $current_assert_count) . $configuration['general']['line_break'];
                     }
                     catch (Exception $e) {
                         $errorhandler_obj = Configuration::GetComponent("errorhandler");
@@ -362,12 +362,12 @@ abstract class Testing
         /** End time for the unit tests */
         $end_time = time();
         
-        $test_results .= $configuration['line_break'] . $configuration['line_break'];
+        $test_results .= $configuration['general']['line_break'] . $configuration['general']['line_break'];
         $test_results .= "Result of unit testing: ";
-        $test_results .= $configuration['line_break'] . $configuration['line_break'];
-        $test_results .= "Number of functions tested: " . $function_count . $configuration['line_break'];
-        $test_results .= "Number of asserts: " . $this->valid_assert_count . $configuration['line_break'];
-        $test_results .= "Number of failed asserts: " . $this->invalid_assert_count . $configuration['line_break'];
+        $test_results .= $configuration['general']['line_break'] . $configuration['general']['line_break'];
+        $test_results .= "Number of functions tested: " . $function_count . $configuration['general']['line_break'];
+        $test_results .= "Number of asserts: " . $this->valid_assert_count . $configuration['general']['line_break'];
+        $test_results .= "Number of failed asserts: " . $this->invalid_assert_count . $configuration['general']['line_break'];
         $test_results .= "Time taken: " . ($end_time - $start_time) . " sec";
         
         echo $test_results;
@@ -397,8 +397,7 @@ abstract class Testing
         );
         $configuration_names = array(
             "testing",
-            "line_break",
-            "application_url_mappings"
+            "general"            
         );
         list($components, $configuration) = Configuration::GetComponentsAndConfiguration($object_names, $configuration_names);
         
@@ -410,8 +409,7 @@ abstract class Testing
         $test_result  = "";
         /** Start time for the unit tests */
         $start_time   = time();
-        foreach ($configuration['application_url_mappings'] as $option => $option_data) {
-            /** The test data is saved to application configuration so it can be used by the application */
+        foreach ($configuration['general']['application_url_mappings'] as $option => $option_data) {
             /** The full path to the test data file */
             $test_file_name = $option . ".json";
             /** If the test data folder path is not defined then an exception is thrown */
@@ -421,22 +419,14 @@ abstract class Testing
             /** The contents of the test data file are read */
             $application_parameters = $components['filesystem']->ReadLocalFile($test_data_file_path);
             /** The test data is json decoded */
-            $application_parameters = json_decode($application_parameters, true);
-            /** The test option is saved to application configuration */
-            Configuration::SetConfig("option", $option);
-            /** The test parameters are saved to application configuration */
-            Configuration::SetConfig("parameters", $application_parameters);
-            /** If the url option specifies files that need to be included then the files are included */
-            if (isset($option_data['include_files'])) {
-                /** All files that need to be included are included */
-                for ($count = 0; $count < count($option_data['include_files']); $count++) {
-                    $file_name = $option_data['include_files'][$count];
-                    if (is_file($file_name))
-                        require_once($file_name);
-                    else
-                        throw new \Exception("Invalid include file name: " . $file_name . " given for page option: " . $option, 60);
-                }
-            }
+            $application_parameters = json_decode($application_parameters, true);					
+            /** The test data is saved to application configuration */
+            $updated_general_config = array_replace_recursive(Configuration::GetConfig("general"), $application_parameters);
+            Configuration::SetConfig("general", "", $updated_general_config);
+			          
+			/** The test parameters are saved to application configuration */
+			if (isset($application_parameters['parameters']))
+                Configuration::SetConfig("general", "parameters", $application_parameters['parameters']);
             /** If a testing function is defined for the url then it is called before the function is tested */
             if (isset($option_data['testing'])) {
                 /** If skip_testing configuration is set to true then the url is not tested */
@@ -453,26 +443,13 @@ abstract class Testing
                         $testing_object,
                         $function_name
                     );
-                    
-                    try {
-                        $current_assert_count = $this->valid_assert_count;
-                        if (is_callable($testing_callback))
-                            call_user_func($testing_callback);
-                        else
-                            throw new \Exception("Testing function : " . $function_name . " was not found for test object: " . $option_data['testing']['object_name']);
-                        
-                        if ($this->invalid_assert_count > 0)
-                            throw new \Exception("Assert failed in function: " . $class_function);
-                        
-                        $test_result .= ($count + 1) . ") Testing function: " . $option_data['testing']['object_name'] . "::" . $class_function . ". result: passed. " . ($this->valid_assert_count - $current_assert_count) . " valid asserts" . $configuration['line_break'];
-                        echo $test_result;
-                        flush();
-                        $test_results .= $test_result;
-                    }
-                    catch (Exception $e) {
-                        $errorhandler_obj = Configuration::GetComponent("errorhandler");
-                        $errorhandler_obj->ExceptionHandler($e);
-                    }
+                                      
+                   $current_assert_count = $this->valid_assert_count;
+                   if (is_callable($testing_callback))
+                       call_user_func($testing_callback);
+ 				   else
+                       throw new \Exception("Testing function : " . $function_name . " was not found for test object: " . $option_data['testing']['object_name']);                       
+                   
                 }
             }
             /** If a controller is defined for the current url option then it is called */
@@ -484,32 +461,33 @@ abstract class Testing
             /** If no controller is defined for the current url option and a template is defined then the template is rendered and then displayed in the browser */
             else if (isset($option_data['templates'])) {
                 /** The application template is rendered */
-                $template_contents = Configuration::GetComponent("application")->RenderApplicationTemplate($option);
-                $test_result       = $this->ValidateOutput("html", $template_contents);
+                $template_contents = Configuration::GetComponent("application")->RenderApplicationTemplate($option);				
+                $test_result       = $this->ValidateOutput("html", $template_contents);				
             }
             /** If no controller and no template is defined for the current url option then an exception is thrown */
             else
-                throw new \Exception("No controller or template defined for the current url.", 60);
+                throw new \Exception("No controller or template defined for the current url.");
             
-            if (!is_array($test_result))
-                throw new \Exception("Functional test for url: " . $option . " returned invalid response", 60);
-            /** If the result of testing a function is error then the function displays an error message */
-            if ($test_result['result'] == 'error')
-                $test_result = "URL: " . $option . ". -> Error. Details: " . $test_result['message'] . $configuration['line_break'];
-            /** Otherwise the function displays not error message */
-            else
-                $test_result = "URL: " . $option . " -> No Errors!" . $configuration['line_break'];
+            if (!is_array($test_result) || (is_array($test_result) && $test_result['result']!='success'))
+                throw new \Exception("Functional test for url: " . $option . " returned invalid response");
+
+			if ($this->invalid_assert_count > 0)
+                throw new \Exception("Assert failed in function: " . $class_function);
+                        
+       		echo ($test_count + 1) . ") Testing url: " . $option . " result: passed" . $configuration['general']['line_break'];            
+            flush();
+            $test_count++;
         }
         
         /** End time for the unit tests */
         $end_time = time();
         
-        $test_results .= $configuration['line_break'] . $configuration['line_break'];
-        $test_results .= "Result of unit testing: ";
-        $test_results .= $configuration['line_break'] . $configuration['line_break'];
-        $test_results .= "Number of functions tested: " . $function_count . $configuration['line_break'];
-        $test_results .= "Number of asserts: " . $this->valid_assert_count . $configuration['line_break'];
-        $test_results .= "Number of failed asserts: " . $this->invalid_assert_count . $configuration['line_break'];
+        $test_results .= $configuration['general']['line_break'];
+        $test_results .= "Result of functional testing: ";
+        $test_results .= $configuration['general']['line_break'] . $configuration['general']['line_break'];
+        $test_results .= "Number of functions tested: " . $test_count . $configuration['general']['line_break'];
+        $test_results .= "Number of asserts: " . $this->valid_assert_count . $configuration['general']['line_break'];
+        $test_results .= "Number of failed asserts: " . $this->invalid_assert_count . $configuration['general']['line_break'];
         $test_results .= "Time taken: " . ($end_time - $start_time) . " sec";
         
         echo $test_results;

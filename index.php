@@ -1,37 +1,30 @@
 <?php
-
 /**
- * The plugin bootstrap file
+ * The application bootstrap file
  *
- * This file is read by WordPress to generate the plugin information in the plugin
- * Dashboard. This file also includes all of the dependencies used by the plugin,
- * registers the activation and deactivation functions, and defines a function
- * this starts the plugin.
+ * This file is the main entry point for the application
+ * All url requests to the application are handled by this file
  *
- * @link:       	  http://pakjiddat.com
- * @since             2.0.0
- * @package           IslamCompanion
- *
- * @wordpress-plugin
- * Plugin Name:       Islam Companion
- * Plugin URI:        http://pakjiddat.com
- * Description:       The goal of this plugin is to make it easier to integrate Islam in your every day life
- * Version:           2.0.0
- * Author:            Pak Jiddat
+ * @link:             http://dev.pakphp.com
+ * @since             1.0.0
+ * @package           Framework
+ * 
+ * Description:       Pak PHP example application  
+ * Version:           1.0.0
+ * Author:            Nadir Latif
  * Author URI:        http://pakjiddat.com
  * License:           GPL-2.0+
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
- * Text Domain:       islam-companion
- * Domain Path:       /languages
+ * Text Domain:       example-pakphp 
  */
-
-
-namespace IslamCompanion;
+namespace Framework;
 
 require("autoload.php");
 
-$argv=isset($argv)?$argv:array();
+$argv       = isset($argv)?$argv:array();
+$class_name = isset($_REQUEST['module'])?$_REQUEST['module']:'Example';     
+$class_name = Utilities\UtilitiesFramework::Factory("string")->Concatenate('\\',$class_name,'\\',"Configuration");
 
-$ic_configuration=Configuration::GetInstance($argv);
-$ic_configuration->InitializeApplication($argv);
-$ic_configuration->RunApplication();
+$configuration=$class_name::GetInstance($argv);
+$configuration->InitializeApplication($argv);
+$configuration->RunApplication();

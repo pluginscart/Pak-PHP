@@ -2,8 +2,6 @@
 
 namespace Framework\FrontController;
 
-use Framework\Configuration\Configuration as Configuration;
-
 /**
  * Base presentation class for browser based applications
  * 
@@ -57,14 +55,13 @@ abstract class Presentation
         
         /** The presentation object is fetched from application configuration */
         $presentation_object = Configuration::GetComponent('presentation');
-        
-        $function_name_suffix = ucwords(str_replace("_", " ", $option));
-        $function_name_suffix = str_replace(" ", "", $function_name_suffix);
+        /** Url option is converted to camelcase */
+        $function_name_suffix = \Framework\Utilities\UtilitiesFramework::Factory("string")->CamelCase($option);                
         
         $function_name                = substr($tag_name, 0, strrpos($tag_name, "."));
-        $function_name                = ucwords(str_replace("_", " ", $function_name));
-        $function_name                = str_replace(" ", "", $function_name);
-        $function_name                = "Get" . $function_name . "ParametersFor" . $function_name_suffix;
+		/** Functiona name is converted to camelcase */
+        $function_name                = \Framework\Utilities\UtilitiesFramework::Factory("string")->CamelCase($function_name);
+        $function_name                = "Get" . $function_name . "ParametersFor" . $function_name_suffix;		
         /** The template parameters callback is defined */
         $template_parameters_callback = array(
             $presentation_object,
@@ -74,7 +71,7 @@ abstract class Presentation
         if (is_callable($template_parameters_callback))
             $template_parameters = call_user_func($template_parameters_callback);
         else
-            throw new \Exception("Please define the function: " . $function_name . " in the application presentation class", 120);
+            throw new \Exception("Please define the function: " . $function_name . " in the application presentation class");
         
         return $template_parameters;       
     }
