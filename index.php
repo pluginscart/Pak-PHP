@@ -5,17 +5,17 @@
  * This file is the main entry point for the application
  * All url requests to the application are handled by this file
  *
- * @link:             http://dev.pakphp.com
+ * @link:             http://pakjiddat.com
  * @since             1.0.0
  * @package           Framework
  * 
- * Description:       Pak PHP example application  
- * Version:           1.0.0
+ * Description:       Pak PHP Framework  
+ * Version:           1.0.4
  * Author:            Nadir Latif
  * Author URI:        http://pakjiddat.com
  * License:           GPL-2.0+
  * License URI:       http://www.gnu.org/licenses/gpl-2.0.txt
- * Text Domain:       example-pakphp 
+ * Text Domain:       pakphp 
  */
 namespace Framework;
 

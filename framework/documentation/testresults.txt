@@ -4,11 +4,12 @@
 4) Testing function: Example\Testing::TestDatabase. result: passed. number of asserts: 1
 5) Testing function: Example\Testing::TestEmail. result: passed. number of asserts: 1
 6) Testing function: Example\Testing::TestString. result: passed. number of asserts: 1
+7) Testing function: Example\Testing::TestTemplate. result: passed. number of asserts: 1
 
 
 Result of unit testing: 
 
-Number of functions tested: 6
-Number of asserts: 6
+Number of functions tested: 7
+Number of asserts: 7
 Number of failed asserts: 0
-Time taken: 1 sec
+Time taken: 0 sec

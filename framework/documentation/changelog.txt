@@ -1,5 +1,9 @@
 Changelog:
 
+1.0.4 (October 4, 2015)
+    1) Updated ErrorHandling.php file so it displays error messages using html template files
+    2) Organized configuration options into categories
+    
 1.0.3 (October 1, 2015)
     1) Renamed browser application folder to frontendcontroller. moved presentation, testing and template files to frontendcontroller folder
     2) Created new framework module called api
