@@ -2,7 +2,7 @@
 
 namespace Framework\Object;
 
-use Framework\FrontController\Configuration as Configuration;
+use Framework\WebApplication\Configuration as Configuration;
 
 /**
  * This class implements the base DataObject class 

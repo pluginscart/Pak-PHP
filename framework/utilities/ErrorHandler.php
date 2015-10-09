@@ -13,7 +13,7 @@ namespace Framework\Utilities;
  * @package    Utilities
  * @author     Nadir Latif <nadir@pakjiddat.com>
  * @license    https://www.gnu.org/licenses/gpl-2.0.html GNU General Public License, version 2
- * @version    Release: 1.0.2
+ * @version    Release: 1.0.0
  * @link       N.A
  */
 class ErrorHandler
@@ -76,6 +76,14 @@ class ErrorHandler
 	 * Used to hold the template folder path
 	 */
 	private $template_folder_path;
+	/**
+	 * Used to store the error template suffix
+	 */
+	private $error_template_suffix;
+	/** Used to store the line break
+	 * 
+	 */
+	private $line_break;
     /**
      * Used to return a single instance of the class
      * 
@@ -157,7 +165,12 @@ class ErrorHandler
         if (isset($parameters['shutdown_function']) && $parameters['shutdown_function']!="" && !(is_callable($parameters['shutdown_function'])))
             throw new \Exception("Invalid custom shutdown function");
         else if($parameters['shutdown_function']!="")
-            register_shutdown_function($parameters['shutdown_function']);                       
+            register_shutdown_function($parameters['shutdown_function']);
+		
+		/** The line break. If the application is being accessed from web browser then line break is set to <br/> */
+		$this->line_break                          = ($this->is_browser_application) ? "<br/>" : "\n";
+		/** The error message template file name suffix. If the application is being accessed from web browser then the suffix is set to html. otherwise it is set to plain */
+		$this->error_template_suffix               = ($this->is_browser_application) ? "html" : "plain";                       
     }
     
     /**
@@ -250,11 +263,9 @@ class ErrorHandler
      */
     private function GetFunctionParameters($trace, $class_name, $function_name)
     {
-    	/** If the application is being accessed from web browser then line break is set to <br/> */   
-        $line_break               = ($this->is_browser_application) ? "<br/>" : "\n";
-        /** The stack trace information. Used to render the function_parameters.html template file */
+    	/** The stack trace information. Used to render the function_parameters.html template file */
 		$template_parameters      = array();		
-        /** Each function parameter is rendered using function_parameters.html template file */        
+        /** Each function parameter is rendered using function_parameters.html template file */               
         for ($count = 0; $count < count($trace['args']); $count++) {
         	/** The parameters for a single function */
             $parameters            = array();
@@ -264,27 +275,31 @@ class ErrorHandler
             if (is_array($parameter_value))
                 $parameter_value   = var_export($parameter_value, true);		
 			/** If the parameter value is numeric then it is converted to a string */
-			if(is_numeric($parameter_value))
+			else if(is_numeric($parameter_value))
 			    $parameter_value   = strval($parameter_value);			
-            /** Gets function parameter name from ReflectionParameter class */
-            $parameters_information = new \ReflectionParameter(array(
-                $class_name,
-                $function_name
-            ), $count);
-            $parameters_name        = $parameters_information->getName();
+			/** Checks if the given class exists */
+			if (class_exists($class_name)) {
+                /** Gets function parameter name from ReflectionParameter class */
+                $parameters_information = new \ReflectionParameter(array(
+                    $class_name,
+                    $function_name
+                ), $count);
+                $parameter_name        = $parameters_information->getName();				
+			}
+			else $parameter_name  = "N.A";
 			
             if (is_object($parameter_value))
                 $parameter_value    = "Object of class: " . get_class($parameter_value);
             /** Adds the function parameter information to the template parameters array */
             $parameters['param_number'] = ($count+1);
-			$parameters['param_name']   = $parameters_name;
+			$parameters['param_name']   = $parameter_name;
 			$parameters['param_value']  = $parameter_value;
-			$parameters['line_break']   = $line_break;
+			$parameters['line_break']   = $this->line_break;
 			$template_parameters[] 		= $parameters;	
         }
 		
 		/** If the trace contained parameters then the stack trace is rendered using error_message.html template file */
-		if (count($template_parameters)>0)$function_parameter_html = UtilitiesFramework::Factory("template")->RenderTemplateFile($this->template_folder_path.DIRECTORY_SEPARATOR."function_parameters.html", $template_parameters);
+		if (count($template_parameters)>0)$function_parameter_html = UtilitiesFramework::Factory("template")->RenderTemplateFile($this->template_folder_path.DIRECTORY_SEPARATOR."function_parameters_".$this->error_template_suffix.".html", $template_parameters);
 		else $function_parameter_html = "";
 		
         return $function_parameter_html;        
@@ -299,9 +314,7 @@ class ErrorHandler
      */
     private function GetStackTrace()
     {
-    	/** If the application is being accessed from web browser then line break is set to <br/> */   
-        $line_break               = ($this->is_browser_application) ? "<br/>" : "\n";        
-        /** The stack trace is fetched */
+    	/** The stack trace is fetched */
         $stack_trace              = debug_backtrace();
 		/** The start index of the stack trace */
 		$start_index              = 0;
@@ -344,14 +357,14 @@ class ErrorHandler
 			$parameters['function_name']          = $function;
 			$parameters['function_parameters']    = $function_parameters;
 			$parameters['class_name']             = $class;
-			$parameters['line_break']             = $line_break;
-			
+			$parameters['line_break']             = $this->line_break;
+			$parameters['counter']                = ($count+1);
 			$template_parameters[] = $parameters;
         }
 		
         /** The stack trace is rendered using stack_trace.html template file */
 		if (count(count($stack_trace))>0)
-		    $stack_trace_html = UtilitiesFramework::Factory("template")->RenderTemplateFile($this->template_folder_path.DIRECTORY_SEPARATOR."stack_trace.html", $template_parameters);		
+		    $stack_trace_html = UtilitiesFramework::Factory("template")->RenderTemplateFile($this->template_folder_path.DIRECTORY_SEPARATOR."stack_trace_".$this->error_template_suffix.".html", $template_parameters);		
 		else 
 		    $stack_trace_html = "";
 		 
@@ -369,13 +382,11 @@ class ErrorHandler
     {
     	try
     	    {    	    	
-		        $log_message = "";
-		        /** If the application is being accessed from web browser then line break is set to <br/> */
-		        $line_break                          = ($this->is_browser_application) ? "<br/>" : "\n";
+		        $log_message = "";		        
 				
 		        $template_parameters = array();
 				$template_parameters['date']          = date("d-m-Y H:i:s");
-				$template_parameters['line_break']    = $line_break;
+				$template_parameters['line_break']    = $this->line_break;
 				$template_parameters['error_level']   = strval($this->error_level);
 				$template_parameters['error_file']    = $this->error_file;
 				$template_parameters['error_line']    = $this->error_line;
@@ -383,9 +394,7 @@ class ErrorHandler
 		        $template_parameters['stack_trace']   = $this->GetStackTrace();
 				
 		        /** The stack trace is rendered using error_message.html template file */
-		        $stack_trace_html = UtilitiesFramework::Factory("template")->RenderTemplateFile($this->template_folder_path.DIRECTORY_SEPARATOR."error_message.html", $template_parameters);
-				/** If the application is not being run from a browser then the html tags are stripped */
-				if (!$this->is_browser_application)$stack_trace_html = strip_tags($stack_trace_html);				
+		        $stack_trace_html = UtilitiesFramework::Factory("template")->RenderTemplateFile($this->template_folder_path.DIRECTORY_SEPARATOR."error_message_".$this->error_template_suffix.".html", $template_parameters);							
 				
 				/** The error message string is displayed and the script ends */
 				die($stack_trace_html);
@@ -431,10 +440,8 @@ class ErrorHandler
 		        } 
 		        else {
 		        	/** The name of the template file used to render the error message to the user */
-		        	if ($this->is_browser_application)		    
-		                $template_file_name = $this->template_folder_path.DIRECTORY_SEPARATOR."production_html_error.html";
-		            else
-		                $template_file_name = $this->template_folder_path.DIRECTORY_SEPARATOR."production_text_error.html";
+		        	$template_file_name = $this->template_folder_path.DIRECTORY_SEPARATOR."production_error_".$this->error_template_suffix.".html";
+		            
 					/** The template parameters used to render the error template */
 		            $template_parameters = array("error_message"=>"An error has occured in the application. Please contact the system administrator");
 				    /** The error message that is displayed to the user is rendered */

@@ -24,20 +24,34 @@ abstract class UiObject
      */
     protected $sub_items;
     /**
-     * DataObject of the UiObject instance
+     * Data object of the UiObject instance
      * It allows saving/loading/deleting the instance from MySQL database
      * 
      * @since 1.0.0		
      */
     protected $data_object;
     /**
+     * Presentation object of the UiObject instance
+     * It is used to present the data
+     * 
+     * @since 1.0.0		
+     */
+    protected $presentation_object;
+ 	/**
      * Used to load the object with data
      * 
      * It loads the data from database to the object. It must be implemented by a child class
      * 
+     * @since 1.0.0		           
+     */
+    abstract function Read();
+    /**
+     * Used to load the object with data
+     * 
+     * It loads the data to the object. It must be implemented by a child class
+     * 
      * @since 1.0.0		 
-     * @param array $data array containing data for the object and the sub items
-     * @return void 
+     * @param array $data array containing data for the object and the sub items     
      */
     abstract function Load($data);
     /**
@@ -45,8 +59,7 @@ abstract class UiObject
      * 
      * It saves the data in the object to database. It must be implemented by child class
      * 
-     * @since 1.0.0
-     * @return void 
+     * @since 1.0.0     
      */
     abstract function Save();
     /**
@@ -54,8 +67,7 @@ abstract class UiObject
      * 
      * It renders the data in the object to a template. It must be implemented by child class		 
      * 
-     * @since 1.0.0
-     * @return void 
+     * @since 1.0.0    
      */
     abstract function Display();
     /**
@@ -63,8 +75,19 @@ abstract class UiObject
      * 
      * It deletes the current object. It must be implemented by child class		 
      * 
-     * @since 1.0.0
-     * @return void 
+     * @since 1.0.0     
      */
     abstract function Delete();
+	/**
+     * Used to set the presentation object
+     * 
+     * It sets the current presentation object
+     * 
+     * @since 1.0.0		 
+     * @param object $presentation_object the presentation object for the class
+	 *     
+     */
+    public function SetPresentationObject($presentation_object) {
+    	$this->presentation_object = $presentation_object;
+    }	
 }

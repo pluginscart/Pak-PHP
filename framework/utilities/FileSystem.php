@@ -87,7 +87,7 @@ class FileSystem
         
         /** If the folder is not readable then an exception is thrown */
         if (!is_dir($folder_path))
-            throw new \Exception("Error in reading folder: " . $folder_path, 110);
+            throw new \Exception("Error in reading folder: " . $folder_path);
         /** The list of files in folder is fetched */
         $file_list = scandir($folder_path);
         /** The . and .. entries are removed from list */
@@ -108,7 +108,7 @@ class FileSystem
     {
         
         if (!unlink($file_path))
-            throw new \Exception("File could not be deleted", 110);
+            throw new \Exception("File could not be deleted");
         
     }
     
@@ -126,7 +126,7 @@ class FileSystem
     {
         $fh = fopen($file_path, "w");
         if (!fwrite($fh, $file_text))
-            throw new \Exception("Text could not be written to file", 110);
+            throw new \Exception("Text could not be written to file");
         else
             fclose($fh);
     }
@@ -176,7 +176,7 @@ class FileSystem
     public function UploadFile($file_data)
     {
         if (!isset($file_data["name"]))
-            throw new \Exception("No file to upload", 110);
+            throw new \Exception("No file to upload");
         
         $max_allowed_file_size = $this->max_allowed_file_size;
         $allowed_extensions    = $this->allowed_extensions;
@@ -185,7 +185,7 @@ class FileSystem
         $type_of_uploaded_file = substr($file_name, strrpos($file_name, ".") + 1);
         
         if ($size_of_uploaded_file > $max_allowed_file_size)
-            throw new \Exception("Size of file should be less than " . $max_allowed_file_size . " Kb", 110);
+            throw new \Exception("Size of file should be less than " . $max_allowed_file_size . " Kb");
          
         //------ Validate the file extension -----
         $allowed_ext = false;
@@ -196,7 +196,7 @@ class FileSystem
         }
      
         if (!$allowed_ext)
-            throw new \Exception("The uploaded file is not a supported file type. Only the following file types are supported: " . implode(',', $allowed_extensions), 110);
+            throw new \Exception("The uploaded file is not a supported file type. Only the following file types are supported: " . implode(',', $allowed_extensions));
         
         //copy the temp. uploaded file to uploads folder
         $path_of_uploaded_file = $this->upload_folder . DIRECTORY_SEPARATOR . $file_name;
@@ -210,7 +210,7 @@ class FileSystem
          */
         if (isset($_SERVER['HTTP_HOST']) && is_uploaded_file($tmp_path) || (!isset($_SERVER['HTTP_HOST']) && is_file($tmp_path))) {
             if (!copy($tmp_path, $path_of_uploaded_file)) {
-                throw new \Exception("Error while copying the uploaded file", 110);
+                throw new \Exception("Error while copying the uploaded file");
             }
         }
         

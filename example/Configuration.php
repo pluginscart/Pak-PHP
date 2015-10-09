@@ -8,14 +8,14 @@ namespace Example;
  * Contains application configuration information
  * It provides configuration information and helper objects to the application
  * 
- * @category   Example
- * @package    ApplicationConfiguration
+ * @category   WebApplication
+ * @package    Example
  * @author     Nadir Latif <nadir@pakjiddat.com>
  * @license    https://www.gnu.org/licenses/gpl-2.0.html GNU General Public License, version 2
  * @version    1.0.0
  * @link       N.A
  */
-class Configuration extends \Framework\FrontController\Configuration
+class Configuration extends \Framework\WebApplication\Configuration
 {
     /**
      * Used to initialize the application

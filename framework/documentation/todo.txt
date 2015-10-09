@@ -13,6 +13,9 @@
 13) Create simple template function for displaying html output. e.g for logging function output
 14) Add qunit test runner
 15) Use http://adrai.github.io/flowchart.js/ to create flowcharts from functions
+16) Add annotation tags to function comments for indicating business rule
+17) Make script for reading functions and classes. it should allow version control at the level of functions and classes. it should also allow editing functions for certain business rules
+18) Create tool for online code file editing. Connect error messages to code file
 
 Reference:
 

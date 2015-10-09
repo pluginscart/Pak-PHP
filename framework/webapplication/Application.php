@@ -1,6 +1,6 @@
 <?php
 
-namespace Framework\FrontController;
+namespace Framework\WebApplication;
 
 /**
  * This class implements the base BrowserApplication class 
@@ -9,7 +9,7 @@ namespace Framework\FrontController;
  * The class is abstract and must be inherited by the application user interface class
  * 
  * @category   Framework
- * @package    FrontController
+ * @package    WebApplication
  * @author     Nadir Latif <nadir@pakjiddat.com>
  * @license    https://www.gnu.org/licenses/gpl-2.0.html GNU General Public License, version 2
  * @version    Release: 1.0.0
@@ -20,7 +20,7 @@ abstract class Application
     /**
      * The single static instance
      */
-    protected static $instance;    
+    protected static $instance;
     /**
      * Class constructor
      * Used to prevent creating an object of this class outside of the class using new operator
@@ -190,35 +190,51 @@ abstract class Application
      * 
      * @since 1.0.0
      * @param string $option the url option
-     * @param array $parameters the list of url parameters	 
+     * @param array $parameters the list of url parameters. it is an associative array. if set to false then the parameters are not used
      * @return string $encoded_url the encoded url
      * @return boolean $is_link used to indicate if url will be used in link. if it will be used in link then url & will be
      * encoded so it is compatible with html5 validator
      * @throws Exception an object of type Exception is thrown if the encoded parameters size is larger than 100 characters
      */
     public function GetEncodedUrl($option, $parameters, $is_link)
-    {        
-        /** The url parameters are first json encoded */
-        $encoded_parameters = json_encode($parameters);
-        /** Then the parameters are base64 encoded */
-        $encoded_parameters = base64_encode($encoded_parameters);
-        /** Then the parameters are urlencoded */
-        $encoded_parameters = urlencode($encoded_parameters);
-        
-        /** An exception is thrown if encoded parameter length is larger then 150 characters */
-        if (strlen($encoded_parameters) > 150)
-            throw new \Exception("The size of the encoded parameters must be less than 100 characters");
+    {
+    	/** If the parameters are set then they are encoded */
+    	if($parameters) {
+    		 /** The url parameters are first json encoded */
+             $encoded_parameters = json_encode($parameters);
+             /** Then the parameters are base64 encoded */
+             $encoded_parameters = base64_encode($encoded_parameters);
+             /** Then the parameters are urlencoded */
+             $encoded_parameters = urlencode($encoded_parameters);
+			                
+             /** An exception is thrown if encoded parameter length is larger then 150 characters */
+             if (strlen($encoded_parameters) > 150)
+                 throw new \Exception("The size of the encoded parameters must be less than 100 characters");
+    	}
         
         /** The web application base url is fetched from application configuration */
         $web_application_url = Configuration::GetConfig("path","framework_url");
 		/** The application name is fetched from the application configuration */   
         $module_name         = Configuration::GetConfig("general","module");
+		/** The url parameters */
+		$url_parameters      = array("option"=>$option,"module"=>$module_name);
+		/** If the parameters were given then they are added to the url */
+		if ($parameters)
+		    $url_parameters['parameters'] = $encoded_parameters;
 		
         /** The encoded url is created and returned */
+        /** If the url will be used in an a tag link then the parameters are separate by &amp; */ 
         if ($is_link)
-            $encoded_url = $web_application_url . "?option=" . $option . '&amp;module=' . $module_name. '&amp;parameters=' . ($encoded_parameters);
-        else
-            $encoded_url = $web_application_url . "?option=" . $option . '&module=' . $module_name. '&parameters=' . ($encoded_parameters);
+		    $separator = "&amp;";
+		else
+            $separator = "&";
+	
+		$encoded_url = $web_application_url . "?";
+		foreach ($url_parameters as $key=>$value) {
+			$encoded_url .= $key."=".$value.$separator;
+		}
+             
+        $encoded_url = trim($encoded_url, $separator);            
         
         return $encoded_url;        
     }    

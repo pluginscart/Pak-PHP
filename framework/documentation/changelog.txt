@@ -1,5 +1,11 @@
 Changelog:
 
+1.0.5 (October 6, 2015)
+    1) Renamed frontcontroller namespace to webapplication
+    2) Added presentation object to UiObject class
+    3) Created new namespace templates. added basicsite template to the template namespace
+    4) Added HtmlTablePresentation abstract class to the basicsite template. it can be used as presentation object in applications that work with tables    
+    
 1.0.4 (October 4, 2015)
     1) Updated ErrorHandling.php file so it displays error messages using html template files
     2) Organized configuration options into categories

@@ -1,6 +1,6 @@
 <?php
 
-namespace Framework\FrontController;
+namespace Framework\WebApplication;
 
 /**
  * Base configuration class for browser based applications
@@ -11,7 +11,7 @@ namespace Framework\FrontController;
  * Initializes objects and sets configuration
  * 
  * @category   Framework
- * @package    FrontController
+ * @package    WebApplication
  * @author     Nadir Latif <nadir@pakjiddat.com>
  * @license    https://www.gnu.org/licenses/gpl-2.0.html GNU General Public License, version 2
  * @version    1.0.0
@@ -68,50 +68,53 @@ class Configuration
     }
     
     /**
-     * Used to create framework objects specified by the user
+     * Used to create the given object
      * 
-     * Creates the objects specified by the user and adds the objects to application configuration 		
-     * Objects are created using GetInstance method if it is supported or new operator if class is not Singleton
+     * Creates the given object
+	 * The object must be mentioned by the user in the application configuration file 		
+     * The object is created using GetInstance method if it is supported or new operator if class is not Singleton
      * 		
-     * @since 1.0.0		 
+     * @since 1.0.0
+	 * @param array $parameters the optional object parameters
+	 * If not set then then the object parameters specified in the application configuration are used 		 
      */
-    private function InitializeFrameworkObjects()
+    private static function InitializeObject($object_name,$parameters=false)
     {
-        /** Each framework object is created an added to application configuration */
-        foreach (static::$configuration['required_frameworks'] as $framework_name => $object_information) {
-            /** The class parameters are initialized */
-            if (!isset($object_information['parameters']))
-                $object_information['parameters'] = "";
+        $object_information = static::$configuration['required_frameworks'][$object_name];
+        /** The class parameters are initialized */
+        if ($parameters)
+			$object_information['parameters'] = $parameters;
+		else if (!isset($object_information['parameters']))
+            $object_information['parameters'] = "";
             
-            /** The name of the framework class */
-            $framework_class_name = $object_information['class_name'];
-            /** 
-             * Used to check if class exists
-             * The class is autoloaded if it is not already included 
-             * If it does not exist then an exception is thrown
-             */
-            if (!class_exists($framework_class_name, true))
-                throw new \Exception("Class: " . $framework_class_name . " does not exist");
-            /**
-             * Used to check if class implments Singleton pattern
-             * If it has a static function called GetInstance then
-             * It is assumed to be a Singleton class
-             * The GetInstance method is used to get class instance
-             */
-            $callable_singleton_method = array(
-                $framework_class_name,
-                "GetInstance"
-            );
-            if (is_callable($callable_singleton_method))
-                $framework_class_obj = call_user_func_array($callable_singleton_method, array(
-                    $object_information['parameters']
-                ));
-            /** If it is not a Singleton class then an object of the class is created using new operator */
-            else
-                $framework_class_obj = new $framework_class_name($object_information['parameters']);
-            /** The object is saved to object list */
-            static::$component_list[$framework_name] = $framework_class_obj;
-        }
+        /** The name of the framework class */
+        $framework_class_name = $object_information['class_name'];
+        /** 
+         * Used to check if class exists
+         * The class is autoloaded if it is not already included 
+         * If it does not exist then an exception is thrown
+         */
+       if (!class_exists($framework_class_name, true))
+           throw new \Exception("Class: " . $framework_class_name . " does not exist");
+       /**
+        * Used to check if class implments Singleton pattern
+        * If it has a static function called GetInstance then
+        * It is assumed to be a Singleton class
+        * The GetInstance method is used to get class instance
+        */
+       $callable_singleton_method = array(
+           $framework_class_name,
+           "GetInstance"
+       );
+       if (is_callable($callable_singleton_method))
+           $framework_class_obj = call_user_func_array($callable_singleton_method, array(
+           $object_information['parameters']
+       ));
+       /** If it is not a Singleton class then an object of the class is created using new operator */
+	   else
+           $framework_class_obj = new $framework_class_name($object_information['parameters']);
+       /** The object is saved to object list */
+       static::$component_list[$object_name] = $framework_class_obj;       
     }
     
     /**
@@ -168,15 +171,10 @@ class Configuration
          * Php settings such as display_error settings are set
          */
         static::$configuration = DefaultConfiguration::GetConfiguration($argv, $user_configuration);
-        /**
-         * The required frameworks are loaded
-         * For each required framework class, an object is created with the given parameters
-         * Checks if class has the method GetInstance
-         * If it does then it is a singleton class and this method is used to get object instance
-         * The object is saved to the object list						 
-         * Autoload function should auto load all the class files
-         */
-        $this->InitializeFrameworkObjects();
+		
+        /** The error handler object is created */
+        $this->InitializeObject("errorhandler");
+		
         /** All required classes are included */
         $this->IncludeRequiredClasses();
         
@@ -234,18 +232,15 @@ class Configuration
         
         /** The list of component objects is fetched */
         for ($count = 0; $count < count($object_names); $count++) {
-            $object_name = $object_names[$count];
-            if (!isset(static::$component_list[$object_name]))
-                throw new \Exception("Application component object: " . $object_name . " could not be found");
-            $component_objects_list[$object_name] = static::$component_list[$object_name];
+        	/** The name of the required object */
+            $object_name                          = $object_names[$count];            
+            $component_objects_list[$object_name] = static::GetComponent($object_name);
         }
         
         /** The list of configuration values is fetched */
         for ($count = 0; $count < count($configuration_names); $count++) {
-            $configuration_name = $configuration_names[$count];
-            if (!isset(static::$configuration[$configuration_name]))
-                throw new \Exception("Application configuration: " . $configuration_name . " could not be found");
-            $configuration_values_list[$configuration_name] = static::$configuration[$configuration_name];
+            $configuration_name                             = $configuration_names[$count];
+            $configuration_values_list[$configuration_name] = static::GetConfig($configuration_name);
         }
         
         $components_and_configuration = array(
@@ -264,13 +259,17 @@ class Configuration
      * 		
      * @since 1.0.0
      * @param object $object_name name of the required object
+	 * @param array $parameters the optional object parameters
+	 * If not set then then the object parameters specified in the application configuration are used 		 
      */
-    public static function GetComponent($object_name)
+    public static function GetComponent($object_name,$parameters=false)
     {
         if (!isset(static::$component_list[$object_name]))
-            throw new \Exception("Application object: " . $object_name . " could not be found");
-        else
-            return static::$component_list[$object_name];
+            static::InitializeObject($object_name,$parameters);
+        
+        $object_name = static::$component_list[$object_name];
+		
+		return $object_name;
     }
     
     /**
@@ -346,7 +345,7 @@ class Configuration
      */
     public function RunApplication()
     {
-        $application_object = static::$component_list['application'];
+        $application_object = $this->GetComponent("application");
         $application_object->HandleRequest();
     }
 }

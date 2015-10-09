@@ -1,6 +1,6 @@
 <?php
 
-namespace Framework\FrontController;
+namespace Framework\WebApplication;
 
 /**
  * This class implements the base ApplicationTest class 
@@ -213,7 +213,9 @@ abstract class Testing
         /** The absolute path of the test results file */
         $test_configuration = Configuration::GetConfig("testing");
         $test_file_name     = $test_configuration['test_results_file'];
-        
+        /** The html is removed from the test results. The <br/> is replaced with new line */
+        $test_results      = str_replace("<br/>", "\n", $test_results);
+        $test_results      = strip_tags($test_results);
         /** The application test results are written to test file */
         Configuration::GetComponent("filesystem")->WriteLocalFile($test_results, $test_file_name);
     }
@@ -407,7 +409,7 @@ abstract class Testing
         $test_results = "";
         /** The result of testing single function */
         $test_result  = "";
-        /** Start time for the unit tests */
+        /** Start time for the funtional tests */
         $start_time   = time();
         foreach ($configuration['general']['application_url_mappings'] as $option => $option_data) {
             /** The full path to the test data file */
@@ -416,7 +418,10 @@ abstract class Testing
             if (!isset($configuration['testing']["test_data_folder"]))
                 throw new \Exception("Invalid test data folder path");
             $test_data_file_path    = $configuration['testing']["test_data_folder"] . DIRECTORY_SEPARATOR . $test_file_name;
-            /** The contents of the test data file are read */
+			/** If the test data file does not exist then an exception is thrown */
+			if (!is_file($test_data_file_path))
+                throw new \Exception("Invalid test data file path");
+            /** The contents of the test data file are read */            
             $application_parameters = $components['filesystem']->ReadLocalFile($test_data_file_path);
             /** The test data is json decoded */
             $application_parameters = json_decode($application_parameters, true);					
@@ -469,13 +474,12 @@ abstract class Testing
                 throw new \Exception("No controller or template defined for the current url.");
             
             if (!is_array($test_result) || (is_array($test_result) && $test_result['result']!='success'))
-                throw new \Exception("Functional test for url: " . $option . " returned invalid response");
+                throw new \Exception("Functional test for url: " . $option . " returned invalid response. Details: ".$test_result['message']);
 
 			if ($this->invalid_assert_count > 0)
                 throw new \Exception("Assert failed in function: " . $class_function);
                         
-       		echo ($test_count + 1) . ") Testing url: " . $option . " result: passed" . $configuration['general']['line_break'];            
-            flush();
+       		$test_results .= ($test_count + 1) . ") Testing url: " . $option . " result: passed" . $configuration['general']['line_break'];
             $test_count++;
         }
         
@@ -492,7 +496,7 @@ abstract class Testing
         
         echo $test_results;
         /** The results of testing are saved to file */
-        if ($configuration['testing']["save_test_data"])
+        if ($configuration['testing']["save_test_results"])
             $this->SaveTestResults($test_results);
     }
 }

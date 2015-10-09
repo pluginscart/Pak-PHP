@@ -13,12 +13,11 @@ namespace Framework\Utilities;
  * @package    Utilities
  * @author     Nadir Latif <nadir@pakjiddat.com>
  * @license    https://www.gnu.org/licenses/gpl-2.0.html GNU General Public License, version 2
- * @version    1.1.0
+ * @version    1.1.1
  * @link       N.A
  */
 class DatabaseFunctions
 {
-
     /**
      * Used to indicate start of sub where clause
      */
@@ -356,7 +355,8 @@ class DatabaseFunctions
             for ($count = 0; $count < count($where_clause); $count++) {
                 $operation = (isset($where_clause[$count]['operation'])) ? $where_clause[$count]['operation'] : "=";
                 $operator  = (isset($where_clause[$count]['operator'])) ? $where_clause[$count]['operator'] : "";
-                $this->df_build_where_clause($where_clause[$count]['field'], $where_clause[$count]['value'], true, $where_clause[$count]['table'], $operation, $operator, false);
+				$is_string = (isset($where_clause[$count]['is_string'])) ? $where_clause[$count]['is_string'] : true;
+                $this->df_build_where_clause($where_clause[$count]['field'], $where_clause[$count]['value'], $is_string, $where_clause[$count]['table'], $operation, $operator, false);
             }
         }
         

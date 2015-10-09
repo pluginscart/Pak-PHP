@@ -1,6 +1,6 @@
 <?php
 
-namespace Framework\FrontController;
+namespace Framework\WebApplication;
 
 /**
  * Default application configuration class
@@ -9,7 +9,7 @@ namespace Framework\FrontController;
  * It provides default application configuration
  * 
  * @category   Framework
- * @package    FrontController
+ * @package    WebApplication
  * @author     Nadir Latif <nadir@pakjiddat.com>
  * @license    https://www.gnu.org/licenses/gpl-2.0.html GNU General Public License, version 2
  * @version    1.0.0
@@ -68,6 +68,9 @@ abstract class DefaultConfiguration
 	        /** The folder name of the application */
 	        $configuration['general']['application_name'] = "";
 	        
+			/** Used to indicate if template parameters generation function should be automatically called */
+	        $configuration['general']['use_presentation'] = false;
+			
 	        /** The line break character for the application is set */
 	        $configuration['general']['line_break'] = ($configuration['general']['is_browser_application']) ? "<br/>" : "\n";
 
@@ -150,41 +153,36 @@ abstract class DefaultConfiguration
 	        $configuration['testing']['include_files']  = array();
 	        /** The application test class */
 	        $configuration['testing']['test_class'] = "";
-	        /** The path to the test results file */
-	        if ($configuration['general']['is_browser_application'])
-	            $configuration['testing']['test_results_file'] = 'test_results.html';
-	        else
-	            $configuration['testing']['test_results_file'] = 'test_results.txt';
 	        /** Test parameters used during testing */
 	        /** The list of classes to test */
 	        $configuration['testing']['classes'] = array("");
 			 /** The url of html validator to use during testing */
 	        $configuration['testing']['validator_url']        = "https://html5.validator.nu/";
 	        /** The path to the application test_data folder */
-	        $configuration['testing']['test_data_folder']     = "";
-	        /** The path to the application test_data folder */
-	        $configuration['testing']['documentation_folder'] = "documentation";
+	        $configuration['testing']['test_data_folder']     = "";	        
 			/** Used to indicate if the application should save page parameters to test_data folder */
-	        $configuration['testing']['save_test_data']      = false;			
-			 /** The path to the application test_data folder is set in user configuration */
+	        $configuration['testing']['save_test_data']      = false;
+			/** Used to indicate if the application should save test results */
+	        $configuration['testing']['save_test_results']      = true;
+			/** The name of the test results file */
+	        if (!isset($user_configuration['testing']['test_results_file']))
+	            $user_configuration['testing']['test_results_file'] = 'test_results.txt';			
+			/** The path to the application documentation folder */
+	        if (!isset($user_configuration['testing']['documentation_folder']))
+	            $user_configuration['testing']['documentation_folder'] = 'documentation';
+									
+			/** The path to the application test data folder is set in user configuration */
 	        if(isset($user_configuration['testing']['test_data_folder']))        
-	            $user_configuration['testing']['test_data_folder'] = $configuration['path']['applications_path'] . DIRECTORY_SEPARATOR . $user_configuration['testing']['test_data_folder'];										
-	        /** An exception is thrown if the test data folder does not exist */      
-	        if (isset($user_configuration['testing']['test_data_folder'])&&!is_dir($user_configuration['testing']['test_data_folder']))
-	            throw new \Exception("Test data folder path: " . $user_configuration['testing']['test_data_folder'] . " does not exist", 150);
-	        
+	            $user_configuration['testing']['test_data_folder'] = $configuration['path']['application_path'] . DIRECTORY_SEPARATOR . $user_configuration['testing']['test_data_folder'];										
+
 	        /** The path to the application documentation folder is set in user configuration */
 	        if (isset($user_configuration['testing']['documentation_folder']))
-	            $user_configuration['testing']['documentation_folder'] = $configuration['testing']['applications_path'] . DIRECTORY_SEPARATOR . $user_configuration['path']['application_folder'] . DIRECTORY_SEPARATOR . $user_configuration['testing']['documentation_folder'];       
-	        
-	        /** An exception is thrown if the documentation folder does not exist */
-	        if (isset($user_configuration['testing']['documentation_folder'])&&!is_dir($user_configuration['testing']['documentation_folder']))
-	            throw new \Exception("Documentation folder path: " . $user_configuration['testing']['documentation_folder'] . " does not exist", 150);
-	        
+	            $user_configuration['testing']['documentation_folder'] = $configuration['path']['application_path'] . DIRECTORY_SEPARATOR . $user_configuration['testing']['documentation_folder'];	        
+
 	        /** The full path to the test results file is set */
 	        if (isset($user_configuration['testing']['test_results_file']))
-	            $user_configuration['testing']['test_results_file'] = $user_configuration['testing']['documentation_folder'] . DIRECTORY_SEPARATOR . $user_configuration['testing']['test_results_file'];
-			
+	            $user_configuration['testing']['test_results_file'] = $user_configuration['testing']['documentation_folder'] . DIRECTORY_SEPARATOR . $user_configuration['testing']['test_results_file'];			
+		
 			/** User configuration is merged */
 	        if(isset($user_configuration['testing']))
 	        	$configuration['testing'] = array_replace_recursive($configuration['testing'], $user_configuration['testing']);
@@ -214,6 +212,9 @@ abstract class DefaultConfiguration
 			if(!isset($user_configuration['general']['application_name']))
 			    throw new \Exception("Application name was not set in configuration settings");
 			
+			/** If the application template name is not set then the default template basicsite is used */
+			if(!isset($user_configuration['general']['template']))
+			    $user_configuration['general']['template'] = "basicsite";
 			/** The application folder name is derived from the application name */
 	        if(isset($user_configuration['general']['application_name']) && !isset($user_configuration['path']['application_folder']))        
 	            $user_configuration['path']['application_folder'] = strtolower(\Framework\Utilities\UtilitiesFramework::Factory("string")->CamelCase($user_configuration['general']['application_name']));			
@@ -223,10 +224,8 @@ abstract class DefaultConfiguration
 	            $user_configuration['path']['module'] = \Framework\Utilities\UtilitiesFramework::Factory("string")->CamelCase($user_configuration['general']['application_name']);
 						
 			/** The application domain name is set */
-	        if ($configuration['general']['is_browser_application'])
+	        if (!isset($user_configuration['path']['web_domain']))
 	            $user_configuration['path']['web_domain'] = (isset($_SERVER['HTTPS_HOST'])) ? "https://" . $_SERVER['HTTPS_HOST'] : "http://" . $_SERVER['HTTP_HOST'];
-	        else
-	            $user_configuration['path']['web_domain'] = "N.A";
 			
 	        /** The web path to the framework */
 	        if (!isset($user_configuration['path']['relative_web_domain']))
@@ -234,28 +233,28 @@ abstract class DefaultConfiguration
 			
 			/** The framework url is set */
 			$user_configuration['path']['framework_url'] = $user_configuration['path']['web_domain'] ."/". $user_configuration['path']['relative_web_domain'] . "/index.php";
-			
+		
 	        /** The web path to the application */
 	        if (!isset($user_configuration['path']['application_folder_url']))
 	        /** The web path to the application */
 	        $user_configuration['path']['application_folder_url']     = $user_configuration['path']['web_domain'] ."/". $user_configuration['path']['relative_web_domain'] . "/" . $user_configuration['path']['application_folder'];
 	        /** The web path to the application's template folder */
 	        if (!isset($user_configuration['path']['web_template_path']))
-	        $user_configuration['path']['web_template_path']   = $user_configuration['path']['application_folder_url'] . "/templates";
+	        $user_configuration['path']['web_template_path']   = $user_configuration['path']['web_domain'] ."/". $user_configuration['path']['relative_web_domain'] . "/framework/templates/" . $user_configuration['general']['template'];
 	        /** The web path to the application's vendors folder */
 	        if (!isset($user_configuration['path']['web_vendor_path']))
 	        $user_configuration['path']['web_vendor_path']     = $user_configuration['path']['application_folder_url'] . "/vendors";
 			
-			/** The framework folder name is set */
+			/** The path to the framework folder */
 	        $configuration['path']['framework_path']      = realpath($configuration['path']['base_path'] . DIRECTORY_SEPARATOR."framework");	        
 	        /** The path to the application folder */
-	        $configuration['path']['applications_path']   = $configuration['path']['base_path'] . DIRECTORY_SEPARATOR . $user_configuration['path']['application_folder'];
-	        /** The path to the templates folder of the application */
-	        $configuration['path']['template_path']       = $configuration['path']['applications_path'] . DIRECTORY_SEPARATOR . 'templates';
+	        $configuration['path']['application_path']   = $configuration['path']['base_path'] . DIRECTORY_SEPARATOR . $user_configuration['path']['application_folder'];
+	        /** The path to the templates html folder */
+	        $configuration['path']['template_path']       = $configuration['path']['framework_path'] . DIRECTORY_SEPARATOR . 'templates' . DIRECTORY_SEPARATOR . $user_configuration['general']['template'] . DIRECTORY_SEPARATOR . "html";
 	        /** The path to the application tmp folder */
-	        $configuration['path']['tmp_folder_path']     = $configuration['path']['applications_path'] . DIRECTORY_SEPARATOR . 'tmp';
-	        /** The path to the vendor folder of the a*/
-	        $configuration['path']['vendor_folder_path']  = $configuration['path']['applications_path'] . DIRECTORY_SEPARATOR . 'vendors';	        
+	        $configuration['path']['tmp_folder_path']     = $configuration['path']['application_path'] . DIRECTORY_SEPARATOR . 'tmp';
+	        /** The path to the vendor folder */
+	        $configuration['path']['vendor_folder_path']  = $configuration['path']['application_path'] . DIRECTORY_SEPARATOR . 'vendors';	        
 
 			/** User configuration is merged */
 	        if(isset($user_configuration['path']))

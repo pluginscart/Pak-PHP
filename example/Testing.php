@@ -9,14 +9,14 @@ namespace Example;
  * It is used to test the Example application
  * It tests the framework utility libraries
  * 
- * @category   Example
- * @package    Testing
+ * @category   WebApplication
+ * @package    Example
  * @author     Nadir Latif <nadir@pakjiddat.com>
  * @license    https://www.gnu.org/licenses/gpl-2.0.html GNU General Public License, version 2
  * @version    1.0.0
  * @link       N.A
  */
-class Testing extends \Framework\FrontController\Testing
+class Testing extends \Framework\WebApplication\Testing
 {
     /** 
      * Authentication function test

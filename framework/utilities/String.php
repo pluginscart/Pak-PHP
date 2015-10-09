@@ -11,7 +11,7 @@ namespace Framework\Utilities;
  * @package    Utilities
  * @author     Nadir Latif <nadir@pakjiddat.com>
  * @license    https://www.gnu.org/licenses/gpl-2.0.html GNU General Public License, version 2
- * @version    1.0.2
+ * @version    1.0.1
  * @link       N.A
  * @author 	   Nadir Latif <nadir@pakiddat.com>
  */
