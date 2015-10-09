@@ -70,7 +70,7 @@ class ExampleClass
         $cached_data = $caching_obj->GetCachedData("TestFunction", array(
             "parameter 1",
             "parameter 2"
-        ));
+		), true);
         print_R($cached_data);
     }
     
@@ -133,7 +133,11 @@ class ExampleClass
     public function ExcelTest()
     {
         /** The PhpExcel library is included */
-        $excel_file_path = DIRECTORY_SEPARATOR . "var" . DIRECTORY_SEPARATOR . "www" . DIRECTORY_SEPARATOR . "html" . DIRECTORY_SEPARATOR . "dev_pakphp" . DIRECTORY_SEPARATOR . "vendors" . DIRECTORY_SEPARATOR . 'phpexcel' . DIRECTORY_SEPARATOR . 'Classes' . DIRECTORY_SEPARATOR . 'PHPExcel' . DIRECTORY_SEPARATOR . 'IOFactory.php';
+        $excel_file_path = "!Enter the path to the PHPExcel IOFactory.php file!";
+		if(!is_file($excel_file_path)) {
+			echo "Please enter the path to the PHPExcel IOFactory.php file!";
+			return;
+		}
         include_once($excel_file_path);
         /** The Excel class object is fetched */
         $excel_obj = UtilitiesFramework::Factory("excel");
@@ -297,7 +301,7 @@ class ExampleClass
     {
         /** The Template class object is fetched */
         $template_obj = UtilitiesFramework::Factory("template");
-		$template_path = "example.html";  
+		$template_path = "templates".DIRECTORY_SEPARATOR."example.html";  
 		$tag_replacement_arr = array(array("title"=>"Page title","body"=>"Body title"));
 		/** The example template file is rendered */
         $template_file_contents    = $template_obj->RenderTemplateFile($template_path, $tag_replacement_arr);

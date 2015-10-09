@@ -127,6 +127,7 @@ class Caching
      * @param string $function_name name of the function whoose output is required
      * @param array $parameters function parameters		 
      * @param boolean $check_cache_duration used to indicate if the function cache duration should be checked
+	 * if set to false then the data will be fetched from cache even if it is expired
 	 * 
      * @return mixed the function data is returned or false if data was not found in cache
      */
