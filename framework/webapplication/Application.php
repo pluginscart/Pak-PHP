@@ -272,7 +272,8 @@ abstract class Application
         
         /** The parameters are then returned */
         return $decoded_parameters;        
-    }    
+    }  
+	  
     /**
      * Used to display the given template contents to the browser		 
      * 
@@ -285,6 +286,7 @@ abstract class Application
     {        
         echo $template_contents;       
     }    
+	
     /**
      * Used to display response to json request
      * 
@@ -293,8 +295,29 @@ abstract class Application
      * @since 1.0.0
      * @param array $response the data to display as json		 
      */
-    function DisplayJsonResponse($response)
+    protected function DisplayJsonResponse($response)
     {        
         echo json_encode($response);       
-    }    
+    }
+	    
+	/**
+     * Used to return the json response containing the given text
+     * 
+     * It returns json encoded string containing the given text
+	 * The json string can be used as response to an ajax request 
+     * 
+     * @since 1.0.0
+     * @param string $text the text that needs to be json encoded
+	 * 
+	 * @return string $response the json encoded response
+     */
+    protected function GetJsonResponse($text)
+    {
+        /** The response array */ 
+        $response    = array("result"=>"success","text"=>$text);
+		/** The response array is json encoded */
+		$response    = json_encode($response);
+		
+		return $response;     
+    }  
 }

@@ -264,38 +264,41 @@ class ErrorHandler
     private function GetFunctionParameters($trace, $class_name, $function_name)
     {
     	/** The stack trace information. Used to render the function_parameters.html template file */
-		$template_parameters      = array();		
+		$template_parameters                    = array();
         /** Each function parameter is rendered using function_parameters.html template file */               
         for ($count = 0; $count < count($trace['args']); $count++) {
         	/** The parameters for a single function */
-            $parameters            = array();
+            $parameters                         = array();
             /** Gets function parameter value from stack trace */
-            $parameter_value       = $trace['args'][$count];
+            $parameter_value                    = $trace['args'][$count];
             /** If parameter value is an array then it is converted to string */
             if (is_array($parameter_value))
-                $parameter_value   = var_export($parameter_value, true);		
+                $parameter_value                = var_export($parameter_value, true);		
 			/** If the parameter value is numeric then it is converted to a string */
 			else if(is_numeric($parameter_value))
-			    $parameter_value   = strval($parameter_value);			
+			    $parameter_value                = strval($parameter_value);			
 			/** Checks if the given class exists */
 			if (class_exists($class_name)) {
-                /** Gets function parameter name from ReflectionParameter class */
-                $parameters_information = new \ReflectionParameter(array(
-                    $class_name,
-                    $function_name
-                ), $count);
-                $parameter_name        = $parameters_information->getName();				
+				try {
+                        /** Gets function parameter name from ReflectionParameter class */
+                		$parameters_information = new \ReflectionParameter(array($class_name,$function_name), $count);
+                		$parameter_name         = $parameters_information->getName();
+				}
+				catch(\Exception $e) {
+					/** If the parameter information could not be fetched then the parameter name is set to N.A */
+					$parameter_name             = "N.A";
+				}				
 			}
-			else $parameter_name  = "N.A";
+			else $parameter_name                = "N.A";
 			
             if (is_object($parameter_value))
-                $parameter_value    = "Object of class: " . get_class($parameter_value);
+                $parameter_value                = "Object of class: " . get_class($parameter_value);
             /** Adds the function parameter information to the template parameters array */
-            $parameters['param_number'] = ($count+1);
-			$parameters['param_name']   = $parameter_name;
-			$parameters['param_value']  = $parameter_value;
-			$parameters['line_break']   = $this->line_break;
-			$template_parameters[] 		= $parameters;	
+            $parameters['param_number']         = ($count+1);
+			$parameters['param_name']           = $parameter_name;
+			$parameters['param_value']          = $parameter_value;
+			$parameters['line_break']           = $this->line_break;
+			$template_parameters[] 		        = $parameters;	
         }
 		
 		/** If the trace contained parameters then the stack trace is rendered using error_message.html template file */

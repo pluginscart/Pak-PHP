@@ -273,20 +273,6 @@ class Configuration
     }
     
     /**
-     * Used to set the given session parameter
-     * 
-     * Sets the given session parameter value 		
-     * 		
-     * @since 1.0.0
-     * @param string $param_name name of the session parameter
-     * @param string $param_value value of the session parameter
-     */
-    public static function SetSession($param_name, $param_value)
-    {
-        $_SESSION[$param_name] = $param_value;
-    }
-    
-    /**
      * Used to get the specified configuration setting
      * 
      * Throws an exception if the specified configuration setting could not be found
@@ -295,6 +281,7 @@ class Configuration
      * @since 1.0.0
      * @param string $config_name name of the required configuration
      * @param string $sub_config_name optional name of the required sub configuration
+	 * @throws Exception an exception is thrown if the given configuration does not exist
      */
     public static function GetConfig($config_name, $sub_config_name = "")
     {
@@ -321,6 +308,7 @@ class Configuration
      * @param string $config_name name of the required configuration
      * @param string $sub_config_name name of the required sub configuration	 
      * @param string $config_value value of the required configuration
+	 * @throws Exception an exception is thrown if the given configuration does not exist
      */
     public static function SetConfig($config_name, $sub_config_name, $config_value)
     {
@@ -331,10 +319,44 @@ class Configuration
         if ($sub_config_name == "")
             static::$configuration[$config_name] = $config_value;
         else
-            static::$configuration[$config_name][$sub_config_name] = $config_value;
-        
+            static::$configuration[$config_name][$sub_config_name] = $config_value;       
     }
     
+	/**
+     * Used to set the session configuration
+     * 
+     * It sets the given session variable
+     * 
+     * @since 1.0.0
+     * @param string $config_name name of the required session configuration     
+     * @param string $config_value value of the required session configuration
+     */
+    public static function SetSessionConfig($config_name, $config_value)
+    {
+    	/** Sets the given session variable */
+    	$_SESSION[$config_name]    = $config_value;
+    }
+	
+	/**
+     * Used to get the session configuration
+     * 
+     * It gets the given session variable
+     * 
+     * @since 1.0.0
+     * @param string $config_name name of the required session configuration
+	 * @throws Exception an exception is thrown if the given session configuration does not exist
+     */
+    public static function GetSessionConfig($config_name)
+    {
+    	/** If the given session variable is not set then an exception is thrown */
+    	if (!isset($_SESSION[$config_name]))
+		    throw new \Exception("The session variable: ".$config_name." does not exist");
+    	/** Returns the given session variable */
+    	$config_value = $_SESSION[$config_name];
+		
+		return $config_value;
+    }
+	
     /**
      * Used to run the application
      * 		 

@@ -27,7 +27,7 @@ abstract class Application
      */
     public function DisplayTemplateContents($template_contents)
     {        
-        echo $template_contents;       
+        echo $template_contents;
     }
 	    
     /**
@@ -40,9 +40,30 @@ abstract class Application
      */
     public function DisplayJsonResponse($response)
     {        
-        echo json_encode($response);       
+        echo json_encode($response);
     }
 	   
+	/**
+     * Used to return the json response containing the given text
+     * 
+     * It returns json encoded string containing the given text
+	 * The json string can be used as response to an ajax request 
+     * 
+     * @since 1.0.0
+     * @param string $text the text that needs to be json encoded
+	 * 
+	 * @return string $response the json encoded response
+     */
+    public function GetJsonResponse($text)
+    {
+        /** The response array */ 
+        $response    = array("result"=>"success","text"=>$text);
+		/** The response array is json encoded */
+		$response    = json_encode($response);
+		
+		return $response;     
+    } 
+	
 	/**
 	 * Used to activate the plugin
 	 *
@@ -263,9 +284,7 @@ abstract class Application
 	 * @param $configuration_name the name of the application configuration that contains the scripts/styles to enqueue
 	 * @param $is_script used to indicate if the given application configuration is a script or style
 	 */
-	public function WP_Enqueue($configuration_name,$is_script) {
-		/** Used to indicate if the localization script is registered. It must be registered after wp_enqueue_script */
-		$is_registered = false;			
+	public function WP_Enqueue($configuration_name,$is_script) {		
 		/** The wordpress configuration is fetched */
 		$wordpress_configuration=Configuration::GetConfig("wordpress");
 		for($count=0;$count<count($wordpress_configuration[$configuration_name]);$count++) {
@@ -278,18 +297,18 @@ abstract class Application
             $wordpress_configuration[$configuration_name][$count]['media'] );
 			
             else wp_enqueue_script(
-            Configuration::GetConfig("wordpress","plugin_url"),
+            $wordpress_configuration[$configuration_name][$count]['name'],
             Configuration::GetConfig("wordpress","plugin_url") ."/". $wordpress_configuration[$configuration_name][$count]['file'],
             $wordpress_configuration[$configuration_name][$count]['dependencies'],
             Configuration::GetConfig("wordpress","plugin_version"), false );
             
 			/** If the localization data is specified for the script then it is loaded to WordPress using wp_localize_script */
-			if(!$is_registered&&$is_script&&isset($wordpress_configuration[$configuration_name."_localization"])) {			
-		        wp_localize_script($wordpress_configuration[$configuration_name."_localization"]["name"],
-                                   $wordpress_configuration[$configuration_name."_localization"]["variable_name"],
-		                           $wordpress_configuration[$configuration_name."_localization"]["data"]
-		        );
-				$is_registered = true;
+			if(isset($wordpress_configuration[$configuration_name][$count]['localization'])) {				
+		        wp_localize_script(
+		        	    $wordpress_configuration[$configuration_name][$count]['localization']["name"],
+                        $wordpress_configuration[$configuration_name][$count]['localization']["variable_name"],
+		                $wordpress_configuration[$configuration_name][$count]['localization']["data"]
+		        );				
 	    	}
         }
 	}
@@ -304,8 +323,7 @@ abstract class Application
 	 * 
 	 * @return array $options the plugin options
 	 */
-	public function GetPluginOptions($option_id){
-		
+	public function GetPluginOptions($option_id){		
 		/** The current plugin options are fetched from WordPress */
 		$options = get_option( $option_id );
 		/** If the options is a json encoded string then it is decoded */
@@ -342,11 +360,11 @@ abstract class Application
 	public function GetOptionsId($option_name){
 		
 		/** The user id of the logged in user */
-    	$user_id=get_current_user_id();
+    	$user_id                    = get_current_user_id();
     	/** The wordpress configuration is fetched */
-		$wordpress_configuration=Configuration::GetConfig("wordpress");
+		$wordpress_configuration    = Configuration::GetConfig("wordpress");
 		/** The plugin settings id */
-		$options_id=$wordpress_configuration['plugin_prefix'].'_'.$option_name.'_'.$user_id;						
+		$options_id                 = $wordpress_configuration['plugin_prefix'].'_'.$option_name.'_'.$user_id;						
 		
 		return $options_id;
 	}
@@ -361,11 +379,10 @@ abstract class Application
 	 * @param string $option_id id of the option to save
 	 */
 	public function SavePluginOptions($options,$option_id) {
-		
 		/** If the options is an array then it is json encoded */
-		if(is_array($options))$options =  $options = json_encode($options);
+		//if(is_array($options))$options = json_encode($options);
 		/** The options values are saved */		
-		update_option($option_id,$options);	
+		update_option($option_id, $options); 					
 	}
 	
     /**

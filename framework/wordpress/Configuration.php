@@ -3,7 +3,7 @@
 namespace Framework\WordPress;
 
 /**
- * Base configuration class for browser based applications
+ * Base configuration class for wordpress applications
  * 
  * Singleton class. must be inherited by a child class
  * It extends the DefaultApplicationConfiguration class
@@ -17,7 +17,7 @@ namespace Framework\WordPress;
  * @version    1.0.0
  * @link       N.A
  */
-class Configuration extends \Framework\FrontController\Configuration
+class Configuration extends \Framework\WebApplication\Configuration
 {   
 	/**
      * Used to initialize the application

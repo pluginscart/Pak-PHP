@@ -67,7 +67,7 @@ abstract class DefaultConfiguration
 		/** The plugin folder name */
         $configuration['wordpress']['plugin_folder_name'] = $plugin_folder_name;
 		/** The plugin url. It is used to create css and javascript file urls */
-        $configuration['wordpress']['plugin_url'] = $configuration['path']['application_url']."/".$configuration['path']['application_folder'];		
+        $configuration['wordpress']['plugin_url'] = $configuration['path']['application_folder_url'];		
 		/** The path to the plugin folder */
         $configuration['wordpress']['plugin_folder_path'] = $configuration['path']['base_path'];
 		/** The path to the plugin template folder */		

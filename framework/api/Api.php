@@ -2,7 +2,7 @@
 
 namespace Framework\Api;
 
-use Framework\FrontController\Configuration as Configuration;
+use Framework\WebApplication\Configuration as Configuration;
 
 /**
  * This class implements the api class
@@ -69,8 +69,8 @@ class Api
 	 * 
 	 * @return string $api_url the api url containing the parameters is returned	 
 	 */
-	public function GenerateApiUrl($parameters){		
-		/** The url of the api in parts*/
+	public function GenerateApiUrl($parameters){
+		/** The url of the api in parts */
 		$api_url              = array();
 		/** 
 		 * The api url containing the parameters is created
@@ -81,9 +81,9 @@ class Api
 		foreach($parameters as $key=>$value)
 			{
 				$api_url[]=(($key)."=".urlencode(base64_encode($value)));
-			}
+			}			
 		/** The trailing & is removed */
-		$api_url             = $this->api_url."?".implode("&",$api_url);
+		$api_url             = $this->api_url."?".implode("&",$api_url);		
 		/** The api url is returned */
 		return $api_url;
 	}
@@ -96,23 +96,19 @@ class Api
 	 * If the response contains an error then an exception is thrown
 	 * Otherwise the api response is returned	 
 	 * 
-	 * @since    1.0.0
-	 * @param array $parameters list of parameters to include with url
+	 * @since 1.0.0
+	 * @param array   $parameters list of parameters to include with url
 	 * @throws object Exception an exception is thrown if the api response contains an error
 	 * 
 	 * @return array $response the api response
 	 */
-	public function MakeAPIRequestFromParams($parameters){
+	public function MakeAPIRequestFromParams($parameters){		
 		/** The api url with parameters is generated */
 		$api_url              = $this->GenerateApiUrl($parameters);
 		/** The api response is fetched */
-		$response             = Configuration::GetComponent("filesystem")->GetFileContent($api_url);		
-		/** The server response is decrypted */		
-		$response             = Configuration::GetComponent("encryption")->DecryptText($response);				
-		/** The server response is json decoded */
-		$response             = json_decode($response,true);
+		$response             = $this->MakeAPIRequestFromUrl($api_url);
 		/** If the server response contains an error then an exception is thrown */
-		if($response['result']!='success')throw new \Exception("Invalid api response was returned. API url: ".$api_url);
+		if($response['result']!='success')throw new \Exception("Invalid api response was returned. API url: ".$api_url.". Details: ".$response['text']);
 		/** The api response is returned */
 		
 		return $response;
@@ -134,13 +130,12 @@ class Api
 	public function MakeAPIRequestFromUrl($url){
 		/** The api response is fetched */
 		$response             = Configuration::GetComponent("filesystem")->GetFileContent($url);
-		/** The server response is decrypted */		
+		/** The server response is decrypted */
 		$response             = Configuration::GetComponent("encryption")->DecryptText($response);		
 		/** The server response is first base64 decoded and then json decoded */		
 		$response             = json_decode($response,true);
-		
 		/** If the server response contains an error then an exception is thrown */
-		if($response['result']!='success')throw new \Exception("Invalid api response was returned. API url: ".$api_url);
+		if($response['result']!='success')throw new \Exception("Invalid api response was returned. API url: ".$url.". Details: ".$response['text']);
 		/** The api response is returned */
 		
 		return $response;

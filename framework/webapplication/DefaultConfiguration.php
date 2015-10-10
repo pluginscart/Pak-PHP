@@ -47,8 +47,7 @@ abstract class DefaultConfiguration
 			/** The module name is derived from the application name */
 	        if(!isset($user_configuration['general']['module']))        
 	            $user_configuration['general']['module'] = \Framework\Utilities\UtilitiesFramework::Factory("string")->CamelCase($user_configuration['general']['application_name']);
-				
-				
+								
 	        /** The application option and the option parameters are saved to application configuration */
 	        if(!isset($configuration['general']['default_option']))
 	            $configuration['general']['default_option']        = "";
@@ -240,21 +239,21 @@ abstract class DefaultConfiguration
 	        $user_configuration['path']['application_folder_url']     = $user_configuration['path']['web_domain'] ."/". $user_configuration['path']['relative_web_domain'] . "/" . $user_configuration['path']['application_folder'];
 	        /** The web path to the application's template folder */
 	        if (!isset($user_configuration['path']['web_template_path']))
-	        $user_configuration['path']['web_template_path']   = $user_configuration['path']['web_domain'] ."/". $user_configuration['path']['relative_web_domain'] . "/framework/templates/" . $user_configuration['general']['template'];
+	        $user_configuration['path']['web_template_path']          = $user_configuration['path']['web_domain'] ."/". $user_configuration['path']['relative_web_domain'] . "/framework/templates/" . $user_configuration['general']['template'];
 	        /** The web path to the application's vendors folder */
 	        if (!isset($user_configuration['path']['web_vendor_path']))
-	        $user_configuration['path']['web_vendor_path']     = $user_configuration['path']['application_folder_url'] . "/vendors";
+	        $user_configuration['path']['web_vendor_path']            = $user_configuration['path']['application_folder_url'] . "/vendors";
 			
 			/** The path to the framework folder */
-	        $configuration['path']['framework_path']      = realpath($configuration['path']['base_path'] . DIRECTORY_SEPARATOR."framework");	        
+	        $configuration['path']['framework_path']                  = realpath($configuration['path']['base_path'] . DIRECTORY_SEPARATOR."framework");	        
 	        /** The path to the application folder */
-	        $configuration['path']['application_path']   = $configuration['path']['base_path'] . DIRECTORY_SEPARATOR . $user_configuration['path']['application_folder'];
+	        $configuration['path']['application_path']                = $configuration['path']['base_path'] . DIRECTORY_SEPARATOR . $user_configuration['path']['application_folder'];
 	        /** The path to the templates html folder */
-	        $configuration['path']['template_path']       = $configuration['path']['framework_path'] . DIRECTORY_SEPARATOR . 'templates' . DIRECTORY_SEPARATOR . $user_configuration['general']['template'] . DIRECTORY_SEPARATOR . "html";
+	        $configuration['path']['template_path']                   = $configuration['path']['framework_path'] . DIRECTORY_SEPARATOR . 'templates' . DIRECTORY_SEPARATOR . $user_configuration['general']['template'] . DIRECTORY_SEPARATOR . "html";
 	        /** The path to the application tmp folder */
-	        $configuration['path']['tmp_folder_path']     = $configuration['path']['application_path'] . DIRECTORY_SEPARATOR . 'tmp';
+	        $configuration['path']['tmp_folder_path']                 = $configuration['path']['application_path'] . DIRECTORY_SEPARATOR . 'tmp';
 	        /** The path to the vendor folder */
-	        $configuration['path']['vendor_folder_path']  = $configuration['path']['application_path'] . DIRECTORY_SEPARATOR . 'vendors';	        
+	        $configuration['path']['vendor_folder_path']              = $configuration['path']['application_path'] . DIRECTORY_SEPARATOR . 'vendors';	        
 
 			/** User configuration is merged */
 	        if(isset($user_configuration['path']))

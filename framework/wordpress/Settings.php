@@ -136,7 +136,7 @@ abstract class Settings
             /** The field label */
             $field_label      = $field_information['name'];
             /** The default field value */
-            $default_value    = $field_information['default_value'];
+            $default_value    = $field_information['current_value'];
             /** Short field name. Used to create name of callback function */
             $short_field_name = $field_information['short_name'];
             /** Indicates if field is hidden */
@@ -158,7 +158,7 @@ abstract class Settings
         }
         
         /** The options are saved */
-        Configuration::GetComponent("application")->SavePluginOptions($options, "options");
+        Configuration::GetComponent("application")->SavePluginOptions($options, $options_id);
     }
     
     /**
