@@ -208,8 +208,8 @@ abstract class Application
              $encoded_parameters = urlencode($encoded_parameters);
 			                
              /** An exception is thrown if encoded parameter length is larger then 150 characters */
-             if (strlen($encoded_parameters) > 150)
-                 throw new \Exception("The size of the encoded parameters must be less than 100 characters");
+             if (strlen($encoded_parameters) > 200)
+                 throw new \Exception("The size of the encoded parameters must be less than 200 characters");
     	}
         
         /** The web application base url is fetched from application configuration */
@@ -246,7 +246,7 @@ abstract class Application
      * The resulting parameters are then stripped of html tags for security purpose
      * 
      * @since 1.0.0
-     * @param $encoded_parameters $encoded_parameters the list of url parameters	 
+     * @param string $encoded_parameters the list of url parameters	 
      * 		 
      * @return array $decoded_parameters the list of decoded parameters
      */

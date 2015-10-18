@@ -40,9 +40,11 @@ abstract class HtmlTablePresentation
         /** The table headers */
         $table_headers               = $this->GetTableHeaders($table_links);
 		/** Used to get html table data */
-        $movie_data                  = $this->GetRowParameters($table_data);
+        $table_rows                  = $this->GetRowParameters($table_data);
+		/** Used to get html table css class */
+        $table_css_class             = $this->GetTableCssClass($table_data);
 		/** The table row css values. The css class alternates between the rows **/
-        $table_css        = array(
+        $table_row_css        = array(
             "CSSlistDARK",
             "CSSlistLIGHT"
         );
@@ -51,8 +53,9 @@ abstract class HtmlTablePresentation
             "header_widths" => $table_width_alignment['header_widths'],
             "header_column_class" => $table_width_alignment['column_css_class'],
             "table_headers" => $table_headers,
-            "table_rows" => $movie_data,
-            "table_css" => $table_css
+            "table_rows" => $table_rows,
+            "table_row_css" => $table_row_css,
+            "table_css_class" => $table_css_class
         );
         
         return $table_parameters;        
@@ -68,4 +71,6 @@ abstract class HtmlTablePresentation
 	abstract protected function GetTableHeaders($header_links);
 	/** Used to get the table header widths and header alignment */
 	abstract protected function GetHeaderWidthAlignment();
+	/** Used to get the table css class */
+	abstract protected function GetTableCssClass();
 }

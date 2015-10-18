@@ -242,7 +242,7 @@ abstract class Testing
         $test_data_file_path     = $configuration['test_data_folder'] . DIRECTORY_SEPARATOR . Configuration::GetConfig('general','option') . ".json";
         /** The application parameters are json encoded */
         $test_data               = Configuration::GetConfig('general');
-		$test_data               = array("custom"=>$custom_options,"option"=>$test_data['option'],"parameters"=>$test_data['parameters'],"uploads"=>$test_data['uploads']);
+		$test_data               = array("custom"=>$custom_options,"option"=>$test_data['option'],"url_parameters"=>$test_data['url_parameters'],"uploads"=>$test_data['uploads']);
 		$test_data               = json_encode($test_data);		
         /** The application parameters are written to test file */
         Configuration::GetComponent("filesystem")->WriteLocalFile($test_data, $test_data_file_path);
@@ -412,26 +412,6 @@ abstract class Testing
         /** Start time for the funtional tests */
         $start_time   = time();
         foreach ($configuration['general']['application_url_mappings'] as $option => $option_data) {
-            /** The full path to the test data file */
-            $test_file_name = $option . ".json";
-            /** If the test data folder path is not defined then an exception is thrown */
-            if (!isset($configuration['testing']["test_data_folder"]))
-                throw new \Exception("Invalid test data folder path");
-            $test_data_file_path    = $configuration['testing']["test_data_folder"] . DIRECTORY_SEPARATOR . $test_file_name;
-			/** If the test data file does not exist then an exception is thrown */
-			if (!is_file($test_data_file_path))
-                throw new \Exception("Invalid test data file path");
-            /** The contents of the test data file are read */            
-            $application_parameters = $components['filesystem']->ReadLocalFile($test_data_file_path);
-            /** The test data is json decoded */
-            $application_parameters = json_decode($application_parameters, true);					
-            /** The test data is saved to application configuration */
-            $updated_general_config = array_replace_recursive(Configuration::GetConfig("general"), $application_parameters);
-            Configuration::SetConfig("general", "", $updated_general_config);
-			          
-			/** The test parameters are saved to application configuration */
-			if (isset($application_parameters['parameters']))
-                Configuration::SetConfig("general", "parameters", $application_parameters['parameters']);
             /** If a testing function is defined for the url then it is called before the function is tested */
             if (isset($option_data['testing'])) {
                 /** If skip_testing configuration is set to true then the url is not tested */
@@ -457,6 +437,23 @@ abstract class Testing
                    
                 }
             }
+            /** The full path to the test data file */
+            $test_file_name = $option . ".json";
+            /** If the test data folder path is not defined then an exception is thrown */
+            if (!isset($configuration['testing']["test_data_folder"]))
+                throw new \Exception("Invalid test data folder path");
+            $test_data_file_path    = $configuration['testing']["test_data_folder"] . DIRECTORY_SEPARATOR . $test_file_name;
+			/** If the test data file does not exist then an exception is thrown */
+			if (!is_file($test_data_file_path))
+                throw new \Exception("Invalid test data file path");
+            /** The contents of the test data file are read */            
+            $application_parameters = $components['filesystem']->ReadLocalFile($test_data_file_path);
+            /** The test data is json decoded */
+            $application_parameters = json_decode($application_parameters, true);					
+            /** The test data is saved to application configuration */
+            $updated_general_config = array_replace_recursive(Configuration::GetConfig("general"), $application_parameters);
+            Configuration::SetConfig("general", "", $updated_general_config);
+
             /** If a controller is defined for the current url option then it is called */
             if (isset($option_data['controller'])) {
                 /** The controller function is run */

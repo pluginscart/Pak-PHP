@@ -369,9 +369,10 @@ class BasicSiteTemplate extends \Framework\WebApplication\TemplateEngine
      * table_headers=>an array whoose each element is a text string. each text string is a header element		 
      * header_widths=>header width of each column header
      * table_rows=>an array whoose each each element is an array of column values
-     * table_css=>an array with 2 elements. each element is a css class for a table row	
+     * table_row_css=>an array with 2 elements. each element is a css class for a table row	
      * css_class=>an array whoose each element is a css class that should be applied to each row column	
 	 * cell_attributes_callback=>a callback function that gives the cell attributes for given table row and column
+	 * table_css_class=>the css class for the table
      * @throws Exception an object of type Exception is thrown if the number of elements in header_width array is not equal to number of elements in header_text array
      * 
      * @return string $table_string the html table string containing all the table data		 
@@ -396,7 +397,8 @@ class BasicSiteTemplate extends \Framework\WebApplication\TemplateEngine
                 "header_column_class" => $header_column_class
             );
         }
-
+		/** The table css class */
+		$table_css_class                        = $parameters['table_css_class'];
         /** The full path to the template file */
         $template_file_path                     = Configuration::GetConfig("path","template_path").DIRECTORY_SEPARATOR."table_header.html";
 		/** The table header template is rendered using the table header parameters */
@@ -407,7 +409,7 @@ class BasicSiteTemplate extends \Framework\WebApplication\TemplateEngine
             /** The table_row_column.html template parameters are initialized */
             $table_col_params                   = array();
             /** The row css class is set. The css class repeats after each row */
-            $row_css_class                      = $parameters['table_css'][$count1 % 2];
+            $row_css_class                      = $parameters['table_row_css'][$count1 % 2];
             /** The table_column.html template parameters are generated */
             $table_row_col_text_arr             = $parameters['table_rows'][$count1];
             for ($count2 = 0; $count2 < count($table_row_col_text_arr); $count2++) {            	
@@ -455,7 +457,8 @@ class BasicSiteTemplate extends \Framework\WebApplication\TemplateEngine
         $table_data_params = array(
             array(
                 "table_headers" => $table_header_text,
-                "table_rows" => $table_rows_text
+                "table_rows" => $table_rows_text,
+                "table_css_class" => $table_css_class
             )
         );
         

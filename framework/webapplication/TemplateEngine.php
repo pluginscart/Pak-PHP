@@ -197,14 +197,23 @@ abstract class TemplateEngine
      * @return string $template_contents the contents of the template file with all the tags replaced. suitable for diplaying in browser
      */
     public function RenderApplicationTemplate($tag_name)
-    {
-        /** The path to the application template folder is fetched */
-        $template_folder_path = Configuration::GetConfig("path","template_path");
+    {    			
         /** The template handling function is called with given option and parameters */
         list($template_file_name, $tag_replacement_arr) = $this->GetTemplateTagsFromFunction($tag_name);
         
+        /** The path to the framework template folder is fetched */
+        $template_folder_path             = Configuration::GetConfig("path","template_path");
+		/** The path to the application template folder is fetched */
+        $application_template_folder_path = Configuration::GetConfig("path","application_template_path");
+		/** The template file path */
+		$template_file_path               = $template_folder_path. DIRECTORY_SEPARATOR . $template_file_name;
+		if (!is_file($template_file_path)) {
+			$template_file_path           = $application_template_folder_path. DIRECTORY_SEPARATOR . $template_file_name;
+		    if (!is_file($template_file_path)) throw new \Exception("Template file: ".$template_file_name." could not be found");	
+		}
+
         /** The tags in the template file are extracted */
-        list($template_contents, $template_tag_list) = \Framework\Utilities\UtilitiesFramework::Factory("template")->ExtractTemplateFileTags($template_folder_path. DIRECTORY_SEPARATOR . $template_file_name);
+        list($template_contents, $template_tag_list) = \Framework\Utilities\UtilitiesFramework::Factory("template")->ExtractTemplateFileTags($template_file_path);
         
         /** For each extracted template tag the value for that tag is fetched */
         for ($count = 0; $count < count($template_tag_list); $count++) {

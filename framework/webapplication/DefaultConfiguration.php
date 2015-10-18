@@ -42,7 +42,7 @@ abstract class DefaultConfiguration
 	        
 	        $option = isset($_REQUEST['option']) ? $_REQUEST['option'] : '';
 	        /** Used to indicate if application is a browser application */
-	        $configuration['general']['is_browser_application'] = (isset($_SERVER['HTTP_HOST'])) ? true : false;
+	        $configuration['general']['is_browser_application']                   = (isset($_SERVER['HTTP_HOST'])) ? true : false;
 
 			/** The module name is derived from the application name */
 	        if(!isset($user_configuration['general']['module']))        
@@ -50,28 +50,28 @@ abstract class DefaultConfiguration
 								
 	        /** The application option and the option parameters are saved to application configuration */
 	        if(!isset($configuration['general']['default_option']))
-	            $configuration['general']['default_option']        = "";
-	        $configuration['general']['option']                = $option;
-	        $configuration['general']['development_mode']      = true;
-	        $configuration['general']['parameters']        = $_REQUEST;
+	            $configuration['general']['default_option']                      = "";
+	        $configuration['general']['option']                                  = $option;
+	        $configuration['general']['development_mode']                        = true;
+	        $configuration['general']['url_parameters']                          = $_REQUEST;
 	        $configuration['general']['uploads'] = (isset($_FILES)) ? $_FILES : array();
 	        /** If the application is a browser application then the current url is saved */
 	        if ($configuration['general']['is_browser_application'])
-	            $configuration['general']['current_url'] = (isset($_SERVER['HTTPS_HOST']) ? 'https://' : 'http://') . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+	            $configuration['general']['current_url']                         = (isset($_SERVER['HTTPS_HOST']) ? 'https://' : 'http://') . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
 	        else
-	            $configuration['general']['current_url'] = "N.A";
+	            $configuration['general']['current_url']                         = "N.A";
 			
 			/** The application url mappings are set */
-			$configuration['general']['application_url_mappings'] = array();	       
+			$configuration['general']['application_url_mappings']                = array();	       
 	        
 	        /** The folder name of the application */
-	        $configuration['general']['application_name'] = "";
+	        $configuration['general']['application_name']                        = "";
 	        
 			/** Used to indicate if template parameters generation function should be automatically called */
-	        $configuration['general']['use_presentation'] = false;
+	        $configuration['general']['use_presentation']                        = false;
 			
 	        /** The line break character for the application is set */
-	        $configuration['general']['line_break'] = ($configuration['general']['is_browser_application']) ? "<br/>" : "\n";
+	        $configuration['general']['line_break']                              = ($configuration['general']['is_browser_application']) ? "<br/>" : "\n";
 
 			/** If no option is set in url and no default option is given by user an exception is thrown */
 	        if ($configuration['general']['option'] == "" && isset($user_configuration['general']) && !is_string($user_configuration['general']['default_option']))
@@ -79,11 +79,11 @@ abstract class DefaultConfiguration
 	
 			/** If no option is set in url then the default option is used */
 	        if ($configuration['general']['option'] == "" && isset($user_configuration['general']['default_option']))
-	            $configuration['general']['option'] = $user_configuration['general']['default_option'];
+	            $configuration['general']['option']                              = $user_configuration['general']['default_option'];
 
 			/** User configuration is merged */
 	        if(isset($user_configuration['general']))
-	        	$configuration['general'] = array_replace_recursive($configuration['general'], $user_configuration['general']);
+	        	$configuration['general']                                        = array_replace_recursive($configuration['general'], $user_configuration['general']);
 				
 			return $configuration;
 		}
@@ -237,9 +237,15 @@ abstract class DefaultConfiguration
 	        if (!isset($user_configuration['path']['application_folder_url']))
 	        /** The web path to the application */
 	        $user_configuration['path']['application_folder_url']     = $user_configuration['path']['web_domain'] ."/". $user_configuration['path']['relative_web_domain'] . "/" . $user_configuration['path']['application_folder'];
-	        /** The web path to the application's template folder */
-	        if (!isset($user_configuration['path']['web_template_path']))
-	        $user_configuration['path']['web_template_path']          = $user_configuration['path']['web_domain'] ."/". $user_configuration['path']['relative_web_domain'] . "/framework/templates/" . $user_configuration['general']['template'];
+	        /** The url to the framework's template folder */
+	        if (!isset($user_configuration['path']['framework_template_url']))
+	        $user_configuration['path']['framework_template_url']     = $user_configuration['path']['web_domain'] ."/". $user_configuration['path']['relative_web_domain'] . "/framework/templates/" . $user_configuration['general']['template'];
+			
+			/** The url to the application's template folder */
+	        if (!isset($user_configuration['path']['application_template_folder']))
+	            $user_configuration['path']['application_template_folder']   = "templates";			
+			$user_configuration['path']['application_template_url']   = $user_configuration['path']['web_domain'] ."/". $user_configuration['path']['relative_web_domain'] . "/" .$user_configuration['path']['application_folder'] . "/" . $user_configuration['path']['application_template_folder'];
+			
 	        /** The web path to the application's vendors folder */
 	        if (!isset($user_configuration['path']['web_vendor_path']))
 	        $user_configuration['path']['web_vendor_path']            = $user_configuration['path']['application_folder_url'] . "/vendors";
@@ -248,8 +254,10 @@ abstract class DefaultConfiguration
 	        $configuration['path']['framework_path']                  = realpath($configuration['path']['base_path'] . DIRECTORY_SEPARATOR."framework");	        
 	        /** The path to the application folder */
 	        $configuration['path']['application_path']                = $configuration['path']['base_path'] . DIRECTORY_SEPARATOR . $user_configuration['path']['application_folder'];
-	        /** The path to the templates html folder */
+	        /** The path to the framework templates html folder */
 	        $configuration['path']['template_path']                   = $configuration['path']['framework_path'] . DIRECTORY_SEPARATOR . 'templates' . DIRECTORY_SEPARATOR . $user_configuration['general']['template'] . DIRECTORY_SEPARATOR . "html";
+			/** The path to the application templates folder */
+	        $configuration['path']['application_template_path']       = $configuration['path']['application_path'] . DIRECTORY_SEPARATOR . $user_configuration['path']['application_template_folder'];
 	        /** The path to the application tmp folder */
 	        $configuration['path']['tmp_folder_path']                 = $configuration['path']['application_path'] . DIRECTORY_SEPARATOR . 'tmp';
 	        /** The path to the vendor folder */

@@ -804,6 +804,13 @@ body{
 	vertical-align: middle;
 }
 
+.delete-button-image{
+	width: 16px;
+	height: 13px;
+	border: 0;
+	vertical-align: middle;
+}
+
 .line-light-image{
 	width: 100%;
 	height: 9px;

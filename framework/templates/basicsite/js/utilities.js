@@ -17,12 +17,19 @@ var Utilities = {
 			try
 				{
 					if(is_overlay)Utilities.ToggleOverlay("show");
-					$.ajax({
+					/** The parameters used to make the ajax call */
+					var ajax_parameters = {
 							type: method,								  
 							url: url,
 							dataType: 'json',
-							data: {parameters: arguments}
-						})
+							data: ''
+					}
+					/** If the arguments were given then they are sent with the ajax call */
+					if(arguments) {						
+						ajax_parameters['data'] = {parameters : arguments};
+					}
+						
+					$.ajax(ajax_parameters)
 					.done(function( result ) {
 						if(is_overlay)Utilities.ToggleOverlay("hide");
 						if(result.result!="success"&&error_call_back)error_call_back(result);

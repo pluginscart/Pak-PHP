@@ -208,6 +208,18 @@ class Configuration
             else
                 throw new \Exception("Please define a valid session authentication error callback");
         }
+		
+		/** If the url parameter called "parameter" was given then it is decoded and saved to application configuration */
+		if (isset(static::$configuration['general']['url_parameters']['parameters']) && is_string(static::$configuration['general']['url_parameters']['parameters'])) {
+			/** The parameters argument given in the url */			
+			$encoded_parameters                                                            = static::$configuration['general']['url_parameters']['parameters'];
+			/** The parameters are decoded into an array */			
+			$decoded_parameters                                                            = $this->GetComponent("application")->GetUrlParameters($encoded_parameters);
+			/** The decoded parameters are saved to application configuration */
+			static::$configuration['general']['url_parameters']['parameters']              = $decoded_parameters;
+			/** The original parameters string is saved to application configuration */
+			static::$configuration['general']['url_parameters']['parameters']['original']  = $encoded_parameters;
+		}
     }
     
     /**

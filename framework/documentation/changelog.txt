@@ -1,5 +1,11 @@
 Changelog:
 
+1.0.6 (October 19, 2015)
+    1) Renamed application configuration variables
+    2) Removed some of the html templates from templates/html folder
+    3) Corrected bug in saving test results in Testing.php file
+    4) Corrected bug in saving test data in Testing.php file
+    
 1.0.5 (October 6, 2015)
     1) Renamed frontcontroller namespace to webapplication
     2) Added presentation object to UiObject class
