@@ -16,7 +16,7 @@ namespace Framework\Utilities;
  * @link       N.A
  * @author 	   Nadir Latif <nadir@pakiddat.com>
  */
-class Encryption
+final class Encryption
 {    
     /**
      * The single static instance

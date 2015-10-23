@@ -16,7 +16,7 @@ namespace Framework\Utilities;
  * @link       https://github.com/nadirlc/Public-API-Functions
  * @author 	   Nadir Latif <nadir@pakiddat.com>
  */
-class Caching
+final class Caching
 {
     /**
      * The caching duration for each function

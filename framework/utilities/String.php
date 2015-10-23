@@ -15,7 +15,7 @@ namespace Framework\Utilities;
  * @link       N.A
  * @author 	   Nadir Latif <nadir@pakiddat.com>
  */
-class String
+final class String
 {
     /**
      * The single static instance

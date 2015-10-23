@@ -2,8 +2,6 @@
 
 namespace Framework\Templates\BasicSite\Presentation;
 
-use \Framework\WebApplication\Configuration as Configuration;
-
 /**
  * This class provides functions for rendering Basic Site templates
  * 
@@ -18,8 +16,8 @@ use \Framework\WebApplication\Configuration as Configuration;
  * @version    Release: 1.0.0
  * @link       N.A
  */
-class BasicSiteTemplate extends \Framework\WebApplication\TemplateEngine
-{
+final class BasicSiteTemplate extends \Framework\WebApplication\TemplateEngine
+{	
     /**
      * Used to render the required user interface template
      * 
@@ -114,7 +112,7 @@ class BasicSiteTemplate extends \Framework\WebApplication\TemplateEngine
         
         /** The selectbox options are rendered */
         /** The full path to the template file */
-        $template_file_path     =  Configuration::GetConfig("path","template_path").DIRECTORY_SEPARATOR."selectbox_option.html";        
+        $template_file_path     =  $this->GetConfig("path","template_path").DIRECTORY_SEPARATOR."selectbox_option.html";        
         $selectbox_options_html =  \Framework\Utilities\UtilitiesFramework::Factory("template")->RenderTemplateFile($template_file_path, $selectbox_options_parameters);
                 
         $selectbox_parameters   = array(
@@ -127,7 +125,7 @@ class BasicSiteTemplate extends \Framework\WebApplication\TemplateEngine
         );
         /** The selectbox html is rendered */
         /** The full path to the template file */
-        $template_file_path     = Configuration::GetConfig("path","template_path").DIRECTORY_SEPARATOR."selectbox.html";
+        $template_file_path     = $this->GetConfig("path","template_path").DIRECTORY_SEPARATOR."selectbox.html";
         $selectbox_html         = \Framework\Utilities\UtilitiesFramework::Factory("template")->RenderTemplateFile($template_file_path, $selectbox_parameters);
         
         return $selectbox_html;
@@ -184,7 +182,7 @@ class BasicSiteTemplate extends \Framework\WebApplication\TemplateEngine
         );
 		
 		/** The full path to the template file */
-        $template_file_path     = Configuration::GetConfig("path","template_path").DIRECTORY_SEPARATOR."base_page.html";
+        $template_file_path     = $this->GetConfig("path","template_path").DIRECTORY_SEPARATOR."base_page.html";
         $page_html              = \Framework\Utilities\UtilitiesFramework::Factory("template")->RenderTemplateFile($template_file_path, $base_page_parameters);
 		
         return $page_html;
@@ -205,7 +203,7 @@ class BasicSiteTemplate extends \Framework\WebApplication\TemplateEngine
     private function RenderSpan($parameters)
     {
         /** The full path to the template file */
-        $template_file_path     = Configuration::GetConfig("path","template_path").DIRECTORY_SEPARATOR."span.html";
+        $template_file_path     = $this->GetConfig("path","template_path").DIRECTORY_SEPARATOR."span.html";
 		/** The span template is rendered using the given span parameters */
         $span_html              = \Framework\Utilities\UtilitiesFramework::Factory("template")->RenderTemplateFile($template_file_path, $parameters);        
         
@@ -241,7 +239,7 @@ class BasicSiteTemplate extends \Framework\WebApplication\TemplateEngine
             )
         );        
         /** The full path to the template file */
-        $template_file_path     = Configuration::GetConfig("path","template_path").DIRECTORY_SEPARATOR."link.html";
+        $template_file_path     = $this->GetConfig("path","template_path").DIRECTORY_SEPARATOR."link.html";
 		/** The link template is rendered using the given link parameters */
         $link_html              = \Framework\Utilities\UtilitiesFramework::Factory("template")->RenderTemplateFile($template_file_path, $link_parameters);        
         
@@ -275,7 +273,7 @@ class BasicSiteTemplate extends \Framework\WebApplication\TemplateEngine
         );
         
         /** The full path to the template file */
-        $template_file_path            = Configuration::GetConfig("path","template_path").DIRECTORY_SEPARATOR."alert_confirmation.html";
+        $template_file_path            = $this->GetConfig("path","template_path").DIRECTORY_SEPARATOR."alert_confirmation.html";
 		/** The alert confirmation template is rendered using the given alert text and custom javascript */
         $alert_confirmation_html       = \Framework\Utilities\UtilitiesFramework::Factory("template")->RenderTemplateFile($template_file_path, $alert_confirmation_parameters);        
         
@@ -320,7 +318,7 @@ class BasicSiteTemplate extends \Framework\WebApplication\TemplateEngine
         );
 
 		/** The full path to the textbox template file */
-        $template_file_path = Configuration::GetConfig("path","template_path").DIRECTORY_SEPARATOR."textbox.html";
+        $template_file_path = $this->GetConfig("path","template_path").DIRECTORY_SEPARATOR."textbox.html";
 		/** The textbox template is rendered using the given textbox parameters */
         $textbox_html       = \Framework\Utilities\UtilitiesFramework::Factory("template")->RenderTemplateFile($template_file_path, $textbox_parameters);        
         
@@ -350,7 +348,7 @@ class BasicSiteTemplate extends \Framework\WebApplication\TemplateEngine
         }
 
 		/** The full path to the template file */
-        $template_file_path = Configuration::GetConfig("path","template_path").DIRECTORY_SEPARATOR."datalist_option.html";
+        $template_file_path = $this->GetConfig("path","template_path").DIRECTORY_SEPARATOR."datalist_option.html";
 		/** The datalist options template is rendered using the given data list names */
         $datalist_options   = \Framework\Utilities\UtilitiesFramework::Factory("template")->RenderTemplateFile($template_file_path, $datalist_names);        
         		
@@ -400,7 +398,7 @@ class BasicSiteTemplate extends \Framework\WebApplication\TemplateEngine
 		/** The table css class */
 		$table_css_class                        = $parameters['table_css_class'];
         /** The full path to the template file */
-        $template_file_path                     = Configuration::GetConfig("path","template_path").DIRECTORY_SEPARATOR."table_header.html";
+        $template_file_path                     = $this->GetConfig("path","template_path").DIRECTORY_SEPARATOR."table_header.html";
 		/** The table header template is rendered using the table header parameters */
         $table_header_text                      = \Framework\Utilities\UtilitiesFramework::Factory("template")->RenderTemplateFile($template_file_path, $table_header_params);
         /** The table row html string is generated */
@@ -437,7 +435,7 @@ class BasicSiteTemplate extends \Framework\WebApplication\TemplateEngine
             }
 			
 			/** The full path to the template file */
-            $template_file_path                = Configuration::GetConfig("path","template_path").DIRECTORY_SEPARATOR."table_column.html";
+            $template_file_path                = $this->GetConfig("path","template_path").DIRECTORY_SEPARATOR."table_column.html";
 		    /** The table_column.html template string is generated */
             $table_col_text                    = \Framework\Utilities\UtilitiesFramework::Factory("template")->RenderTemplateFile($template_file_path, $table_col_params);        
                    
@@ -449,7 +447,7 @@ class BasicSiteTemplate extends \Framework\WebApplication\TemplateEngine
         }
 
 		/** The full path to the template file */
-        $template_file_path                   = Configuration::GetConfig("path","template_path").DIRECTORY_SEPARATOR."table_row.html";
+        $template_file_path                   = $this->GetConfig("path","template_path").DIRECTORY_SEPARATOR."table_row.html";
 		/** The table_row_column.html template string is generated */
         $table_rows_text                      = \Framework\Utilities\UtilitiesFramework::Factory("template")->RenderTemplateFile($template_file_path, $table_rows_params);        
  
@@ -463,7 +461,7 @@ class BasicSiteTemplate extends \Framework\WebApplication\TemplateEngine
         );
         
 		/** The full path to the template file */
-        $template_file_path                  = Configuration::GetConfig("path","template_path").DIRECTORY_SEPARATOR."table_data.html";
+        $template_file_path                  = $this->GetConfig("path","template_path").DIRECTORY_SEPARATOR."table_data.html";
 		/** The table_row_column.html template string is generated */
         $table_rows_str                      = \Framework\Utilities\UtilitiesFramework::Factory("template")->RenderTemplateFile($template_file_path, $table_data_params);        
 
@@ -486,7 +484,7 @@ class BasicSiteTemplate extends \Framework\WebApplication\TemplateEngine
     private function RenderCssJsFileTags($parameters)
     {
         /** The path to the application template folder is fetched */
-        $template_folder_path = Configuration::GetConfig("path","template_path");
+        $template_folder_path = $this->GetConfig("path","template_path");
         $file_list            = $parameters['file_list'];
         
         $tag_arr = array();

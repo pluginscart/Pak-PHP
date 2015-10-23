@@ -1,6 +1,8 @@
 <?php
 
-namespace Framework\WebApplication;
+namespace Framework\Testing;
+
+use \Framework\Configuration\Base as Base;
 
 /**
  * This class implements the base ApplicationTest class 
@@ -15,7 +17,7 @@ namespace Framework\WebApplication;
  * @version    Release: 1.0.0
  * @link       N.A
  */
-abstract class Testing
+class Testing extends Base
 {
     /**
      * The single static instance
@@ -55,7 +57,7 @@ abstract class Testing
      * @since 1.0.0
      * @return ApplicationTesting static::$instance name the instance of the correct child class is returned 
      */
-    public static function GetInstance()
+    final public static function GetInstance()
     {
         if (static::$instance == null) {
             static::$instance = new static();
@@ -77,7 +79,7 @@ abstract class Testing
      * @return $array $validation_results the results of validation. the array contains 2 keys. result=> success or error
      * and message=> response returned by validation function
      */
-    function ValidateOutput($output_type, $output)
+    final function ValidateOutput($output_type, $output)
     {
         if ($output_type == "html")
             $validation_results = $this->ValidateHTML($output);
@@ -101,7 +103,7 @@ abstract class Testing
      * @return $array $validation_results the results of validation. the array contains 2 keys. error=> success or error
      * and message=> error message contained in json string message property
      */
-    function ValidateArray($output)
+    final function ValidateArray($output)
     {
         if (isset($output['result']) && $output['result'] == 'success')
             $validation_results = array(
@@ -130,7 +132,7 @@ abstract class Testing
      * @return $array $validation_results the results of validation. the array contains 2 keys. result=> success or error
      * and message=> error message contained in json string message property
      */
-    function ValidateJson($output_string)
+    final function ValidateJson($output_string)
     {
         $output_arr = json_decode($output_string, true);
         if (isset($output_arr['result']) && $output_arr['result'] == 'success')
@@ -158,11 +160,11 @@ abstract class Testing
      * @return $array $validation_results the results of validation. the array contains 2 keys. result=> success or error
      * and message=> response returned by w3c validation service
      */
-    private function ValidateHTML($html_content)
+    final private function ValidateHTML($html_content)
     {
         $filesystem_obj          = \Framework\Utilities\UtilitiesFramework::Factory("filesystem");
-        $is_browser_application  = Configuration::GetConfig("general","is_browser_application");
-        $test_parameters         = Configuration::GetConfig("testing");
+        $is_browser_application  = $this->GetConfig("general","is_browser_application");
+        $test_parameters         = $this->GetConfig("testing");
         
         $html_content = str_replace("\r", "", $html_content);
         $html_content = str_replace("\n", "", $html_content);
@@ -208,16 +210,16 @@ abstract class Testing
      * @since 1.0.0		 
      * @param string $test_results results of testing		 		 
      */
-    private function SaveTestResults($test_results)
+    final private function SaveTestResults($test_results)
     {
         /** The absolute path of the test results file */
-        $test_configuration = Configuration::GetConfig("testing");
+        $test_configuration = $this->GetConfig("testing");
         $test_file_name     = $test_configuration['test_results_file'];
         /** The html is removed from the test results. The <br/> is replaced with new line */
         $test_results      = str_replace("<br/>", "\n", $test_results);
         $test_results      = strip_tags($test_results);
         /** The application test results are written to test file */
-        Configuration::GetComponent("filesystem")->WriteLocalFile($test_results, $test_file_name);
+        $this->GetComponent("filesystem")->WriteLocalFile($test_results, $test_file_name);
     }
     
     /**
@@ -229,23 +231,21 @@ abstract class Testing
      * 
      * @since 1.0.0
      */
-    public function SaveTestData()
+    final public function SaveTestData()
     {
         /** The application custom options */
-        $custom_options          = Configuration::GetConfig('custom');
-        /** The test parameters are fetched from application configuration */
-        $configuration           = Configuration::GetConfig('testing');		
+        $custom_options          = $this->GetConfig('custom');	
         /** The test data file path */
         /** If the test data folder path is not defined then an exception is thrown */
-        if (!is_dir($configuration["test_data_folder"]))
+        if (!is_dir($this->GetConfig("testing","test_data_folder")))
             throw new \Exception("Invalid test data folder path");
-        $test_data_file_path     = $configuration['test_data_folder'] . DIRECTORY_SEPARATOR . Configuration::GetConfig('general','option') . ".json";
+        $test_data_file_path     = $this->GetConfig("testing","test_data_folder") . DIRECTORY_SEPARATOR . $this->GetConfig('general','option') . ".json";
         /** The application parameters are json encoded */
-        $test_data               = Configuration::GetConfig('general');
+        $test_data               = $this->GetConfig('general');
 		$test_data               = array("custom"=>$custom_options,"option"=>$test_data['option'],"url_parameters"=>$test_data['url_parameters'],"uploads"=>$test_data['uploads']);
 		$test_data               = json_encode($test_data);		
         /** The application parameters are written to test file */
-        Configuration::GetComponent("filesystem")->WriteLocalFile($test_data, $test_data_file_path);
+        $this->GetComponent("filesystem")->WriteLocalFile($test_data, $test_data_file_path);
     }
     
     /**
@@ -257,7 +257,7 @@ abstract class Testing
      * @since 1.0.0
      * @param boolean $expression an expression that is either true or false
      */
-    public function AssertTrue($expression)
+    final public function AssertTrue($expression)
     {
         if ($expression)
             $this->valid_assert_count++;
@@ -275,7 +275,7 @@ abstract class Testing
      * @since 1.0.0
      * @param boolean $is_valid indicates if the parameters are equal
      */
-    public function AssertEqual($parameter1, $parameter2)
+    final public function AssertEqual($parameter1, $parameter2)
     {
         $is_valid = ($parameter1 == $parameter2);
         if ($is_valid)
@@ -298,27 +298,16 @@ abstract class Testing
      * @since 1.0.0		 
      * @throws Exception an object of type Exception if an exception occured
      */
-    public function RunUnitTests()
+    final public function RunUnitTests()
     {
-        /** Utility object and configuration values are fetched from application configuration */
-        $object_names        = array(
-            "filesystem",
-            "testing"
-        );
-        $configuration_names = array(
-            "testing",
-            "required_frameworks",
-            "general"
-        );
-        list($components, $configuration) = Configuration::GetComponentsAndConfiguration($object_names, $configuration_names);
         /** The number of unit tests run */
         $test_count     = 0;
         /** The results of testing all functions*/
-        $test_results   = "";
+        $test_results   = $this->GetConfig('general','line_break'). $this->GetConfig('general','line_break');
         /** The result of testing single function */
         $test_result    = "";
         /** The classes to be unit tested */
-        $test_classes   = $configuration["testing"]['test_classes'];
+        $test_classes   = $this->GetConfig('testing','test_classes');
         /** Start time for the unit tests */
         $start_time     = time();
         /** The function count is set */
@@ -326,11 +315,13 @@ abstract class Testing
         /** For each class all functions that start with Test are called */
         for ($count = 0; $count < count($test_classes); $count++) {
             $object_name   = $test_classes[$count];
-            $class_name    = $configuration['required_frameworks'][$object_name]['class_name'];
+			/** The required frameworks configuration */
+			$require_frameworks = $this->GetConfig('required_frameworks');
+            $class_name         = $require_frameworks[$object_name]['class_name'];
             /** The class methods are fetched */
-            $class_methods = get_class_methods($class_name);
+            $class_methods      = get_class_methods($class_name);
             /** The class object is fetched from application configuration */
-            $test_object   = Configuration::GetComponent($object_name);
+            $test_object        = $this->GetComponent($object_name);
             /** Each object function that starts with "Test" is called */
             for ($count = 0; $count < count($class_methods); $count++) {
                 $class_function = $class_methods[$count];
@@ -351,10 +342,10 @@ abstract class Testing
                         if ($this->invalid_assert_count > 0)
                             throw new \Exception("Assert failed in function: " . $class_function);
                         
-                        $test_results .= ($count + 1) . ") Testing function: " . $class_name . "::" . $class_function . ". result: passed. number of asserts: " . ($this->valid_assert_count - $current_assert_count) . $configuration['general']['line_break'];
+                        $test_results .= ($count + 1) . ") Testing function: " . $class_name . "::" . $class_function . ". result: passed. number of asserts: " . ($this->valid_assert_count - $current_assert_count) . $this->GetConfig('general','line_break');
                     }
                     catch (Exception $e) {
-                        $errorhandler_obj = Configuration::GetComponent("errorhandler");
+                        $errorhandler_obj = $this->GetComponent("errorhandler");
                         $errorhandler_obj->ExceptionHandler($e);
                     }
                 }
@@ -364,19 +355,19 @@ abstract class Testing
         /** End time for the unit tests */
         $end_time = time();
         
-        $test_results .= $configuration['general']['line_break'] . $configuration['general']['line_break'];
+        $test_results .= $this->GetConfig('general','line_break') . $this->GetConfig('general','line_break');
         $test_results .= "Result of unit testing: ";
-        $test_results .= $configuration['general']['line_break'] . $configuration['general']['line_break'];
-        $test_results .= "Number of functions tested: " . $function_count . $configuration['general']['line_break'];
-        $test_results .= "Number of asserts: " . $this->valid_assert_count . $configuration['general']['line_break'];
-        $test_results .= "Number of failed asserts: " . $this->invalid_assert_count . $configuration['general']['line_break'];
-        $test_results .= "Time taken: " . ($end_time - $start_time) . " sec";
+        $test_results .= $this->GetConfig('general','line_break') . $this->GetConfig('general','line_break');
+        $test_results .= "Number of functions tested: " . $function_count . $this->GetConfig('general','line_break');
+        $test_results .= "Number of asserts: " . $this->valid_assert_count . $this->GetConfig('general','line_break');
+        $test_results .= "Number of failed asserts: " . $this->invalid_assert_count . $this->GetConfig('general','line_break');
+        $test_results .= "Time taken: " . ($end_time - $start_time) . " sec". $this->GetConfig('general','line_break'). $this->GetConfig('general','line_break');
         
         echo $test_results;
         
         /** The results of testing are saved to file */
         /** If the test data folder path is not defined then an exception is thrown */
-        if ($configuration['testing']["save_test_data"])
+        if ($this->GetConfig('testing','save_test_results'))
             $this->SaveTestResults($test_results);
     }
     
@@ -390,19 +381,8 @@ abstract class Testing
      * @since 1.0.0		 
      * @throws Exception an object of type Exception if an exception occured         
      */
-    public function RunFunctionalTests()
-    {
-        /** Utility object and configuration values are fetched from application configuration */
-        $object_names        = array(
-            "filesystem",
-            "testing"
-        );
-        $configuration_names = array(
-            "testing",
-            "general"            
-        );
-        list($components, $configuration) = Configuration::GetComponentsAndConfiguration($object_names, $configuration_names);
-        
+    final public function RunFunctionalTests()
+    {       
         /** The number of functional tests run */
         $test_count   = 0;
         /** The results of testing */
@@ -411,7 +391,7 @@ abstract class Testing
         $test_result  = "";
         /** Start time for the funtional tests */
         $start_time   = time();
-        foreach ($configuration['general']['application_url_mappings'] as $option => $option_data) {
+        foreach ($this->GetConfig('general','application_url_mappings') as $option => $option_data) {
             /** If a testing function is defined for the url then it is called before the function is tested */
             if (isset($option_data['testing'])) {
                 /** If skip_testing configuration is set to true then the url is not tested */
@@ -420,7 +400,7 @@ abstract class Testing
                 /** The testing function is run if the test object name and function name are not empty */
                 else if ($option_data['testing']['object_name'] != "" && $option_data['testing']['function_name'] != "") {
                     /** The testing object is fetched from application configuration */
-                    $testing_object = Configuration::GetComponent($option_data['testing']['object_name']);
+                    $testing_object = $this->GetComponent($option_data['testing']['object_name']);
                     $function_name  = $option_data['testing']['function_name'];
                     
                     /** The testing callback function is defined */
@@ -438,32 +418,29 @@ abstract class Testing
                 }
             }
             /** The full path to the test data file */
-            $test_file_name = $option . ".json";
-            /** If the test data folder path is not defined then an exception is thrown */
-            if (!isset($configuration['testing']["test_data_folder"]))
-                throw new \Exception("Invalid test data folder path");
-            $test_data_file_path    = $configuration['testing']["test_data_folder"] . DIRECTORY_SEPARATOR . $test_file_name;
+            $test_file_name = $option . ".json";            
+            $test_data_file_path    = $this->GetConfig('testing','test_data_folder') . DIRECTORY_SEPARATOR . $test_file_name;
 			/** If the test data file does not exist then an exception is thrown */
 			if (!is_file($test_data_file_path))
                 throw new \Exception("Invalid test data file path");
             /** The contents of the test data file are read */            
-            $application_parameters = $components['filesystem']->ReadLocalFile($test_data_file_path);
+            $application_parameters = $this->GetComponent('filesystem')->ReadLocalFile($test_data_file_path);
             /** The test data is json decoded */
             $application_parameters = json_decode($application_parameters, true);					
             /** The test data is saved to application configuration */
-            $updated_general_config = array_replace_recursive(Configuration::GetConfig("general"), $application_parameters);
-            Configuration::SetConfig("general", "", $updated_general_config);
+            $updated_general_config = array_replace_recursive($this->GetConfig("general"), $application_parameters);
+            $this->SetConfig("general", "", $updated_general_config);
 
             /** If a controller is defined for the current url option then it is called */
             if (isset($option_data['controller'])) {
                 /** The controller function is run */
-                $response    = Configuration::GetComponent("application")->RunControllerFunction($option);
+                $response    = $this->GetComponent("application")->RunControllerFunction($option);
                 $test_result = $this->ValidateOutput("array", $response);
             }
             /** If no controller is defined for the current url option and a template is defined then the template is rendered and then displayed in the browser */
             else if (isset($option_data['templates'])) {
                 /** The application template is rendered */
-                $template_contents = Configuration::GetComponent("application")->RenderApplicationTemplate($option);				
+                $template_contents = $this->GetComponent("application")->RenderApplicationTemplate($option);				
                 $test_result       = $this->ValidateOutput("html", $template_contents);				
             }
             /** If no controller and no template is defined for the current url option then an exception is thrown */
@@ -476,24 +453,84 @@ abstract class Testing
 			if ($this->invalid_assert_count > 0)
                 throw new \Exception("Assert failed in function: " . $class_function);
                         
-       		$test_results .= ($test_count + 1) . ") Testing url: " . $option . " result: passed" . $configuration['general']['line_break'];
+       		$test_results .= ($test_count + 1) . ") Testing url: " . $option . " result: passed" . $this->GetConfig('general','line_break');
             $test_count++;
         }
         
         /** End time for the unit tests */
         $end_time = time();
         
-        $test_results .= $configuration['general']['line_break'];
+        $test_results .= $this->GetConfig('general','line_break');
         $test_results .= "Result of functional testing: ";
-        $test_results .= $configuration['general']['line_break'] . $configuration['general']['line_break'];
-        $test_results .= "Number of functions tested: " . $test_count . $configuration['general']['line_break'];
-        $test_results .= "Number of asserts: " . $this->valid_assert_count . $configuration['general']['line_break'];
-        $test_results .= "Number of failed asserts: " . $this->invalid_assert_count . $configuration['general']['line_break'];
-        $test_results .= "Time taken: " . ($end_time - $start_time) . " sec";
+        $test_results .= $this->GetConfig('general','line_break') . $this->GetConfig('general','line_break');
+        $test_results .= "Number of functions tested: " . $test_count . $this->GetConfig('general','line_break');
+        $test_results .= "Number of asserts: " . $this->valid_assert_count . $this->GetConfig('general','line_break');
+        $test_results .= "Number of failed asserts: " . $this->invalid_assert_count . $this->GetConfig('general','line_break');
+        $test_results .= "Time taken: " . ($end_time - $start_time) . " sec". $this->GetConfig('general','line_break'). $this->GetConfig('general','line_break');
         
         echo $test_results;
         /** The results of testing are saved to file */
-        if ($configuration['testing']["save_test_results"])
+        if ($this->GetConfig('testing','save_test_results'))
             $this->SaveTestResults($test_results);
+    }
+
+	/**
+	 * This function is used to read application configuration from a test data file
+	 *
+	 * It reads the test data file. contents of file should be in json format
+	 * It decodes the json text and sets the application configuration property: [general][parameters] to the json array
+	 * 
+	 * @since    1.0.0
+	 * @param string $test_file_name the short name of the test data file
+	 */
+	final public function LoadTestDataToParameters($test_file_name){
+		/** The test file is read */
+		$test_file_name = $this->GetConfig("testing","test_data_folder").DIRECTORY_SEPARATOR.$test_file_name;
+		$test_data      = $this->GetComponent("filesystem")->ReadLocalFile($test_file_name);
+		/** The test data is json decoded */
+		$test_data      = json_decode($test_data, true);
+		/** The test data is set to the parameters configuration */
+		$this->SetConfig("general","parameters",$test_data);
+		$this->SetConfig("general","option",$test_data['option']);			
+	}
+	
+	/**
+	 * This function is used to save application configuration to a test data file
+	 *
+	 * It json encodes the given application parameters
+	 * It saves the json string to given test data file	 
+	 * 
+	 * @since    1.0.0
+	 * @param string $test_file_name the short name of the test data file
+	 */
+	final public function SaveParametersToTestData($parameters,$test_file_name){
+		/** The test data is json encoded */
+		$test_data      = json_encode($parameters);
+		/** The test file is read */
+		$test_file_name = $this->GetConfig("testing","test_data_folder").DIRECTORY_SEPARATOR.$test_file_name;
+		$this->GetComponent("filesystem")->WriteLocalFile($parameters,$test_file_name);		
+	}
+	
+	/**
+     * Used to insert the given html into a html5 template
+     * 
+     * The given html is added to the html5 template
+	 * The output of this function should be valid html5
+	 * This function can be used to validate html5 content
+     * 
+     * @since 1.0.0
+     * @param string $html the html to be added to the html5 template
+	 * @param string $template_name the name of the template object to use. it must support the base_page option
+	 * 
+	 * @return string $page_html the html string of the complete page
+     */
+    final public function InsertHtmlToTemplate($html,$template_object_name)
+    {
+    	/** The parameters for the test page */
+    	$parameters = array("title"=>"Base Page","css"=>array(),"javascript"=>array(),"body"=>$html);
+		/** The test page is rendered with the given parameters */ 
+        $page_html  = $this->GetComponent($template_object_name)->Render("base_page", $parameters);
+		
+		return $page_html;
     }
 }

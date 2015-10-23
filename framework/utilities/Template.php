@@ -15,7 +15,7 @@ namespace Framework\Utilities;
  * @version    Release: 1.0.1
  * @link       N.A
  */
-class Template
+final class Template
 {
     /**
      * The single static instance

@@ -1,12 +1,12 @@
 <?php
 
-namespace Framework\WordPress;
+namespace Framework\Application\WordPress;
 
 /**
  * This class implements the base BrowserApplication class 
  * 
  * It contains functions that help in constructing the user interface of browser based applications
- * The class is abstract and must be inherited by the application user interface class
+ * The class should be inherited by the application user interface class
  * 
  * @category   Framework
  * @package    WordPress
@@ -15,55 +15,8 @@ namespace Framework\WordPress;
  * @version    Release: 1.0.0
  * @link       N.A
  */
-abstract class Application
-{
-	/**
-     * Used to display the given template contents to the browser		 
-     * 
-     * It echoes the template contents		 
-     * 
-     * @since 1.0.0
-     * @param string $template_contents the contents of the template file to be displayed
-     */
-    public function DisplayTemplateContents($template_contents)
-    {        
-        echo $template_contents;
-    }
-	    
-    /**
-     * Used to display response to json request
-     * 
-     * It echoes a json encoded response	 
-     * 
-     * @since 1.0.0
-     * @param array $response the data to display as json		 
-     */
-    public function DisplayJsonResponse($response)
-    {        
-        echo json_encode($response);
-    }
-	   
-	/**
-     * Used to return the json response containing the given text
-     * 
-     * It returns json encoded string containing the given text
-	 * The json string can be used as response to an ajax request 
-     * 
-     * @since 1.0.0
-     * @param string $text the text that needs to be json encoded
-	 * 
-	 * @return string $response the json encoded response
-     */
-    public function GetJsonResponse($text)
-    {
-        /** The response array */ 
-        $response    = array("result"=>"success","text"=>$text);
-		/** The response array is json encoded */
-		$response    = json_encode($response);
-		
-		return $response;     
-    } 
-	
+class Application extends \Framework\Application\Application
+{   
 	/**
 	 * Used to activate the plugin
 	 *
@@ -103,13 +56,13 @@ abstract class Application
     	 /** If the function is not callable then an exception is thrown */
          if (!is_callable($wordpress_callback))throw new \Exception("Function : " . $callback . " was not found");
          /** The wordpress configuration is fetched */
-		 $wordpress_configuration=Configuration::GetConfig("wordpress");
+		 $wordpress_configuration=$this->GetConfig("wordpress");
 		 $actions=$wordpress_configuration['actions'];         
 		 /** The new action is added to the WordPress actions array */
          $actions = $this->WP_Add($actions, $hook, $component, $callback, $priority, $accepted_args);
 		 /** The updated actions data is saved to the application configuration */
 		 $wordpress_configuration['actions']=$actions;
-		 Configuration::SetConfig("wordpress", "actions", $actions);
+		 $this->SetConfig("wordpress", "actions", $actions);
     }
     
     /**
@@ -130,13 +83,13 @@ abstract class Application
          if (!is_callable($wordpress_callback))throw new \Exception("Function : " . $callback . " was not found");
 
 		/** The wordpress configuration is fetched */
-		$wordpress_configuration=Configuration::GetConfig("wordpress");
+		$wordpress_configuration=$this->GetConfig("wordpress");
 		$filters=$wordpress_configuration['filters'];         
 		/** The new filter is added to the WordPress filters array */
         $filters = $this->Add($filters, $hook, $component, $callback, $priority, $accepted_args);
 		/** The updated actions data is saved to the application configuration */
 		$wordpress_configuration['filters']=$filters;
-		Configuration::SetConfig("wordpress", "filters", $filters);
+		$this->SetConfig("wordpress", "filters", $filters);
     }
     
     /**
@@ -175,9 +128,9 @@ abstract class Application
 		
 		/** Used to load the plugin's text domain */
         load_plugin_textdomain(
-            Configuration::GetConfig("wordpress","plugin_text_domain"),
+            $this->GetConfig("wordpress","plugin_text_domain"),
             false,
-            Configuration::GetConfig("wordpress","plugin_language_path")
+            $this->GetConfig("wordpress","plugin_language_path")
 		);		
 	}  
 	
@@ -242,10 +195,10 @@ abstract class Application
 	 */
 	public function WP_DisplaySettings() {
 		/** The wordpress configuration is fetched */
-		$wordpress_configuration=Configuration::GetConfig("wordpress");
+		$wordpress_configuration=$this->GetConfig("wordpress");
 		/** The object used to set the settings page content is fetched */
 		$object_name=$wordpress_configuration['settings_page_content_callback'][0];
-		$object=Configuration::GetComponent($object_name);
+		$object=$this->GetComponent($object_name);
 		$wordpress_configuration['settings_page_content_callback'][0]=$object;
 		/** If the settings page callback is not callable then an exception is thrown */
 		if(!is_callable($wordpress_configuration['settings_page_content_callback']))throw new \Exception("Invalid callback function defined for settings page");				
@@ -266,10 +219,10 @@ abstract class Application
 	 */
 	public function WP_InitAdmin() {		
 		/** The wordpress configuration is fetched */
-		$wordpress_configuration=Configuration::GetConfig("wordpress");
+		$wordpress_configuration=$this->GetConfig("wordpress");
 		/** The object used to set the settings page content is fetched */
 		$object_name=$wordpress_configuration['admin_init_callback'][0];
-		$object=Configuration::GetComponent($object_name);
+		$object=$this->GetComponent($object_name);
 		$wordpress_configuration['admin_init_callback'][0]=$object;		
 		/** If the init admin page callback is not callable then an exception is thrown */
 		if(!is_callable($wordpress_configuration['admin_init_callback']))throw new \Exception("Invalid callback function defined for initializing admin page");
@@ -286,21 +239,21 @@ abstract class Application
 	 */
 	public function WP_Enqueue($configuration_name,$is_script) {		
 		/** The wordpress configuration is fetched */
-		$wordpress_configuration=Configuration::GetConfig("wordpress");
+		$wordpress_configuration=$this->GetConfig("wordpress");
 		for($count=0;$count<count($wordpress_configuration[$configuration_name]);$count++) {
             	 
             if(!$is_script)wp_enqueue_style( 
             $wordpress_configuration[$configuration_name][$count]['name'], 
-            Configuration::GetConfig("wordpress","plugin_url") . "/". $wordpress_configuration[$configuration_name][$count]['file'],
+            $this->GetConfig("wordpress","plugin_url") . "/". $wordpress_configuration[$configuration_name][$count]['file'],
             $wordpress_configuration[$configuration_name][$count]['dependencies'],
-            Configuration::GetConfig("wordpress","plugin_version"),
+            $this->GetConfig("wordpress","plugin_version"),
             $wordpress_configuration[$configuration_name][$count]['media'] );
 			
             else wp_enqueue_script(
             $wordpress_configuration[$configuration_name][$count]['name'],
-            Configuration::GetConfig("wordpress","plugin_url") ."/". $wordpress_configuration[$configuration_name][$count]['file'],
+            $this->GetConfig("wordpress","plugin_url") ."/". $wordpress_configuration[$configuration_name][$count]['file'],
             $wordpress_configuration[$configuration_name][$count]['dependencies'],
-            Configuration::GetConfig("wordpress","plugin_version"), false );
+            $this->GetConfig("wordpress","plugin_version"), false );
             
 			/** If the localization data is specified for the script then it is loaded to WordPress using wp_localize_script */
 			if(isset($wordpress_configuration[$configuration_name][$count]['localization'])) {				
@@ -327,7 +280,7 @@ abstract class Application
 		/** The current plugin options are fetched from WordPress */
 		$options = get_option( $option_id );
 		/** If the options is a json encoded string then it is decoded */
-		if(Configuration::GetComponent("string")->IsJson($options))$options = json_decode($options,true);
+		if($this->GetComponent("string")->IsJson($options))$options = json_decode($options,true);
 		
 		return $options;		
 	}
@@ -362,7 +315,7 @@ abstract class Application
 		/** The user id of the logged in user */
     	$user_id                    = get_current_user_id();
     	/** The wordpress configuration is fetched */
-		$wordpress_configuration    = Configuration::GetConfig("wordpress");
+		$wordpress_configuration    = $this->GetConfig("wordpress");
 		/** The plugin settings id */
 		$options_id                 = $wordpress_configuration['plugin_prefix'].'_'.$option_name.'_'.$user_id;						
 		
@@ -389,16 +342,18 @@ abstract class Application
      * Register the filters and actions with WordPress.
      *
      * @since    1.0.0
+	 * 
+	 * @return boolean $output used to indicate that application has no output
+	 * all output is sent by wordpress actions
      */
-    public function HandleRequest()
+    public function Main()
     {
     	/** The wordpress configuration is fetched */
-		$wordpress_configuration=Configuration::GetConfig("wordpress");
-		
+		$wordpress_configuration=$this->GetConfig("wordpress");		
     	/** Used to register the function that will be called when the plugin is activated */
-		\register_activation_hook( Configuration::GetConfig("wordpress","plugin_file_path"), array( 'Application', 'WP_Activate' ) );
+		\register_activation_hook( $this->GetConfig("wordpress","plugin_file_path"), array( 'Application', 'WP_Activate' ) );
 		/** Used to register the function that will be called when the plugin is deactivated */
-		\register_activation_hook( Configuration::GetConfig("wordpress","plugin_file_path"), array( 'Application', 'WP_Deactivate' ) );
+		\register_activation_hook( $this->GetConfig("wordpress","plugin_file_path"), array( 'Application', 'WP_Deactivate' ) );
 				
 		$filters=$wordpress_configuration['filters'];         
 		$actions=$wordpress_configuration['actions'];
@@ -410,5 +365,9 @@ abstract class Application
         foreach ($actions as $hook) {
             \add_filter($hook['hook'], array($hook['component'],$hook['callback']), $hook['priority'], $hook['accepted_args']);
         }
+		
+		$output = false;
+		
+		return ($output);
     }
 }

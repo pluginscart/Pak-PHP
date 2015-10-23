@@ -18,7 +18,7 @@ namespace Framework\Utilities;
  * @link       N.A
  * @author 	   Nadir Latif <nadir@pakiddat.com>
  */
-class Email
+final class Email
 {
     /**
      * The single static instance

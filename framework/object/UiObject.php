@@ -2,9 +2,12 @@
 
 namespace Framework\Object;
 
+use \Framework\Configuration\Base as Base;
+
 /**
  * This class implements the base UiObject class 
  * 
+ * Abstract class. must be extended by child class
  * It contains functions that help in constructing objects with user interfaces
  * Such as data tables
  * 
@@ -15,8 +18,8 @@ namespace Framework\Object;
  * @version    Release: 1.0.0
  * @link       N.A
  */
-abstract class UiObject
-{
+abstract class UiObject extends Base
+{	
     /**
      * Sub items of the UiObject instance
      * 
@@ -24,12 +27,11 @@ abstract class UiObject
      */
     protected $sub_items;
     /**
-     * Data object of the UiObject instance
-     * It allows saving/loading/deleting the instance from MySQL database
+     * Data of the UiObject instance     
      * 
      * @since 1.0.0		
      */
-    protected $data_object;
+    protected $data;
     /**
      * Presentation object of the UiObject instance
      * It is used to present the data
@@ -37,23 +39,30 @@ abstract class UiObject
      * @since 1.0.0		
      */
     protected $presentation_object;
+	/**
+     * ExcelFile database reader object
+	 * It is used to read the excel data from database
+     */
+    protected $database_reader;
  	/**
      * Used to load the object with data
      * 
      * It loads the data from database to the object. It must be implemented by a child class
      * 
-     * @since 1.0.0		           
+     * @since 1.0.0		 
+	 * @param array $data optional data used to read from database          
      */
-    abstract function Read();
+    function Read($data=""){}
     /**
      * Used to load the object with data
      * 
      * It loads the data to the object. It must be implemented by a child class
      * 
      * @since 1.0.0		 
-     * @param array $data array containing data for the object and the sub items     
+     * @param array $data array containing data for the object and the sub items
+	 * @param array $data optional data to be loaded into the current object
      */
-    abstract function Load($data);
+    function Load($data=""){}
     /**
      * Used to save the data in the object
      * 
@@ -61,7 +70,7 @@ abstract class UiObject
      * 
      * @since 1.0.0     
      */
-    abstract function Save();
+    function Save(){}
     /**
      * Used to display the data of the object in a template 
      * 
@@ -77,7 +86,7 @@ abstract class UiObject
      * 
      * @since 1.0.0     
      */
-    abstract function Delete();
+    function Delete(){}
 	/**
      * Used to set the presentation object
      * 
@@ -87,7 +96,23 @@ abstract class UiObject
      * @param object $presentation_object the presentation object for the class
 	 *     
      */
-    public function SetPresentationObject($presentation_object) {
+    final public function SetPresentationObject($presentation_object)
+    {
     	$this->presentation_object = $presentation_object;
-    }	
+    }
+	/**
+     * Used to set the database reader object of the excel file
+     * 
+     * It sets the database reader object
+	 * The database reader object is used to read the excel file data from database
+     * 
+     * @since 1.0.0
+     * 	
+     * @return void 
+     */
+    final public function SetDatabaseReader($database_reader)
+    {        
+       /** The database reader object is set */
+       $this->database_reader = $database_reader;
+    }
 }

@@ -16,7 +16,7 @@ namespace Framework\Utilities;
  * @link       N.A
  * @author 	   Nadir Latif <nadir@pakiddat.com>
  */
-class FileSystem
+final class FileSystem
 {
     /**
      * Location of upload folder

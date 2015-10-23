@@ -2,7 +2,7 @@
 
 namespace Framework\Object;
 
-use Framework\WebApplication\Configuration as Configuration;
+use \Framework\Configuration\Base as Base;
 
 /**
  * This class implements the base DataObject class 
@@ -17,20 +17,21 @@ use Framework\WebApplication\Configuration as Configuration;
  * @version    Release: 1.0.0
  * @link       N.A
  */
-class DataObject
+class DataObject Base
 {
     /**
-     * MySQL table primary key
+     * MySQL table key field
+	 * Used to lookup the data in database
      * 
      * @since 1.0.0		
      */
-    public static $primary_key;
+    public $key_field;
     /**
      * MySQL table name
      * 
      * @since 1.0.0		
      */
-    public static $table_name;
+    public $table_name;
     /**
      * Object data
      * 
@@ -54,7 +55,7 @@ class DataObject
     /**
      * Used to get the  object data
      * 
-     * It returns the buisness object data		 
+     * It returns the object data		 
      * 
      * @since 1.0.0
 	 * 
@@ -97,11 +98,11 @@ class DataObject
      * Used to load the data from database to the data property of the object
      * 
      * It reads data from database and loads it to the $data property of the object
-     * It uses the primary key value given as parameter
+     * It uses the key field value given as parameter
      * The current object corresponds to a single database row 
      * 
      * @since 1.0.0
-     * @param int $id the primary key value of the row
+     * @param int $id the key field value of the row
      * @throws Exception an object of type Exception is thrown if the data does not exist or could not be read
      */
     function Read($id)
@@ -109,7 +110,7 @@ class DataObject
         /** The data array is initialized */
         $this->data = array();
         /** The $db_functions object is initialized and cleared */
-        Configuration::GetComponent("database")->df_initialize();
+        $this->configuration->GetComponent("database")->df_initialize();
         /** The select query is built */
         $main_query             = array();
         $main_query[0]['field'] = "*";
@@ -117,14 +118,14 @@ class DataObject
         $where_clause = array();
         
         $where_clause                 = array();
-        $where_clause[0]['field']     = static::$primary_key;
+        $where_clause[0]['field']     = $this->$key_field;
         $where_clause[0]['value']     = $id;
-        $where_clause[0]['table']     = static::$table_name;
+        $where_clause[0]['table']     = $this->table_name;
         $where_clause[0]['operation'] = '=';
         $where_clause[0]['operator']  = '';
         /** The data is fetched from database */
-        $query                        = Configuration::GetComponent("database")->df_build_query($main_query, $where_clause, 's');
-        $db_rows                      = Configuration::GetComponent("database")->df_all_rows($query);
+        $query                        = $this->configuration->GetComponent("database")->df_build_query($main_query, $where_clause, 's');
+        $db_rows                      = $this->configuration->GetComponent("database")->df_all_rows($query);
         
         /** If no data was returned by select query then function returns */
         if (!isset($db_rows[0]))
@@ -165,7 +166,7 @@ class DataObject
     function Delete()
     {        
         /** The $db_functions object is initialized and cleared */
-        Configuration::GetComponent("database")->df_initialize();
+        $this->configuration->GetComponent("database")->df_initialize();
         /** The where clause of the database query is created */
         $counter      = 0;
         $where_clause = array();
@@ -173,7 +174,7 @@ class DataObject
         foreach ($this->data as $field_name => $field_value) {
             $where_clause[$counter]['field']     = $field_name;
             $where_clause[$counter]['value']     = $field_value;
-            $where_clause[$counter]['table']     = static::$table_name;
+            $where_clause[$counter]['table']     = $this->table_name;
             $where_clause[$counter]['operation'] = '=';
             $where_clause[$counter]['operator']  = 'AND';
             $counter++;
@@ -181,15 +182,15 @@ class DataObject
         
         $where_clause[$counter - 1]['operator'] = '';
         /** The database query is built */
-        $query                                  = Configuration::GetComponent("database")->df_build_query(array(), $where_clause, 'd');
+        $query                                  = $this->configuration->GetComponent("database")->df_build_query(array(), $where_clause, 'd');
         /** The database query is executed. An exception is thrown if the data could not be deleted */
-        if (!Configuration::GetComponent("database")->df_execute($query))
+        if (!$this->configuration->GetComponent("database")->df_execute($query))
             throw new \Exception("Data could not be deleted", 30);        
     }   
     /**
      * Used to indicate if the record already exists in database
      * 
-     * It checks if the primary key of the record already exists in database
+     * It checks if the key field of the record already exists in database
      * If it does then the function returns true
      * Otherwise it returns false
      * 
@@ -200,18 +201,18 @@ class DataObject
     function RecordExists()
     {        
         /** The $db_functions object is initialized and cleared */
-        Configuration::GetComponent("database")->df_initialize();
+        $this->configuration->GetComponent("database")->df_initialize();
         
         $main_query             = array();
-        $main_query[0]['field'] = static::$primary_key;
-        $main_query[0]['table'] = static::$table_name;
+        $main_query[0]['field'] = $this->key_field;
+        $main_query[0]['table'] = $this->table_name;
         
         $counter      = 0;
         $where_clause = array();
         foreach ($this->data as $field_name => $field_value) {
             $where_clause[$counter]['field']     = $field_name;
             $where_clause[$counter]['value']     = $field_value;
-            $where_clause[$counter]['table']     = static::$table_name;
+            $where_clause[$counter]['table']     = $this->table_name;
             $where_clause[$counter]['operation'] = '=';
             $where_clause[$counter]['operator']  = 'AND';
             $counter++;
@@ -219,10 +220,10 @@ class DataObject
         
         $where_clause[$counter - 1]['operator'] = '';
         
-        $query   = Configuration::GetComponent("database")->df_build_query($main_query, $where_clause, 's');
-        $db_rows = Configuration::GetComponent("database")->df_all_rows($query);
+        $query   = $this->configuration->GetComponent("database")->df_build_query($main_query, $where_clause, 's');
+        $db_rows = $this->configuration->GetComponent("database")->df_all_rows($query);
         
-        if (isset($db_rows[0][static::$primary_key]))
+        if (isset($db_rows[0][$this->key_field]))
             $record_exists = true;
         else
             $record_exists = false;
@@ -232,43 +233,43 @@ class DataObject
     /**
      * Used to save the object data
      * 
-     * It saves the object data to database. If the primary key field of the data contains a value
+     * It saves the object data to database. If the key field of the data contains a value
      * Then the data is updated. Otherwise it is added
      * 
      * @since 1.0.0
-     * @return int $record_id the value of the primary key field of the saved row 
+     * @return int $record_id the value of the key field of the saved row 
      */
     function Save()
     {        
         /** The $record_id variable is initialized */
         $record_id = '-1';
         /** The $db_functions object is initialized and cleared */
-        Configuration::GetComponent("database")->df_initialize();
-        /** If the $data contains primary key information then it is updated */
-        if (isset($this->data[static::$primary_key])) {
+        $this->configuration->GetComponent("database")->df_initialize();
+        /** If the $data contains key field information then it is updated */
+        if (isset($this->data[$this->key_field])) {
             /** The update query fields are added to the database object */
             foreach ($this->data as $field_name => $field_value)
-                Configuration::GetComponent("database")->df_add_update_field($field_name, static::$table_name, $field_value, true);
+                $this->configuration->GetComponent("database")->df_add_update_field($field_name, $this->table_name, $field_value, true);
             /** The where clause of the update query is set */
-            Configuration::GetComponent("database")->df_build_where_clause(static::$primary_key, $this->data[static::$primary_key], true, static::$table_name, '=', '', '');
+            $this->configuration->GetComponent("database")->df_build_where_clause($this->key_field, $this->data[$this->key_field], true, $this->table_name, '=', '', '');
             /** The update query is fetched */
-            $query_str = Configuration::GetComponent("database")->df_get_query_string('u');
+            $query_str = $this->configuration->GetComponent("database")->df_get_query_string('u');
             /** The update query is run */
-            Configuration::GetComponent("database")->df_execute($query_str);
-            /** The primary key value for the data */
-            $record_id = $this->data[static::$primary_key];
+            $this->configuration->GetComponent("database")->df_execute($query_str);
+            /** The key field value for the data */
+            $record_id = $this->data[$this->key_field];
         }
-        /** If the $data does not contain primary key information then it is added */
+        /** If the $data does not contain key field information then it is added */
         else {
             /** The insert query fields are added to the database object */
             foreach ($this->data as $field_name => $field_value)
-                Configuration::GetComponent("database")->df_build_insert_query($field_name, $field_value, true, static::$table_name);
+                $this->configuration->GetComponent("database")->df_build_insert_query($field_name, $field_value, true, $this->table_name);
             /** The insert query is fetched */
-            $query_str = Configuration::GetComponent("database")->df_get_query_string('i');
+            $query_str = $this->configuration->GetComponent("database")->df_get_query_string('i');
             /** The insert query is run */
-            Configuration::GetComponent("database")->df_execute($query_str);
+            $this->configuration->GetComponent("database")->df_execute($query_str);
             /** The id of the last added record */
-            $record_id = Configuration::GetComponent("database")->df_last_insert_id();
+            $record_id = $this->configuration->GetComponent("database")->df_last_insert_id();
         }
         return $record_id;
         

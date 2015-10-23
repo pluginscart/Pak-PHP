@@ -16,7 +16,7 @@ namespace Framework\Utilities;
  * @version    1.2.1
  * @link       N.A
  */
-class DatabaseFunctions
+final class DatabaseFunctions
 {
     /**
      * Used to indicate start of sub where clause

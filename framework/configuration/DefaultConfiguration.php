@@ -1,59 +1,58 @@
 <?php
 
-namespace Framework\WebApplication;
+namespace Framework\Configuration;
+
+use \Framework\Configuration\Base as Base;
 
 /**
  * Default application configuration class
  * 
- * Abstract class. must be extended by a child class
+ * Final class. cannot be extended by child class
  * It provides default application configuration
  * 
  * @category   Framework
- * @package    WebApplication
+ * @package    Configuration
  * @author     Nadir Latif <nadir@pakjiddat.com>
  * @license    https://www.gnu.org/licenses/gpl-2.0.html GNU General Public License, version 2
  * @version    1.0.0
  * @link       N.A
  */
-abstract class DefaultConfiguration
+class DefaultConfiguration extends Base
 {
 	/**
      * Used to get default general configuration
      * 
      * It returns configuration containing general parameters
 	 * 
-     * @since 1.0.0
-     * @param array $argv the command line parameters given by the user	 
+     * @since 1.0.0     	
 	 * @param array $user_configuration the user configuration
+	 * @throws object Exception an exception is thrown if the application name was not set in the user configuration
+	 * @throws object Exception an exception is thrown if no option parameter was given in url and no default option was defined
 	 * 
 	 * @return array $configuration the default configuration information
      */
-    private static function GetGeneralConfig($argv,$user_configuration)
+    private function GetGeneralConfig($user_configuration)
 	    {
  			/** If the application name is not set then an exception is thrown */
 			if(!isset($user_configuration['general']['application_name']))
 			    throw new \Exception("Application name was not set in configuration settings");
 			
 	    	/** The configuration array is initialized */
-	    	$configuration=$user_configuration;
-	   		/** If application is being run from commandline then the command line parameters are copied to $_REQUEST */
-	        if (!isset($_SERVER['HTTP_HOST']) && isset($_SERVER['HTTPS_HOST']))
-	            parse_str(implode('&', array_slice($argv, 1)), $_REQUEST);
-	        
-	        $option = isset($_REQUEST['option']) ? $_REQUEST['option'] : '';
-	        /** Used to indicate if application is a browser application */
-	        $configuration['general']['is_browser_application']                   = (isset($_SERVER['HTTP_HOST'])) ? true : false;
+	    	$configuration=$user_configuration;	   		
 
-			/** The module name is derived from the application name */
-	        if(!isset($user_configuration['general']['module']))        
-	            $user_configuration['general']['module'] = \Framework\Utilities\UtilitiesFramework::Factory("string")->CamelCase($user_configuration['general']['application_name']);
-								
+	        /** Used to indicate if application is a browser application */
+	        if (isset($user_configuration['general']['is_browser_application']))
+			    $configuration['general']['is_browser_application']              = $user_configuration['general']['is_browser_application'];    
+			else
+			    $configuration['general']['is_browser_application']              = (isset($_SERVER['HTTP_HOST']) || isset($_SERVER['HTTPS_HOST'])) ? true : false;
+				
 	        /** The application option and the option parameters are saved to application configuration */
-	        if(!isset($configuration['general']['default_option']))
-	            $configuration['general']['default_option']                      = "";
-	        $configuration['general']['option']                                  = $option;
+	        if(!isset($user_configuration['general']['default_option']))
+	            $user_configuration['general']['default_option']                 = "Index";
+			
+	        $configuration['general']['option']                                  = isset($user_configuration['general']['parameters']['option']) ? $user_configuration['general']['parameters']['option'] : '';
 	        $configuration['general']['development_mode']                        = true;
-	        $configuration['general']['url_parameters']                          = $_REQUEST;
+	        $configuration['general']['parameters']                              = (isset($user_configuration['general']['parameters']))?$user_configuration['general']['parameters']:array();
 	        $configuration['general']['uploads'] = (isset($_FILES)) ? $_FILES : array();
 	        /** If the application is a browser application then the current url is saved */
 	        if ($configuration['general']['is_browser_application'])
@@ -64,11 +63,11 @@ abstract class DefaultConfiguration
 			/** The application url mappings are set */
 			$configuration['general']['application_url_mappings']                = array();	       
 	        
+			/** Used to indicate if application should use sessions */
+	        $configuration['general']['enable_sessions']                         = false;	    
+			
 	        /** The folder name of the application */
-	        $configuration['general']['application_name']                        = "";
-	        
-			/** Used to indicate if template parameters generation function should be automatically called */
-	        $configuration['general']['use_presentation']                        = false;
+	        $configuration['general']['application_name']                        = "";	        
 			
 	        /** The line break character for the application is set */
 	        $configuration['general']['line_break']                              = ($configuration['general']['is_browser_application']) ? "<br/>" : "\n";
@@ -99,7 +98,7 @@ abstract class DefaultConfiguration
 	 * 
 	 * @return array $configuration the default configuration information
      */
-    private static function GetHttpSessionAuthConfig($configuration,$user_configuration)
+    private function GetHttpSessionAuthConfig($configuration,$user_configuration)
 	    {
 			/** HTTP authentication information */
 	        /** Used to indicate if application should be protected by http authentication */
@@ -141,7 +140,7 @@ abstract class DefaultConfiguration
 	 * 
 	 * @return array $configuration the default configuration information
      */
-    private static function GetTestConfig($configuration,$user_configuration)
+    private function GetTestConfig($configuration,$user_configuration)
 		{
 			/** Test parameters */
 	        /** Test mode indicates the application will be tested when its run */
@@ -162,7 +161,7 @@ abstract class DefaultConfiguration
 			/** Used to indicate if the application should save page parameters to test_data folder */
 	        $configuration['testing']['save_test_data']      = false;
 			/** Used to indicate if the application should save test results */
-	        $configuration['testing']['save_test_results']      = true;
+	        $configuration['testing']['save_test_results']      = false;
 			/** The name of the test results file */
 	        if (!isset($user_configuration['testing']['test_results_file']))
 	            $user_configuration['testing']['test_results_file'] = 'test_results.txt';			
@@ -197,71 +196,67 @@ abstract class DefaultConfiguration
      * @since 1.0.0
 	 * @param array $configuration the default configuration
 	 * @param array $user_configuration the user configuration
-	 * 
+	 * @throws 
 	 * @return array $configuration the default configuration information
      */
-    private static function GetPathConfig($configuration,$user_configuration)
+    private function GetPathConfig($configuration,$user_configuration)
 		{
 			/** The document root of the application is set */
 	        $configuration['path']['document_root'] = $_SERVER['DOCUMENT_ROOT'];
 			/** The base folder path is set. All the application files including the framework are in this folder */
 			$configuration['path']['base_path'] = realpath(dirname(__FILE__) . DIRECTORY_SEPARATOR . ".." . DIRECTORY_SEPARATOR. "..");			
-			
-			/** If the application name is not set then an exception is thrown */
-			if(!isset($user_configuration['general']['application_name']))
-			    throw new \Exception("Application name was not set in configuration settings");
-			
+
 			/** If the application template name is not set then the default template basicsite is used */
 			if(!isset($user_configuration['general']['template']))
 			    $user_configuration['general']['template'] = "basicsite";
 			/** The application folder name is derived from the application name */
 	        if(isset($user_configuration['general']['application_name']) && !isset($user_configuration['path']['application_folder']))        
-	            $user_configuration['path']['application_folder'] = strtolower(\Framework\Utilities\UtilitiesFramework::Factory("string")->CamelCase($user_configuration['general']['application_name']));			
-			
-			/** The module name is derived from the application name */
-	        if(!isset($user_configuration['path']['module']))        
-	            $user_configuration['path']['module'] = \Framework\Utilities\UtilitiesFramework::Factory("string")->CamelCase($user_configuration['general']['application_name']);
+	            $user_configuration['path']['application_folder'] = strtolower(\Framework\Utilities\UtilitiesFramework::Factory("string")->CamelCase($user_configuration['general']['application_name']));
 						
 			/** The application domain name is set */
-	        if (!isset($user_configuration['path']['web_domain']))
-	            $user_configuration['path']['web_domain'] = (isset($_SERVER['HTTPS_HOST'])) ? "https://" . $_SERVER['HTTPS_HOST'] : "http://" . $_SERVER['HTTP_HOST'];
+			if (isset($parameters['web_domain']))
+			    $user_configuration['path']['web_domain']             = $parameters['web_domain']; 
+			else if(isset($_SERVER['HTTP_HOST']) || isset($_SERVER['HTTPS_HOST'])) 
+				$user_configuration['path']['web_domain']             = (isset($_SERVER['HTTPS_HOST'])) ? "https://" . $_SERVER['HTTPS_HOST'] : "http://" . $_SERVER['HTTP_HOST'];
+			else
+				$user_configuration['path']['web_domain']             = "http://example.com";	
 			
 	        /** The web path to the framework */
 	        if (!isset($user_configuration['path']['relative_web_domain']))
-			    $user_configuration['path']['relative_web_domain'] = trim(str_replace($configuration['path']['document_root'],"",$configuration['path']['base_path']), "/");						
+			    $user_configuration['path']['relative_web_domain']    = trim(str_replace($configuration['path']['document_root'],"",$configuration['path']['base_path']), "/");						
 			
 			/** The framework url is set */
-			$user_configuration['path']['framework_url'] = $user_configuration['path']['web_domain'] ."/". $user_configuration['path']['relative_web_domain'] . "/index.php";
+			$user_configuration['path']['framework_url']              = $user_configuration['path']['web_domain'] ."/". $user_configuration['path']['relative_web_domain'] . "/index.php";
 		
 	        /** The web path to the application */
 	        if (!isset($user_configuration['path']['application_folder_url']))
 	        /** The web path to the application */
-	        $user_configuration['path']['application_folder_url']     = $user_configuration['path']['web_domain'] ."/". $user_configuration['path']['relative_web_domain'] . "/" . $user_configuration['path']['application_folder'];
+	        $user_configuration['path']['application_folder_url']      = $user_configuration['path']['web_domain'] ."/". $user_configuration['path']['relative_web_domain'] . "/" . $user_configuration['path']['application_folder'];
 	        /** The url to the framework's template folder */
 	        if (!isset($user_configuration['path']['framework_template_url']))
-	        $user_configuration['path']['framework_template_url']     = $user_configuration['path']['web_domain'] ."/". $user_configuration['path']['relative_web_domain'] . "/framework/templates/" . $user_configuration['general']['template'];
+	        $user_configuration['path']['framework_template_url']      = $user_configuration['path']['web_domain'] ."/". $user_configuration['path']['relative_web_domain'] . "/framework/templates/" . $user_configuration['general']['template'];
 			
 			/** The url to the application's template folder */
 	        if (!isset($user_configuration['path']['application_template_folder']))
 	            $user_configuration['path']['application_template_folder']   = "templates";			
-			$user_configuration['path']['application_template_url']   = $user_configuration['path']['web_domain'] ."/". $user_configuration['path']['relative_web_domain'] . "/" .$user_configuration['path']['application_folder'] . "/" . $user_configuration['path']['application_template_folder'];
+			$user_configuration['path']['application_template_url']    = $user_configuration['path']['web_domain'] ."/". $user_configuration['path']['relative_web_domain'] . "/" .$user_configuration['path']['application_folder'] . "/" . $user_configuration['path']['application_template_folder'];
 			
 	        /** The web path to the application's vendors folder */
 	        if (!isset($user_configuration['path']['web_vendor_path']))
-	        $user_configuration['path']['web_vendor_path']            = $user_configuration['path']['application_folder_url'] . "/vendors";
+	        $user_configuration['path']['web_vendor_path']             = $user_configuration['path']['application_folder_url'] . "/vendors";
 			
 			/** The path to the framework folder */
-	        $configuration['path']['framework_path']                  = realpath($configuration['path']['base_path'] . DIRECTORY_SEPARATOR."framework");	        
+	        $configuration['path']['framework_path']                   = realpath($configuration['path']['base_path'] . DIRECTORY_SEPARATOR."framework");	        
 	        /** The path to the application folder */
-	        $configuration['path']['application_path']                = $configuration['path']['base_path'] . DIRECTORY_SEPARATOR . $user_configuration['path']['application_folder'];
+	        $configuration['path']['application_path']                 = $configuration['path']['base_path'] . DIRECTORY_SEPARATOR . $user_configuration['path']['application_folder'];
 	        /** The path to the framework templates html folder */
-	        $configuration['path']['template_path']                   = $configuration['path']['framework_path'] . DIRECTORY_SEPARATOR . 'templates' . DIRECTORY_SEPARATOR . $user_configuration['general']['template'] . DIRECTORY_SEPARATOR . "html";
+	        $configuration['path']['template_path']                    = $configuration['path']['framework_path'] . DIRECTORY_SEPARATOR . 'templates' . DIRECTORY_SEPARATOR . $user_configuration['general']['template'] . DIRECTORY_SEPARATOR . "html";
 			/** The path to the application templates folder */
-	        $configuration['path']['application_template_path']       = $configuration['path']['application_path'] . DIRECTORY_SEPARATOR . $user_configuration['path']['application_template_folder'];
+	        $configuration['path']['application_template_path']        = $configuration['path']['application_path'] . DIRECTORY_SEPARATOR . $user_configuration['path']['application_template_folder'];
 	        /** The path to the application tmp folder */
-	        $configuration['path']['tmp_folder_path']                 = $configuration['path']['application_path'] . DIRECTORY_SEPARATOR . 'tmp';
+	        $configuration['path']['tmp_folder_path']                  = $configuration['path']['application_path'] . DIRECTORY_SEPARATOR . 'tmp';
 	        /** The path to the vendor folder */
-	        $configuration['path']['vendor_folder_path']              = $configuration['path']['application_path'] . DIRECTORY_SEPARATOR . 'vendors';	        
+	        $configuration['path']['vendor_folder_path']               = $configuration['path']['application_path'] . DIRECTORY_SEPARATOR . 'vendors';	        
 
 			/** User configuration is merged */
 	        if(isset($user_configuration['path']))
@@ -281,41 +276,44 @@ abstract class DefaultConfiguration
 	 * 
 	 * @return array $configuration the application configuration information
      */
-    private static function GetRequiredFrameworksConfig($configuration,$user_configuration)
+    private function GetRequiredFrameworksConfig($configuration,$user_configuration)
 		{
 			/** The parameters array is initialized */
 	        $error_handler_parameters = $db_parameters = $filesystem_parameters = array();
 	        /** The logging class parameters are set */
 	        /** The shutdown function callable */
-	        $error_handler_parameters['shutdown_function'] = "";
+	        $error_handler_parameters['shutdown_function']                  = "";
 	        /** Used to indicate if application should use custom error handler */
-	        $error_handler_parameters['register_error_handler']     = true;
-	        /** Used to indicate if application should display the error. If it is false then a simple javascript alert message will be shown in browser */
-	        $error_handler_parameters['display_error']              = true;
+	        $error_handler_parameters['register_error_handler']             = true;
+	        /** Used to indicate if application is in development mode */
+	        $error_handler_parameters['development_mode']                   = (isset($user_configuration['general']['development_mode']))?$user_configuration['general']['development_mode']: true;
 	        /** Custom error handler callback */
-	        $error_handler_parameters['custom_error_handler']       = "";
+	        $error_handler_parameters['custom_error_handler']               = "";
 	        /** Used to indicate if the error message should be emailed to user */
-	        $error_handler_parameters['email_error']                = ($configuration['general']['is_browser_application']);
+	        $error_handler_parameters['email']['enable']                    = (isset($user_configuration['required_frameworks']['errorhandler']['parameters']['enable']))?$user_configuration['required_frameworks']['errorhandler']['parameters']['enable']: false;
 	        /** Used to indicate if application is being run from browser */
-	        $error_handler_parameters['is_browser_application']     = $configuration['general']['is_browser_application'];
+	        $error_handler_parameters['is_browser_application']             = $configuration['general']['is_browser_application'];
 	        /** The email at which log message is sent */
-	        $error_handler_parameters['log_email']                  = '';
+	        $error_handler_parameters['email']['email_address']             = '';
 	        /** Subject of the notification email */
-	        $error_handler_parameters['notification_email_subject'] = '';
+	        $error_handler_parameters['email']['email_subject']             = '';
 	        /** Addition log email smtp headers such as From: */
-	        $error_handler_parameters['log_email_header']           = "";
+	        $error_handler_parameters['email']['email_header']              = "";
 	        /** Full path of error log file */
-	        $error_handler_parameters['log_file_name']              = "";
+	        $error_handler_parameters['log_file_name']                      = "";
+			/** Used to indicate if error should be logged using web hook */
+	        $error_handler_parameters['web_hook']['enable']                 = "";
+			$error_handler_parameters['web_hook']['url']                    = "";
 	        /** The database class parameters are set */
 	        $db_parameters = array("host" => "","user" => "","password" => "","database" => "","debug" => "");
 	        
 	        /** The utilities class parameters are set */
-	        $filesystem_parameters['table_prefix']            = "";
-	        $filesystem_parameters['function_cache_duration'] = array();
-	        $filesystem_parameters['upload_folder']           = $configuration['path']['tmp_folder_path'];
-	        $filesystem_parameters['allowed_extensions']      = array("xls","xlsx","txt");
-	        $filesystem_parameters['max_allowed_file_size']   = "2048";
-	        $filesystem_parameters['link']                    = '';        
+	        $filesystem_parameters['table_prefix']                          = "";
+	        $filesystem_parameters['function_cache_duration']               = array();
+	        $filesystem_parameters['upload_folder']                         = $configuration['path']['tmp_folder_path'];
+	        $filesystem_parameters['allowed_extensions']                    = array("xls","xlsx","txt");
+	        $filesystem_parameters['max_allowed_file_size']                 = "2048";
+	        $filesystem_parameters['link']                                  = '';        
 	        /** The required framework objects are defined */
 	        $configuration['required_frameworks'] = array(
 	            "errorhandler" => array(
@@ -338,7 +336,7 @@ abstract class DefaultConfiguration
 			
 			/** User configuration is merged */
 	        if(isset($user_configuration['required_frameworks']))
-	        	$configuration['required_frameworks'] = array_replace_recursive($configuration['required_frameworks'], $user_configuration['required_frameworks']);
+	        	$configuration['required_frameworks']                      = array_replace_recursive($configuration['required_frameworks'], $user_configuration['required_frameworks']);
 	
 			return $configuration;	
 		}
@@ -349,7 +347,7 @@ abstract class DefaultConfiguration
 	 * 
      * @since 1.0.0
      */
-    private static function InitializePhpSettings()
+    private function InitializePhpSettings()
     	{
     		error_reporting(E_ALL);
 	        date_default_timezone_set('Asia/Karachi');
@@ -378,28 +376,27 @@ abstract class DefaultConfiguration
      * If the application is not under development then no errors are displayed		
      * It also sets the default time zone     
      * 
-     * @since 1.0.0
-     * @param array $argv the command line parameters given by the user
+     * @since 1.0.0     
 	 * @param array $user_configuration user defined application configuration
 	 * 
 	 * @return array $configuration the application configuration information
      */
-    public static function GetConfiguration($argv,$user_configuration)
+    public function GetDefaultConfiguration($user_configuration)
 	    {
 	    	/** The general default configuration is fetched */
-	    	$configuration = self::GetGeneralConfig($argv,$user_configuration);
+	    	$configuration                                               = self::GetGeneralConfig($user_configuration);
 			      
 	    	/** The http and session authentication default configuration is fetched */
-	    	$configuration = array_merge($configuration,self::GetHttpSessionAuthConfig($configuration,$user_configuration));	     
+	    	$configuration                                               = array_replace_recursive($configuration,self::GetHttpSessionAuthConfig($configuration,$user_configuration));	     
 
 	        /** The path default configuration is fetched */
-	    	$configuration = array_merge($configuration,self::GetPathConfig($configuration,$user_configuration));
+	    	$configuration                                               = array_replace_recursive($configuration,self::GetPathConfig($configuration,$user_configuration));
 	        
 			/** The test default configuration is fetched */
-	    	$configuration = array_merge($configuration,self::GetTestConfig($configuration,$user_configuration));
+	    	$configuration                                               = array_replace_recursive($configuration,self::GetTestConfig($configuration,$user_configuration));
 			
 			/** The required frameworks default configuration is fetched */
-	    	$configuration = array_merge($configuration,self::GetRequiredFrameworksConfig($configuration,$user_configuration));
+	    	$configuration                                               = array_replace_recursive($configuration,self::GetRequiredFrameworksConfig($configuration,$user_configuration));
 
 	        return $configuration;        
 		}   

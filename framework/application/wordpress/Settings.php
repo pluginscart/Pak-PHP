@@ -1,6 +1,8 @@
 <?php
 
-namespace Framework\WordPress;
+namespace Framework\Application\WordPress;
+
+use \Framework\Configuration\Base as Base;
 
 /**
  * This class implements the main plugin class
@@ -15,46 +17,8 @@ namespace Framework\WordPress;
  * @version    1.0.0
  * @link       N.A
  */
-abstract class Settings
-{
-    /**
-     * The single static instance
-     */
-    protected static $instance;
-    /**
-     * Class constructor
-     * Used to prevent creating an object of this class outside of the class using new operator
-     * 
-     * Used to implement Singleton class
-     * Sets default configuration values
-     * 
-     * @since 1.0.0  
-     */
-    protected function __construct()
-    {
-        
-    }
-    
-    /**
-     * Used to return a single instance of the class
-     * 
-     * Checks if instance already exists
-     * If it does not exist then it is created
-     * The instance is returned
-     * 
-     * @since 1.0.0
-     * @param array $argv the command line parameters given by the user
-     * 
-     * @return ApplicationConfiguration static::$instance name the instance of the correct child class is returned 
-     */
-    public static function GetInstance($argv)
-    {
-        if (static::$instance == null) {
-            static::$instance = new static($argv);
-        }
-        return static::$instance;
-    }
-    
+abstract class Settings extends Base
+{	    
     /**
      * Used to display the settings fields
      *
@@ -65,12 +29,12 @@ abstract class Settings
      * 
      * @return string $field_settings_html the field settings string is returned 
      */
-    public function GetSettingsFieldsHtml()
+    final public function GetSettingsFieldsHtml()
     {
         /** Output buffering is started so the field content can be fetched */
         ob_start();
         /** The wordpress configuration is fetched */
-        $wordpress_configuration = Configuration::GetConfig("wordpress");
+        $wordpress_configuration = $this->GetConfig("wordpress");
         /** The registered option page fields are displayed */
         settings_fields($wordpress_configuration['plugin_prefix'] . '_option_group');
         /** The registered section title and fields for the given page are displayed */
@@ -98,14 +62,14 @@ abstract class Settings
      * short_name=> the short field name
      * args=> the arguments for the callback function
      */
-    public function RegisterPluginOptions($plugin_settings)
+    final public function RegisterPluginOptions($plugin_settings)
     {
         /** The wordpress configuration is fetched */
-        $wordpress_configuration = Configuration::GetConfig("wordpress");
+        $wordpress_configuration = $this->GetConfig("wordpress");
         /** The options id is fetched */
-        $options_id              = Configuration::GetComponent("application")->GetOptionsId("options");
+        $options_id              = $this->GetComponent("application")->GetOptionsId("options");
         /** The current plugin options are fetched */
-        $options                 = Configuration::GetComponent("application")->GetPluginOptions($options_id);
+        $options                 = $this->GetComponent("application")->GetPluginOptions($options_id);
         
         /** The settings group is registered */
         register_setting($wordpress_configuration['plugin_prefix'] . '_option_group', $options_id, array(
@@ -126,12 +90,12 @@ abstract class Settings
             '', // Title
             $print_section_info_callback, // Callback
             $wordpress_configuration['settings_page_url'] // Page
-            );
+        );
         
         /** All of the plugin settings are registered */
         foreach ($plugin_settings as $field_short_name => $field_information) {        	
             /** The field callback. If it is given as an object name then the object is fetched from application configuration */
-            $field_callback   = (is_object($field_information['callback'][0])) ? $field_information['callback'][0] : Configuration::GetComponent($field_information['callback'][0]);
+            $field_callback   = (is_object($field_information['callback'][0])) ? $field_information['callback'][0] : $this->GetComponent($field_information['callback'][0]);
 			$field_callback   = array($field_callback, $field_information['callback'][1]);	
             /** The field label */
             $field_label      = $field_information['name'];
@@ -158,7 +122,7 @@ abstract class Settings
         }
         
         /** The options are saved */
-        Configuration::GetComponent("application")->SavePluginOptions($options, $options_id);
+        $this->GetComponent("application")->SavePluginOptions($options, $options_id);
     }
     
     /**
@@ -168,7 +132,7 @@ abstract class Settings
      * 
      * @param array $input Contains all settings fields as array keys
      */
-    public function Sanitize($input)
+    final public function Sanitize($input)
     {
         /** The updated input fields array is initialized */
         $new_input = array();

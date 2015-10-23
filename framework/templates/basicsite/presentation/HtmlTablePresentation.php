@@ -15,7 +15,7 @@ namespace Framework\Templates\BasicSite\Presentation;
  * @link       N.A
  */
 abstract class HtmlTablePresentation
-{
+{	
 	/**
      * Used to format the data so its suitable for displaying in html table
      * 
@@ -29,7 +29,7 @@ abstract class HtmlTablePresentation
      * table_headers=> the list of table headers
      * table_rows=> the table row data
      */
-    public function GetTableParameters($table_data)
+    final public function GetTableParameters($table_data)
     {    	
     	/** The alignment and width information of the table */        
         $table_width_alignment       = $this->GetHeaderWidthAlignment();		

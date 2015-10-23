@@ -2,6 +2,8 @@
 
 namespace Framework\WebApplication;
 
+use \Framework\Configuration\Base as Base;
+
 /**
  * This class implements the base Template class 
  * 
@@ -15,43 +17,8 @@ namespace Framework\WebApplication;
  * @version    Release: 1.0.0
  * @link       N.A
  */
-abstract class TemplateEngine
-{
-    /**
-     * The single static instance
-     */
-    protected static $instance;
-    /**
-     * Class constructor
-     * Used to prevent creating an object of this class outside of the class using new operator
-     * 
-     * Used to implement Singleton class
-     * 
-     * @since 1.0.0		  
-     */
-    protected function __construct()
-    {
-        
-    }
-    /**
-     * Used to return a single instance of the class
-     * 
-     * Checks if instance already exists
-     * If it does not exist then it is created
-     * The instance is returned
-     * 
-     * @since 1.0.0
-     * 
-     * @return BrowserApplicationTemplate static::$instance name the instance of the correct child class is returned 
-     */
-    public static function GetInstance()
-    {        
-        if (static::$instance == null) {
-            static::$instance = new static();
-        }
-        return static::$instance;        
-    }
-	
+abstract class TemplateEngine extends Base
+{   
 	/**
      * Used to call a function of the presentation class that generates the template parameters
      * For the given url and tag name
@@ -68,29 +35,29 @@ abstract class TemplateEngine
      * 
      * @return array $template_parameters it is an array that contains template parameters	 
      */
-    public function GetTemplateParameters($option, $tag_name)
+    final public function GetTemplateParameters($option, $tag_name)
     {        
-        $template_parameters = array();
+        $template_parameters            = array();
         
         /** The presentation object is fetched from application configuration */
-        $presentation_object = Configuration::GetComponent('presentation');
+        $presentation_object            = $this->GetComponent('presentation');
         /** Url option is converted to camelcase */
-        $function_name_suffix = \Framework\Utilities\UtilitiesFramework::Factory("string")->CamelCase($option);                
+        $function_name_suffix           = \Framework\Utilities\UtilitiesFramework::Factory("string")->CamelCase($option);                
         
-        $function_name                = substr($tag_name, 0, strrpos($tag_name, "."));
+        $function_name                  = substr($tag_name, 0, strrpos($tag_name, "."));
 		/** Functiona name is converted to camelcase */
-        $function_name                = \Framework\Utilities\UtilitiesFramework::Factory("string")->CamelCase($function_name);
-        $function_name                = "Get" . $function_name . "ParametersFor" . $function_name_suffix;		
+        $function_name                  = \Framework\Utilities\UtilitiesFramework::Factory("string")->CamelCase($function_name);
+        $function_name                  = "Get" . $function_name . "ParametersFor" . $function_name_suffix;		
         /** The template parameters callback is defined */
-        $template_parameters_callback = array(
+        $template_parameters_callback   = array(
             $presentation_object,
             $function_name
         );
-        /** If the callback exists then it is called. Otherwise an exception is thrown */
+        /** If the callback exists then it is called. Otherwise the template parameters are set to empty array */
         if (is_callable($template_parameters_callback))
-            $template_parameters = call_user_func($template_parameters_callback);
+            $template_parameters        = call_user_func($template_parameters_callback);
         else
-            throw new \Exception("Please define the function: " . $function_name . " in the application presentation class");
+            $template_parameters        = array();
         
         return $template_parameters;       
     }
@@ -122,7 +89,7 @@ abstract class TemplateEngine
      * first is template file name
      * second is $tag_replacement_arr. this is a list of tags values that will replace the tags in the given template file 
      */
-    function GetTemplateTagsFromFunction($tag_name)
+    final function GetTemplateTagsFromFunction($tag_name)
     {        
         /** Configuration values are fetched from application configuration */
         $component_list      = array(
@@ -132,7 +99,7 @@ abstract class TemplateEngine
             "general"
         );
         
-        list($components, $configuration) = Configuration::GetComponentsAndConfiguration($component_list, $configuration_names);			
+        list($components, $configuration) = $this->GetComponentsAndConfiguration($component_list, $configuration_names);			
         /** If no url mapping is defined for the current url option then an exception is thrown */
         if (!isset($configuration['general']['application_url_mappings'][$configuration['general']['option']]))
             throw new \Exception("Invalid url request sent to application");
@@ -144,12 +111,11 @@ abstract class TemplateEngine
         for ($count = 0; $count < count($url_templates); $count++) {
             if ($url_templates[$count]["tag_name"] == $tag_name) {
                 $ui_object_name      = $url_templates[$count]['object_name'];
-                $ui_object           = Configuration::GetComponent($ui_object_name);
+                $ui_object           = $this->GetComponent($ui_object_name);
                 $function_name       = $url_templates[$count]['function_name'];
                 $template_file_name  = $url_templates[$count]['template_file_name'];
 				/** Used to indicate that function for generating template parameters should be automatically called */                
-                if ($configuration['general']['use_presentation'])
-                    $template_parameters = $this->GetTemplateParameters($configuration['general']['option'], $template_file_name);
+                $template_parameters = $this->GetTemplateParameters($configuration['general']['option'], $template_file_name);
                 
                 /** The template callback function is defined */
                 $template_callback = array(
@@ -196,15 +162,15 @@ abstract class TemplateEngine
      * 
      * @return string $template_contents the contents of the template file with all the tags replaced. suitable for diplaying in browser
      */
-    public function RenderApplicationTemplate($tag_name)
+    final public function RenderApplicationTemplate($tag_name)
     {    			
         /** The template handling function is called with given option and parameters */
         list($template_file_name, $tag_replacement_arr) = $this->GetTemplateTagsFromFunction($tag_name);
         
         /** The path to the framework template folder is fetched */
-        $template_folder_path             = Configuration::GetConfig("path","template_path");
+        $template_folder_path             = $this->GetConfig("path","template_path");
 		/** The path to the application template folder is fetched */
-        $application_template_folder_path = Configuration::GetConfig("path","application_template_path");
+        $application_template_folder_path = $this->GetConfig("path","application_template_path");
 		/** The template file path */
 		$template_file_path               = $template_folder_path. DIRECTORY_SEPARATOR . $template_file_name;
 		if (!is_file($template_file_path)) {

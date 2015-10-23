@@ -12,7 +12,7 @@ namespace Framework\Utilities;
  * @package    Utilities
  * @author     Nadir Latif <nadir@pakjiddat.com>
  * @license    https://www.gnu.org/licenses/gpl-2.0.html GNU General Public License, version 2
- * @version    1.0.4
+ * @version    1.0.5
  * @link       N.A
  */
 abstract class UtilitiesFramework
@@ -47,7 +47,7 @@ abstract class UtilitiesFramework
      * 
      * @return object $utility_object an object of the required utility class		 
      */
-    public static function Factory($object_type, $parameters = array())
+    final public static function Factory($object_type, $parameters = array())
     {        
         $object_hash = base64_encode(json_encode($parameters));
         
