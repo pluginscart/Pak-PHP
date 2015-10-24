@@ -18,17 +18,14 @@
  * Text Domain:       example
  */
 namespace Framework;
+
 /** The autoload.php file is included */
 require("autoload.php");
-
-/** The command line arguments */
-$argv                = isset($argv)?$argv:array();
-/** The current module name is determined */
-$class_name          = isset($_REQUEST['module'])?$_REQUEST['module']:'Example';
-$class_name          = Utilities\UtilitiesFramework::Factory("string")->Concatenate('\\',$class_name,'\\',"Configuration");
-/** An instance of the required module is created */
-$configuration       = $class_name::GetInstance($argv);
-/** The application is initialized */
-$configuration->InitializeApplication($argv);
-/** The application is run */
-$configuration->RunApplication();
+/** The application context is determined */
+$context = (isset($argc))?"command line":"browser";
+/** The application parameters */
+$parameters = ($context =="command line")?$argv:$_REQUEST;
+/** The application request is handled */
+$output  = \Framework\Application\WordPress\Application::HandleRequest($context, $parameters, "Example");
+/** The application output is echoed back */
+echo $output;

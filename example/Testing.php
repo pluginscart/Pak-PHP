@@ -4,19 +4,19 @@ namespace Example;
 
 /**
  * This class implements the unit tests for the Example application
- * It extends the BrowserApplicationTest class
+ * It extends the Testing class
  * 
  * It is used to test the Example application
  * It tests the framework utility libraries
  * 
- * @category   WebApplication
- * @package    Example
+ * @category   Example
+ * @package    Testing
  * @author     Nadir Latif <nadir@pakjiddat.com>
  * @license    https://www.gnu.org/licenses/gpl-2.0.html GNU General Public License, version 2
  * @version    1.0.0
  * @link       N.A
  */
-class Testing extends \Framework\WebApplication\Testing
+class Testing extends \Framework\Testing\Testing
 {
     /** 
      * Authentication function test
@@ -38,7 +38,7 @@ class Testing extends \Framework\WebApplication\Testing
         /** The custom text to use in the authentication box that shows in the browser **/
         $authentication_box_title = "Protected Area!";
         /** The authentication object is fetched **/
-        $authentication           = Configuration::GetComponent("authentication");
+        $authentication           = $this->GetComponent("authentication");
         /** 
          * If the user presses the cancel button then the function returns false
          * If the user entered the wrong credentials then he will be asked to login again
@@ -53,7 +53,7 @@ class Testing extends \Framework\WebApplication\Testing
      */
     public function TestCaching()
     {
-        $database_obj        = Configuration::GetComponent("database");
+        $database_obj        = $this->GetComponent("database");
         $db_link             = $database_obj->df_get_id();
         /** The prefix of the table. e.g if prefix name is example_ then table name is example_cached_data **/
         $table_prefix        = "example_";
@@ -62,7 +62,7 @@ class Testing extends \Framework\WebApplication\Testing
             "db_link" => $database_obj->df_get_id(),
             "table_prefix" => $table_prefix
         );
-        $caching_obj         = Configuration::GetComponent("caching");
+        $caching_obj         = $this->GetComponent("caching");
 		/** The db link is set so the data can be cached to database **/
 		$caching_obj->SetDbLink($db_link);
         /** The data is saved to cache **/
@@ -87,7 +87,7 @@ class Testing extends \Framework\WebApplication\Testing
     public function TestEncryption()
     {
         /** The encryption object is fetched **/
-        $encryption_obj = Configuration::GetComponent("encryption");
+        $encryption_obj = $this->GetComponent("encryption");
         /** The text to be encrypted **/
         $original_text  = "test encryption";
         /** The original text is encrypted **/
@@ -105,7 +105,7 @@ class Testing extends \Framework\WebApplication\Testing
     public function TestDatabase()
     {
 
-        $database_obj        = Configuration::GetComponent("database");
+        $database_obj        = $this->GetComponent("database");
         /** The $database_obj is initialized and cleared **/
         $database_obj->df_initialize();
         /** The select query is built **/
@@ -141,7 +141,7 @@ class Testing extends \Framework\WebApplication\Testing
         $from_email = "nadir@pakjiddat.com";
         $to_email   = "nadir@pakjiddat.com";
         
-        $email_obj = Configuration::GetComponent("email");
+        $email_obj = $this->GetComponent("email");
         $is_sent   = $email_obj->SendEmail(array(
             "test.xls"
         ), $from_email, $to_email, "Utilitiesframework Test", "<h3>testing html content</h3>");
@@ -156,7 +156,7 @@ class Testing extends \Framework\WebApplication\Testing
     public function TestString()
     {
         /** The String class object is fetched **/
-        $string_obj = Configuration::GetComponent("string");
+        $string_obj = $this->GetComponent("string");
         $main_url   = "https://pear.php.net/manual/en/";
         $rel_url    = "package.mail.mail.send.php";
         /** The relative link is converted to absolute link **/
@@ -171,7 +171,7 @@ class Testing extends \Framework\WebApplication\Testing
     public function TestTemplate()
     {
         /** The Template class object is fetched */
-        $template_obj = Configuration::GetComponent("template");
+        $template_obj = $this->GetComponent("template");
 		$template_path = realpath(__DIR__.DIRECTORY_SEPARATOR."..".DIRECTORY_SEPARATOR."framework".DIRECTORY_SEPARATOR."utilities".DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR."templates".DIRECTORY_SEPARATOR."example.html";  
 		$tag_replacement_arr = array(array("title"=>"Page title","body"=>"Body title"));
 		/** The example template file is rendered */
