@@ -165,7 +165,9 @@ class Testing extends Base
     /**
      * Used to save the test results to test folder
      * 
-     * It saves the results of testing to the given file
+     * It saves the results of testing to file given in application configuration
+	 * If the test results file does not exist
+	 * Then the function returns without saving the test results
      * 
      * @since 1.0.0		 
      * @param string $test_results results of testing		 		 
@@ -175,6 +177,8 @@ class Testing extends Base
         /** The absolute path of the test results file */
         $test_configuration = $this->GetConfig("testing");
         $test_file_name     = $test_configuration['test_results_file'];
+		/** If the test results file does not exist */
+		if (!is_file($test_file_name)) return;
         /** The html is removed from the test results. The <br/> is replaced with new line */
         $test_results       = str_replace("<br/>", "\n", $test_results);
         $test_results       = strip_tags($test_results);
@@ -360,7 +364,7 @@ class Testing extends Base
         /** The number of unit tests run */
         $test_count   = 0;
         /** The results of testing all functions*/
-        $test_results = $this->GetConfig('general', 'line_break') . $this->GetConfig('general', 'line_break');
+        $test_results = $this->GetConfig('general', 'line_break');
         /** The result of testing single function */
         $test_result  = "";
         /** The classes to be unit tested */
@@ -378,8 +382,8 @@ class Testing extends Base
             /** The class object is fetched from application configuration */
             $test_object        = $this->GetComponent($object_name);
             /** Each object function that starts with "Test" is called */
-            for ($count = 0; $count < count($class_methods); $count++) {
-                $class_function = $class_methods[$count];
+            for ($count1 = 0; $count1 < count($class_methods); $count1++) {
+                $class_function = $class_methods[$count1];
                 if (strpos($class_function, "Test") === 0) {
                     /** The testing callback function is defined */
                     $testing_callback = array(
@@ -398,7 +402,7 @@ class Testing extends Base
                             /** The number of test cases of the test function */
                             $test_cases          = 0;
                             /** The test function is called for each parameter in test data file */
-                            for ($count = 0; $count < count($test_data); $count++) {
+                            for ($count2 = 0; $count2 < count($test_data); $count2++) {
                                 call_user_func_array($testing_callback, $test_data);
                                 $test_cases++;
                             }
@@ -409,6 +413,7 @@ class Testing extends Base
                         $this->GetConfig('general', 'line_break')."Result: passed".
                         $this->GetConfig('general', 'line_break')."Number of test cases: ".$test_cases.
                         $this->GetConfig('general', 'line_break')."Number of asserts: " . ($this->valid_assert_count - $current_assert_count).
+                        $this->GetConfig('general', 'line_break').
                         $this->GetConfig('general', 'line_break');
                     }
                     catch (Exception $e) {
@@ -557,27 +562,33 @@ class Testing extends Base
      */
     protected function LoadTestData($function_name)
     {
+    	/** The test data */
+    	$test_data                          = array();
     	/** The test data folder */
-    	$test_data_folder          = $this->GetConfig("testing", "test_data_folder");
+    	$test_data_folder                   = $this->GetConfig("testing", "test_data_folder");
+		/** If the test data folder is not defined then empty test data is returned */
+		if (!is_dir($test_data_folder))
+		    return $test_data;
+		
     	/** The list of all test data files */
-		$test_file_list            = scandir($test_data_folder);
+		$test_file_list                     = scandir($test_data_folder);
 		/** Current test file name */
-		$current_test_file_name    = str_replace("Test", "", $function_name);
+		$current_test_file_name             = str_replace("Test", "", $function_name);
 		/** For each test data file the function name is compared with test file name */
 		for ($count = 0; $count < count($test_file_list); $count++) {
-			$test_file_name        = $test_file_list[$count];
-			$temp_test_file_name   = str_replace("_test_data.json","",$test_file_name);
+			$test_file_name                 = $test_file_list[$count];
+			$temp_test_file_name            = str_replace("_test_data.json","",$test_file_name);
 			if ($temp_test_file_name == $current_test_file_name) break;
 		}		
         /** The test file is read */
-        $test_file_name   = $this->GetConfig("testing", "test_data_folder") . DIRECTORY_SEPARATOR . $test_file_name;
+        $test_file_name                     = $this->GetConfig("testing", "test_data_folder") . DIRECTORY_SEPARATOR . $test_file_name;
 		/** If the test data file does not exist then an exception is thrown */
 		if (!is_file($test_file_name))
 		    throw new \Exception("The test data file: ".$test_file_name." does not exist");
 		
-        $test_data        = $this->GetComponent("filesystem")->ReadLocalFile($test_file_name);
+        $test_data                          = $this->GetComponent("filesystem")->ReadLocalFile($test_file_name);
         /** The test data is json decoded */
-        $test_data        = json_decode($test_data, true);
+        $test_data                          = json_decode($test_data, true);
         /** The test data is returned */
         return $test_data;
     }

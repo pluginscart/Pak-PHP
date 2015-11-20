@@ -33,6 +33,9 @@ final class ErrorHandler
     private $error_message, $error_file, $error_line, $error_context;
     /**
      * The email information used for emailing the error message
+	 * It is an array with 2 keys:
+	 * address => the email address string
+	 * headers => the email headers string
      */
     private $email;
 	/**
@@ -87,11 +90,10 @@ final class ErrorHandler
      * 
      * @since 1.0.0
      * @param array $parameters it contains the configuration information for the logging class object. it should have following keys:
-	 * web_hook=> the web hook at which the error message should be posted		
-     * log_email=> the email address at which to sent error notification
-     * log_file_name=> the name of the log file to which the error will be logged
-     * log_email_header=> the smtp headers to include in the log email		 
-     * display_error=> used to indicate if the error message should be displayed to the user
+	 * @param array $parameters it contains the configuration information for the logging class object. it should have following keys:		 
+     * email=> the email information used for emailing the error message. It is an array with 2 keys: address => the email address string. headers => the email headers string
+     * log_file_name=> the name of the log file to which the error will be logged     		
+     * development_mode=> used to indicate if the application is in development mode or production mode
      * is_browser_application=> used to indicate if class is being used by a browser application
      * custom_error_handler=> used to specify a custom error handling function. it will be called when there is an error or exception. it is an array with 2 keys
      *  					  first is the object the second is the name of the function that will handle the error
@@ -119,7 +121,7 @@ final class ErrorHandler
      * 
      * @since 1.0.0		 
      * @param array $parameters it contains the configuration information for the logging class object. it should have following keys:		 
-     * email=> the email information used for emailing the error message
+     * email=> the email information used for emailing the error message. It is an array with 2 keys: address => the email address string. headers => the email headers string
      * log_file_name=> the name of the log file to which the error will be logged     		
      * development_mode=> used to indicate if the application is in development mode or production mode
      * is_browser_application=> used to indicate if class is being used by a browser application
@@ -133,13 +135,13 @@ final class ErrorHandler
     protected function __construct($parameters)
     {
     	/** Object properties are set to the constructor parameters */
-        $this->email                  = $parameters['email'];
-		$this->web_hook               = $parameters['web_hook'];
-        $this->log_file_name          = $parameters['log_file_name'];        
-        $this->custom_error_handler   = $parameters['custom_error_handler'];
+        $this->email                  = isset($parameters['email'])?$parameters['email']:"";
+		$this->web_hook               = isset($parameters['web_hook'])?$parameters['web_hook']:"";
+        $this->log_file_name          = isset($parameters['log_file_name'])?$parameters['log_file_name']:"";        
+        $this->custom_error_handler   = isset($parameters['custom_error_handler'])?$parameters['custom_error_handler']:"";
         $this->type                   = "";
-		$this->development_mode       = $parameters['development_mode'];
-        $this->is_browser_application = $parameters['is_browser_application'];
+		$this->development_mode       = isset($parameters['development_mode'])?$parameters['development_mode']:true;
+        $this->is_browser_application = isset($parameters['is_browser_application'])?$parameters['is_browser_application']:true;
 		/** The path to the templates folder */
 		$this->template_folder_path   = realpath(__DIR__.DIRECTORY_SEPARATOR."templates");		
         /** The error handler, exception handler and shutdown handler functions are registered */
@@ -398,7 +400,7 @@ final class ErrorHandler
 				$template_parameters['error_message'] = $this->error_message;
 		        $template_parameters['stack_trace']   = $this->GetStackTrace();				
 		        /** The log message. The error message is rendered using error_message.html template file */
-		        $log_message                          = UtilitiesFramework::Factory("template")->RenderTemplateFile($this->template_folder_path.DIRECTORY_SEPARATOR."error_message_".$error_template_suffix.".html", $template_parameters);				
+		        $log_message                          = UtilitiesFramework::Factory("template")->RenderTemplateFile($this->template_folder_path.DIRECTORY_SEPARATOR."error_message_".$error_template_suffix.".html", $template_parameters);							
 				/** If the application is in development mode */
 				if ($this->development_mode) {
 					/** The error message to be displayed to the user */
@@ -412,19 +414,19 @@ final class ErrorHandler
 		         */
 				else {   		        		      
 		            /** The name of the template file used to render the error message to the user */
-				    $template_file_name = $this->template_folder_path.DIRECTORY_SEPARATOR."production_error_".$this->error_template_suffix.".html";		            
+				    $template_file_name = $this->template_folder_path.DIRECTORY_SEPARATOR."production_error_".$error_template_suffix.".html";					           
 					/** The template parameters used to render the error template */
 		            $template_parameters = array("error_message"=>"An error has occured in the application. Please contact the system administrator");
 				    /** The error message that is displayed to the user is rendered */
-		            $error_message = UtilitiesFramework::Factory("template")->RenderTemplateFile($template_file_name, $template_parameters);				    
+		            $error_message = UtilitiesFramework::Factory("template")->RenderTemplateFile($template_file_name, $template_parameters);									   
 		        }
 				
 				/** The log message is written to log file if log file name is given */
 		        if ($this->log_file_name != "")
 		            error_log($log_message, 3, $this->log_file_name);
-		            /** The log message is sent as email if the email address is given */
-		        if ($this->email['email_address'] != "")
-		            error_log($log_message, 1, $this->email['email_address'], $this->email['email_header']);
+		        /** The log message is sent as email if the email address is given */
+		        if ($this->email && $this->email['address'] != "")
+		            error_log($log_message, 1, $this->email['address'], $this->email['headers']);
 				/** TO DO ! */
 				if($this->web_hook != ""){}
 					

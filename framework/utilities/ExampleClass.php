@@ -180,28 +180,28 @@ final class ExampleClass
     public function ErrorHandlingTest()
     {
         /** The parameters from ErrorHandler object */
-        $parameters                         = array();
+        $parameters                           = array();
         /** Custom shutdown function. It is automatically called just before script exits */
-        $parameters['shutdown_function']    = array(
+        $parameters['shutdown_function']      = array(
             $this,
             "CustomShutdown"
         );
+		/** Used to indicate that application is being run from browser */
+		$parameters['is_browser_application'] = true;
         /** Used to indicate if the error message should be displayed */
-        $parameters['display_error']        = true;
+        $parameters['development_mode']       = true;
         /** The email address that will get the error message email */
-        $parameters['log_email']            = "";
+        $parameters['email']                  = array("address"=>"nadir@pakjiddat.com","headers"=>"From: admin@pakjiddat.com\r\nSubject: Test email");
         /** The error log file name */
-        $parameters['log_file_name']        = "";
-        /** The smtp mail headers to include with the error email. e.g array("Subject"=>"Error email") */
-        $parameters['log_email_header']     = "";
+        $parameters['log_file_name']          = "";
         /** Custom error handling function */
-        $parameters['custom_error_handler'] = array(
+        $parameters['custom_error_handler']   = array(
             $this,
             "CustomErrorHandler"
         );
         
         /** The ErrorHandling class object is fetched */
-        $errorhandling_obj = UtilitiesFramework::Factory("errorhandler", $parameters);
+        $errorhandling_obj                    = UtilitiesFramework::Factory("errorhandler", $parameters);
         /** Throw an exception for testing the error handling */
         throw new \Exception("Test exception!", 10);
     }
