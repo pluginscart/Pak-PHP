@@ -42,7 +42,7 @@ final class Template
      * 
      * @since 1.0.1
      * 
-     * @return BrowserApplicationTemplate static::$instance name the instance of the correct child class is returned 
+     * @return object static::$instance name the instance of the correct child class is returned 
      */
     public static function GetInstance()
     {        

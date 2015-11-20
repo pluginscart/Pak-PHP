@@ -16,6 +16,8 @@
 16) Add annotation tags to function comments for indicating business rule
 17) Make script for reading functions and classes. it should allow version control at the level of functions and classes. it should also allow editing functions for certain business rules
 18) Create tool for online code file editing. Connect error messages to code file
+19) Classes for generating test data automatically
+20) Tools class for transforming data so it provides multiple views 
 
 Reference:
 
@@ -72,6 +74,8 @@ Reference:
 51) http://php.net/manual/en/function.getopt.php
 52) http://php.net/manual/en/language.oop5.references.php
 53) http://php.net/manual/en/keyword.parent.php
+54) http://php.net/manual/en/language.oop5.constants.php
+55) http://ruwix.com/simple-javascript-html-css-slider-progress-bar/
 
 Concepts used:
 
@@ -82,3 +86,6 @@ Concepts used:
 5) push and pull based template generation
 6) wordpress plugin development component
 7) support for unit and functional testing
+8) data source abstraction
+9) dependency inversion
+10) dependency injection

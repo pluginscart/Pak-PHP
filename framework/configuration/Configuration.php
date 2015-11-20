@@ -42,7 +42,7 @@ abstract class Configuration extends Base
     	/** The user defined application configuration */
     	$this->user_configuration                                    = array();
 		/** The parameters given by the user are set in the application configuration */
-    	$this->user_configuration['parameters']                      = $parameters;
+    	$this->user_configuration['general']['parameters']           = $parameters;
 		/** The default application name is set in the application configuration */
 		$this->user_configuration['general']['application_name']     = "Default";
 		/** The default application option is set */
@@ -159,10 +159,10 @@ abstract class Configuration extends Base
     {
     	/** The configuration object for the current object is set */
     	$this->SetConfigurationObject($this);        
-        /** User configuration settings are merged with default configuration settings */
+        /** The default configuration settings */
         $default_configuration = new DefaultConfiguration();
-		/** The default configuration object is created */
-        $this->configuration   = $default_configuration->GetDefaultConfiguration($this->user_configuration);
+		/** The default configuration is merged with user configuration and the result is returned */
+        $this->configuration   = $default_configuration->GetUpdatedConfiguration($this->user_configuration);		
         /** The error handler object is created */
         $this->InitializeObject("errorhandler");
         /** All required classes are included */
@@ -188,7 +188,7 @@ abstract class Configuration extends Base
     final protected function GetUrlParameters()
     {    	       
         /** The url parameters */
-		$parameters                                                    = $this->GetConfig('general','parameters');		
+		$parameters                                                    = $this->GetConfig('general','parameters');
 		/** If the url parameter called "parameter" was given then it is decoded and saved to application configuration */
 		if (isset($parameters['parameters']) && is_string($parameters['parameters'])) {
 			/** The parameters argument given in the url */			
@@ -198,9 +198,9 @@ abstract class Configuration extends Base
 			/** The decoded parameters are saved to application configuration */
 			$parameters['parameters']                                  = $decoded_parameters;
 			/** The original parameters string is saved to application configuration */
-			$parameters['parameters']['parameter']                     = $encoded_parameters;
+			$parameters['parameters']['parameter']                     = $encoded_parameters;					
 			$this->SetConfig("general","parameters",$parameters);
-		}
+		}				
     }
 	 
 	/**

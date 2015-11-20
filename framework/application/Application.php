@@ -11,7 +11,7 @@ use \Framework\Configuration\Base as Base;
  * The class should be inherited by the user application class
  * 
  * @category   Framework
- * @package    WebApplication
+ * @package    Application
  * @author     Nadir Latif <nadir@pakjiddat.com>
  * @license    https://www.gnu.org/licenses/gpl-2.0.html GNU General Public License, version 2
  * @version    Release: 1.0.0
@@ -52,13 +52,11 @@ abstract class Application extends Base
 			/** The application url mappings */
 			$application_url_mappings                                                  = $this->GetConfig("general","application_url_mappings");			
 			/** The application option */
-			$option                                                                    = $this->GetConfig("general","option");			
+			$option                                                                    = $this->GetConfig("general","option");					
             /** If a controller is defined for the current url option then it is called */
             if (isset($application_url_mappings[$option]['controller'])) {
                 /** The controller function is run */
                 $response                                                              = $this->RunControllerFunction($option);
-                /** The response data is json encoded */
-                $response                                                              = json_encode($response);
             }
 			/** If no controller is defined for the current url option and a template is defined then the template is rendered and then displayed in the browser */
             else if (isset($application_url_mappings[$option]['templates'])) {
@@ -93,6 +91,9 @@ abstract class Application extends Base
             /** If the application needs to be unit tested then only given test class with be tested with test parameters */
             else if ($this->GetConfig('testing','test_type') == "unit")
                 $response                                                              = $application_test_class_obj->RunUnitTests();
+			/** If the application script needs to be called then the test class given in application configuration will be used */
+            else if ($this->GetConfig('testing','test_type') == "script")
+                $response                                                              = $application_test_class_obj->CallScript();
             /** If some other test type is given then an exception is thrown */
             else
                 throw new \Exception("Invalid test type given in application configuration");
@@ -109,11 +110,11 @@ abstract class Application extends Base
      * @since 1.0.0
      * @param string $text the text to echo     		
      */
-    final public function DisplayOutout($text)
+    final public function DisplayOutput($text)
     {        
         echo $text;  
     }
-	 
+	
     /**
      * Used to call the url handling function of a controller class
      * 
@@ -239,20 +240,29 @@ abstract class Application extends Base
 	 * @return array $response the api response
 	 */
 	final public function MakeApiRequestToLocalModule($parameters){
-		/** The api response. it is fetched by making call to local module */		
-		$response                        = self::HandleRequest("local api",$parameters);
-		/** If the api request asked for the api response to be encrypted then the api response from server is decrypted and decoded */
-		if ($parameters['encrypt_response']) {		
-		    /** The api response is decrypted */
-		    $response                    = $this->GetComponent("encryption")->DecryptText($response);
+		try {
+		    /** The api response. it is fetched by making call to local module */		
+		    $response                        = self::HandleRequest("local api",$parameters);
+		    /** If the api request asked for the api response to be encrypted then the api response from server is decrypted and decoded */
+		    if ($parameters['encrypt_response']) {		
+  		        /** The api response is decrypted */
+		        $response                    = $this->GetComponent("encryption")->DecryptText($response);
+		    }
+		    /** The api response is json decoded */		
+		    $response                        = json_decode($response,true);		
+		    /** If the server response contains an error then an exception is thrown */
+		    if($response['result']!='success')
+		        throw new \Exception("Invalid api response was returned. API resonse: ".var_export($response,true).". Parameters: ".var_export($parameters,true));
 		}
-		/** The api response is json decoded */		
-		$response                    = json_decode($response,true);
-		/** If the server response contains an error then an exception is thrown */
-		if($response['result']!='success')throw new \Exception("Invalid api response was returned. API resonse: ".var_export($response,true).". Parameters: ".var_export($parameters,true));
-		
+		catch(\Exception $e){
+		   $this->GetComponent("errorhandler")->ExceptionHandler($e);
+		}
+		/** If the api response text contains json data, then it is decoded */
+		if ($this->GetComponent("string")->IsJson($response['text'])) {
+			$response                        = json_decode($response['text'],true);
+		}
 		/** The api response is returned */
-		return $response['text'];
+		return $response;
 	}
     
 	/**
@@ -307,60 +317,63 @@ abstract class Application extends Base
     final public static function HandleRequest($context, $parameters, $default_module="")
     {
     	/** The application module to be called */
-		$module                                   = $default_module;
-		/** The application parameters and module name are determined */
+		$module                                           = $default_module;
+				
         /** If the application is being run from browser */
 		if ($context == "browser" || $context == "local api" || $context == "remote api") {
     	    /** The current module name is determined */
-    	    $module                               = isset($parameters['module'])?$parameters['module']:$default_module;
+    	    $module                                       = isset($parameters['module'])?$parameters['module']:$default_module;
 		}
 		/** If the application is being run from command line then the module name is determined */
 		else if ($context == "command line") {
 			/** The updated application parameters in standard key => value format */
-			$updated_parameters                   = array();
+			$updated_parameters                           = array();
 			/** The application parameters are determined */
 			for ($count=1; $count<count($parameters); $count++ ) {
 				/** Single command line argument */
-				$command                          = $parameters[$count];
+				$command                                  = $parameters[$count];
 				/** If the command does not contain equal sign then an exception is thrown. only commands of the form --key=value are accepted */
-				if (strpos("--", $command)!==0 || strpos("=",$command)===false)
+				if (strpos($command, "--")!==0 || strpos($command, "=")===false)
 				    throw new \Exception("Invalid command line argument was given");
 				else {
-					 $command                     = str_replace("--", "", $command);
-					 list($key,$value)            = explode("=", $command);
-					 $updated_parameters[$key]    = $value;
+					 $command                             = str_replace("--", "", $command);
+					 list($key,$value)                    = explode("=", $command);
+					 $updated_parameters[$key]            = $value;
 				}
 			}
 			/** The parameters are set */
-			$parameters                           = $updated_parameters;
+			$parameters                                   = $updated_parameters;
 			/** The application module name is set */
-			$module                               = (isset($parameters['module']))?$parameters['module']:$default_module;
+			$module                                       = (isset($parameters['module']))?$parameters['module']:$default_module;
 		}
 		/** If an invalid application context is given then an exception is thrown */
 	    else throw new \Exception("Invalid application context: ".$context);
-		
+				
 		/** An exception is thrown if the module name cannot be determined */
 		if (!$module) throw new \Exception("Module name was not given in url request");
+		
 		/** The application configuration class name */ 
-		$class_name                               = \Framework\Utilities\UtilitiesFramework::Factory("string")->Concatenate('\\',$module,'\\',"Configuration");
-		/** An instance of the required module is created */		
-		$configuration                            = new $class_name($parameters);
+		$class_name                                       = \Framework\Utilities\UtilitiesFramework::Factory("string")->Concatenate('\\',$module,'\\',"Configuration");
+		/** An instance of the required module is created */
+		$configuration                                    = new $class_name($parameters);
 		/** The application output */
-		$response                                 = $configuration->RunApplication();
-		if ($context == "local api"){			
-			/** If the response from the local function call was a string then success string is added to response */
-			if (is_string($response))
-			    $response                         = array("result"=>"success","text"=>$response);
-			/** If the response from the local function call was not a string then error string is added to response */		
-			else
-			    $response                         = array("result"=>"error","text"=>"An error has occured in the application. Please contact the system administrator");
-			/** The response is json encoded */			
-			$response = json_encode($response);			
-		} 
+		$response                                         = $configuration->RunApplication();
+		/** If the response is an array then it is json encoded */
+		if (is_array($response)) {
+			$response                                     = json_encode($response);
+		}
+		/** If the response is not false. e.g some functions may return false response */
+		if ($response) {
+		    /** Success string is added to response */
+		    $response                                     = array("result"=>"success","text"=>$response);			
+		    /** The response is json encoded */			
+		    $response                                     = json_encode($response);
+		}			
 		/** If the parameters requested encrpytion of response then the response is encrypted */
 		if (isset($parameters['encrypt_response']) && $parameters['encrypt_response']) 
-		    $response                             = \Framework\Utilities\UtilitiesFramework::Factory("encryption")->EncryptText($response);		
-		/** The output is returned */
+		    $response                                     = \Framework\Utilities\UtilitiesFramework::Factory("encryption")->EncryptText($response);		       
+		
+		/** The output is returned */		
 		return $response;
     }
 }

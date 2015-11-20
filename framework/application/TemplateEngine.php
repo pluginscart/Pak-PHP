@@ -1,6 +1,6 @@
 <?php
 
-namespace Framework\WebApplication;
+namespace Framework\Application;
 
 use \Framework\Configuration\Base as Base;
 
@@ -11,7 +11,7 @@ use \Framework\Configuration\Base as Base;
  * The class is abstract and must be inherited by the template classes
  * 
  * @category   Framework
- * @package    WebApplication
+ * @package    Application
  * @author     Nadir Latif <nadir@pakjiddat.com>
  * @license    https://www.gnu.org/licenses/gpl-2.0.html GNU General Public License, version 2
  * @version    Release: 1.0.0

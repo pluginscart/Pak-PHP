@@ -189,7 +189,11 @@ final class ExampleClass
         /** Used to indicate if the error message should be displayed */
         $parameters['display_error']        = true;
         /** The email address that will get the error message email */
-        $parameters['email']                = array("email_address"=>"example@example.com","email_header"=>"Subject: Test Email");       
+        $parameters['log_email']            = "";
+        /** The error log file name */
+        $parameters['log_file_name']        = "";
+        /** The smtp mail headers to include with the error email. e.g array("Subject"=>"Error email") */
+        $parameters['log_email_header']     = "";
         /** Custom error handling function */
         $parameters['custom_error_handler'] = array(
             $this,

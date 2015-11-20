@@ -13,7 +13,7 @@ namespace Framework\Utilities;
  * @package    Utilities
  * @author     Nadir Latif <nadir@pakjiddat.com>
  * @license    https://www.gnu.org/licenses/gpl-2.0.html GNU General Public License, version 2
- * @version    Release: 1.0.2
+ * @version    Release: 1.0.1
  * @link       N.A
  */
 final class ErrorHandler
@@ -118,9 +118,8 @@ final class ErrorHandler
      * Used to initialize the object variables from the constructor parameters
      * 
      * @since 1.0.0		 
-     * @param array $parameters it contains the configuration information for the logging class object. it should have following keys:
-	 * web_hook=> the web hook at which the error message should be posted	(Not yet implemented !)		 
-     * email=> the email information used for emailing the error message. it is an array with following keys: email_address,email_header 
+     * @param array $parameters it contains the configuration information for the logging class object. it should have following keys:		 
+     * email=> the email information used for emailing the error message
      * log_file_name=> the name of the log file to which the error will be logged     		
      * development_mode=> used to indicate if the application is in development mode or production mode
      * is_browser_application=> used to indicate if class is being used by a browser application
@@ -134,13 +133,13 @@ final class ErrorHandler
     protected function __construct($parameters)
     {
     	/** Object properties are set to the constructor parameters */
-        $this->email                  = (isset($parameters['email']))?$parameters['email']:array("email_address"=>"");
-		$this->web_hook               = (isset($parameters['web_hook']))?$parameters['web_hook']:"";
-        $this->log_file_name          = (isset($parameters['log_file_name']))?$parameters['log_file_name']:"";        
-        $this->custom_error_handler   = (isset($parameters['custom_error_handler']))?$parameters['custom_error_handler']:"";
+        $this->email                  = $parameters['email'];
+		$this->web_hook               = $parameters['web_hook'];
+        $this->log_file_name          = $parameters['log_file_name'];        
+        $this->custom_error_handler   = $parameters['custom_error_handler'];
         $this->type                   = "";
-		$this->development_mode       = (isset($parameters['development_mode']))?$parameters['development_mode']:true;
-        $this->is_browser_application = (isset($parameters['is_browser_application']))?$parameters['is_browser_application']:true;
+		$this->development_mode       = $parameters['development_mode'];
+        $this->is_browser_application = $parameters['is_browser_application'];
 		/** The path to the templates folder */
 		$this->template_folder_path   = realpath(__DIR__.DIRECTORY_SEPARATOR."templates");		
         /** The error handler, exception handler and shutdown handler functions are registered */
@@ -363,7 +362,7 @@ final class ErrorHandler
 			$parameters['class_name']             = $class;
 			$parameters['line_break']             = $line_break;
 			$parameters['counter']                = ($count+1);
-			$template_parameters[] = $parameters;
+			$template_parameters[] 		          = $parameters;
         }
 		
         /** The stack trace is rendered using stack_trace.html template file */

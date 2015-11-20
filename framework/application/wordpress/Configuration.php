@@ -36,8 +36,8 @@ abstract class Configuration extends \Framework\Configuration\Configuration
     	$this->SetConfigurationObject($this);        
         /** User configuration settings are merged with default configuration settings */
         $default_configuration = new DefaultConfiguration();
-		/** The default configuration object is created */
-        $this->configuration   = $default_configuration->GetDefaultConfiguration($this->user_configuration);		
+		/** The default configuration is merged with user configuration and the result is returned */
+        $this->configuration   = $default_configuration->GetUpdatedConfiguration($this->user_configuration);		
         /** The error handler object is created */
         $this->InitializeObject("errorhandler");		
         /** All required classes are included */

@@ -12,7 +12,7 @@ namespace Framework\Utilities;
  * @package    Utilities;
  * @author     Nadir Latif <nadir@pakjiddat.com>
  * @license    https://www.gnu.org/licenses/gpl-2.0.html GNU General Public License, version 2
- * @version    1.0.0
+ * @version    1.0.1
  * @link       N.A
  * @author 	   Nadir Latif <nadir@pakiddat.com>
  */
@@ -69,6 +69,8 @@ final class Encryption
      *
      * @since 1.0.0
      * @param string $text the text to encrypt
+	 * 
+	 * @return string $ciphertext the encrypted text
      */
     public function EncryptText($text)
     {
@@ -98,6 +100,7 @@ final class Encryption
      *
      * @since 1.0.0
      * @param string $ciphertext_base64 the encrypted text
+	 * 
      * @return string $decrypted_string the decrypted text
      */
     public function DecryptText($ciphertext_base64)
@@ -122,5 +125,52 @@ final class Encryption
         
         return $decrypted_string;
         
+    }
+	
+	/**
+     * Used to encode the given data
+     * 
+     * It first json encodes the data if it is an array
+	 * Then it applies base64 encoding to the string
+	 * The resulting string is returned
+     * 
+     * @since 1.0.1
+     * @param mixed $data the data to be encoded
+	 * 
+	 * @return string $encoded_data the encoded data    		
+     */
+    final public function EncodeData($data)
+    {
+    	/** If the data is an array then it is json encoded */        
+        if (is_array($data)) {
+        	$data         = json_encode($data);
+        }
+		/** The data is base64 decoded */
+		$encoded_data     = base64_encode($data);
+		
+		return $encoded_data;
+    }
+	
+	/**
+     * Used to decode the given data
+     * 
+     * It first base64 decodes the string
+	 * If the resulting string is json encoded then it is json decoded
+     * 
+     * @since 1.0.1
+     * @param string $encoded_data the encoded data
+	 * 
+	 * @return mixed $original_data the original data    		
+     */
+    final public function DecodeData($data)
+    {
+    	/** The data is base64 decoded */        
+        $original_data     = base64_decode($data);
+		/** If the data is a json string then it is json decoded */
+		if (UtilitiesFramework::Factory("string")->IsJson($original_data)) {
+			$original_data = json_decode($original_data, true);
+		}
+		
+		return $original_data;
     }
 }

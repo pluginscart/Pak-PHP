@@ -1,12 +1,9 @@
 Changelog:
 
-1.0.7 (October 24, 2015)
-    1) Updated class parameters for ErrorHandling class in Utilities package. simplified choice of error templates
-    2) Renamed DataObject class to MysqlDataObject
-    3) Added the class \Framework\Configuration\Base. It is the base class for all classes. It allows application configuration to be shared by all application classes
-    4) Removed the use of static function calls for fetching application configuration
-    5) Moved the wordpress package inside the application package
-    
+1.0.7 (November 20, 2015)
+    1) Added new DataObjectAbstraction class. it allows using different data sources from a single interface
+    2) Added new DataObjectEtl class. it provides simple functions for writing etl scripts
+
 1.0.6 (October 19, 2015)
     1) Renamed application configuration variables
     2) Removed some of the html templates from templates/html folder

@@ -18,7 +18,7 @@ namespace Framework\Application\WordPress;
 class DefaultConfiguration extends \Framework\Configuration\DefaultConfiguration
 {    
     /**
-     * Used to get default application configuration data     
+     * Used to get updated application configuration data     
      *
 	 * It fetches the default application configuration
 	 * It merges the wordpress default configuration with the default application configuration
@@ -31,7 +31,7 @@ class DefaultConfiguration extends \Framework\Configuration\DefaultConfiguration
 	 * 
 	 * @return array $configuration the application configuration information
      */
-    public function GetDefaultConfiguration($user_configuration)
+    public function GetUpdatedConfiguration($user_configuration)
     {    	
 		/** If the php session is not started then it is started */
 		if (!$this->IsSessionStarted())
@@ -41,7 +41,7 @@ class DefaultConfiguration extends \Framework\Configuration\DefaultConfiguration
     	$user_configuration['general']['application_name']                                      = $user_configuration['wordpress']['plugin_name'];
 		
     	/** The default application configuration is fetched from parent default configuration object */
-    	$configuration                                                                          = parent::GetDefaultConfiguration($user_configuration);    			
+    	$configuration                                                                          = parent::GetUpdatedConfiguration($user_configuration);    			
 		/** If the plugin name is not given in application configuration then an exception is thrown */
         if(!isset($user_configuration['wordpress']['plugin_name']))throw new \Exception("Plugin name was not given in application configuration");
 		/** If the plugin version is not given in application configuration then an exception is thrown */

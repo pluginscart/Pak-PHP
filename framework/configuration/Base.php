@@ -23,6 +23,22 @@ abstract class Base
     private $configuration_object;
     
 	/**
+     * Used to get the configuration object
+     * 
+     * It returns the configuration object	
+     * 		
+     * @since 1.0.0
+     * @return object $configuration_object the configuration object for the module	  		
+     */
+    final public function GetConfigurationObject()
+    {
+    	/** The configuration object is set */
+    	$configuration_object = $this->configuration_object;
+		
+		return $configuration_object;
+    }
+	
+	/**
      * Used to set the configuration object
      * 
      * It sets the configuration object	
@@ -70,9 +86,10 @@ abstract class Base
      * @since 1.0.0
      * @param string $config_name name of the required configuration
      * @param string $sub_config_name optional name of the required sub configuration
+	 * @param string $sub_sub_config_name optional name of the required third level sub configuration
 	 * @throws Exception an exception is thrown if the given configuration does not exist
      */
-    final public function GetConfig($config_name, $sub_config_name = "")
+    final public function GetConfig($config_name, $sub_config_name = "", $sub_sub_config_name = "")
     {
     	/** The configuration list is fetched from the configuration object */
     	$configuration = $this->configuration_object->GetConfiguration();		
@@ -82,11 +99,18 @@ abstract class Base
         /** If the second level configuration is given but its value could not be found then an exception is thrown */
         if ($sub_config_name != "" && !isset($configuration[$config_name][$sub_config_name]))
             throw new \Exception("Application configuration could not be found for config name: [" . $config_name."][".$sub_config_name."]");
-        /** The configuration value is returned */
+		 /** If the third level configuration is given but its value could not be found then an exception is thrown */
+        if ($sub_sub_config_name != "" && !isset($configuration[$config_name][$sub_config_name][$sub_sub_config_name]))
+            throw new \Exception("Application configuration could not be found for config name: [" . $config_name."][".$sub_config_name."]".$sub_sub_config_name."]");
+        /** The configuration value is returned if the sub configuration is empty */
         if ($sub_config_name == "")
             return $configuration[$config_name];
-        else
+        /** The configuration value is returned if the sub sub configuration is empty */
+        else if ($sub_sub_config_name == "")
             return $configuration[$config_name][$sub_config_name];
+		/** The configuration value is returned if the sub sub configuration is not empty */
+		else
+			return $configuration[$config_name][$sub_config_name][$sub_sub_config_name];
     }
     
     /**

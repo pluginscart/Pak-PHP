@@ -13,7 +13,7 @@ namespace Framework\Utilities;
  * @package    Utilities
  * @author     Nadir Latif <nadir@pakjiddat.com>
  * @license    https://www.gnu.org/licenses/gpl-2.0.html GNU General Public License, version 2
- * @version    1.2.1
+ * @version    1.2.2
  * @link       N.A
  */
 final class DatabaseFunctions
@@ -76,17 +76,25 @@ final class DatabaseFunctions
      */
     private $query_log = array();
     /**
-     * The sort field using in ORDER BY clause of MySQL
+     * The sort field used in ORDER BY clause of MySQL
      */
     private $sort_by = "";
     /**
-     * The order by field using in ORDER BY clause of MySQL
+     * The order by field used in ORDER BY clause of MySQL
      */
     private $order_by = "";
+	/**
+     * The group by field used in GROUP BY clause of MySQL
+     */
+    private $group_by = "";
     /**
      * Used to indicate if the current application is being run from a browser
      */
     private $is_browser_application = true;
+	/**
+     * Default table name to be used in MySQL queries
+     */
+    private $table_name = "";
 
     /**
      * Class constructor
@@ -203,6 +211,19 @@ final class DatabaseFunctions
             $this->internal_df_close();       
     }
 
+   /**
+    * Used to set the table name
+    * 
+    * @since 1.0.0
+    * @param string $table_name the name of the default MySQL table
+    * 
+    * @return void
+    */
+    public function df_set_table_name($table_name)
+    {        
+        $this->table_name = $table_name; 
+    }
+	
     /**
      * Used to execute the given sql query
      *
@@ -311,6 +332,20 @@ final class DatabaseFunctions
         $this->order_by = $sort_order;       
     }
 
+	/**
+     * Used to set the group by used in select query
+     * 
+     * @since 1.0.0     
+     * @param string $table_name the name of the table that contains the group by field
+     * @param string $field_name the name of the field to group by         
+     * 
+     * @return void		 
+     */
+    public function df_set_group_by($table_name, $field_name)
+    {        
+        $this->group_by  = $table_name . "." . $field_name;              
+    }
+	
     /**
      * Used to set the limit parameters used in select query
      * 
@@ -342,7 +377,7 @@ final class DatabaseFunctions
         $this->df_set_query_type($query_type);
         
         for ($count = 0; $count < count($main_query); $count++) {
-            $table_name = (isset($main_query[$count]['table'])) ? $main_query[$count]['table'] : "";
+            $table_name = (isset($main_query[$count]['table'])) ? $main_query[$count]['table'] : $this->table_name;			
             if ($query_type == 's')
                 $this->df_add_select_field($main_query[$count]['field'], $table_name);
             else if ($query_type == 'i')
@@ -353,10 +388,11 @@ final class DatabaseFunctions
         
         if ($where_clause != '') {
             for ($count = 0; $count < count($where_clause); $count++) {
-                $operation = (isset($where_clause[$count]['operation'])) ? $where_clause[$count]['operation'] : "=";
-                $operator  = (isset($where_clause[$count]['operator'])) ? $where_clause[$count]['operator'] : "";
-				$is_string = (isset($where_clause[$count]['is_string'])) ? $where_clause[$count]['is_string'] : true;
-                $this->df_build_where_clause($where_clause[$count]['field'], $where_clause[$count]['value'], $is_string, $where_clause[$count]['table'], $operation, $operator, false);
+                $operation  = (isset($where_clause[$count]['operation'])) ? $where_clause[$count]['operation'] : "=";
+                $operator   = (isset($where_clause[$count]['operator'])) ? $where_clause[$count]['operator'] : "";
+				$is_string  = (isset($where_clause[$count]['is_string'])) ? $where_clause[$count]['is_string'] : true;
+				$table_name = (isset($where_clause[$count]['table'])) ? $where_clause[$count]['table'] : $this->table_name; 
+                $this->df_build_where_clause($where_clause[$count]['field'], $where_clause[$count]['value'], $is_string, $table_name, $operation, $operator, false);
             }
         }
         
@@ -428,7 +464,7 @@ final class DatabaseFunctions
     /**
      * Used to clear the query log
      * 
-     * @since 1.0.0		 		     
+     * @since 1.2.1		     
      *
      * @return void 
      */
@@ -440,7 +476,7 @@ final class DatabaseFunctions
     /**
      * Used to display the query log
      * 
-     * @since 1.0.0		 		     
+     * @since 1.2.1	     
      *
      * @return void 
      */
@@ -510,6 +546,9 @@ final class DatabaseFunctions
             if ($this->sort_by != "" && $this->order_by != "")
                 $this->query .= " ORDER BY " . $this->sort_by . " " . $this->order_by;
             
+			if ($this->group_by != "")
+			    $this->query .= " GROUP BY " . $this->group_by;
+			
             if ($this->start < $this->end)
                 $this->query .= " LIMIT " . $this->start . "," . $this->end;
         } else if (strtolower($this->query_type) == 'u') {
@@ -586,7 +625,9 @@ final class DatabaseFunctions
         $this->where_clause   = '';
         $this->query_type     = '';
         $this->sort_by        = '';
+		$this->group_by       = '';
         $this->order_by       = '';
+		$this->table_name     = '';
         $this->table_list     = array();
         $this->field_list     = array();
         $this->value_list     = array();
@@ -650,9 +691,7 @@ final class DatabaseFunctions
      * @return void
      */
     public function df_build_where_clause($field, $value, $is_string, $table, $operation, $operator, $options)
-    {        
-        $value = mysqli_escape_string($this->id, $value);
-        
+    {    
         $this->internal_df_build_select_query($field, $value, false, $is_string, $table, $operation, $operator, $options);        
     }
 
@@ -663,7 +702,7 @@ final class DatabaseFunctions
      * It does not support MyISAM table type
      * Once the transaction is commited the changes are written to database		 
      * 
-     * @since 1.0.0		 
+     * @since 1.2.1
      * @throws Exception object if transaction could not be commited
      * 
      * @return void		 
@@ -681,7 +720,7 @@ final class DatabaseFunctions
      * It does not support MyISAM table type
      * Once the transaction is rolledback it cannot be saved to database
      * 
-     * @since 1.0.0		 
+     * @since 1.2.1
      * @throws Exception object if transaction could not be commited
      * 
      * @return void		 
@@ -699,7 +738,7 @@ final class DatabaseFunctions
      * It does not support MyISAM table type
      * Autocommit should be turned off if queries need to be run as part of a transaction
      * 
-     * @since 1.0.0
+     * @since 1.2.1
      * @param boolean $is_enable is true if autocommit needs to be enabled. its false if it needs to be disabled
      * @throws Exception object if autocommit could not be turned off
      * 
@@ -822,7 +861,7 @@ final class DatabaseFunctions
             $this->table_list[] = $table;
         
         if ($is_display_field) {
-            if ($table != "")
+            if ($table != "" && $field != "*" && strpos($field, "DISTINCT") != false)
                 $this->display_fields[] = $table . "." . $field;
             else
                 $this->display_fields[] = $field;

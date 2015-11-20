@@ -278,9 +278,10 @@ class Application extends \Framework\Application\Application
 	 */
 	public function GetPluginOptions($option_id){		
 		/** The current plugin options are fetched from WordPress */
-		$options = get_option( $option_id );
+		$options                  = get_option( $option_id );
 		/** If the options is a json encoded string then it is decoded */
-		if($this->GetComponent("string")->IsJson($options))$options = json_decode($options,true);
+		if($this->GetComponent("string")->IsJson($options))
+		    $options              = json_decode($options,true);
 		
 		return $options;		
 	}
@@ -331,11 +332,9 @@ class Application extends \Framework\Application\Application
 	 * @param array $options the plugin options
 	 * @param string $option_id id of the option to save
 	 */
-	public function SavePluginOptions($options,$option_id) {
-		/** If the options is an array then it is json encoded */
-		//if(is_array($options))$options = json_encode($options);
+	public function SavePluginOptions($options,$option_id) {		
 		/** The options values are saved */		
-		update_option($option_id, $options); 					
+		update_option($option_id, $options);
 	}
 	
     /**

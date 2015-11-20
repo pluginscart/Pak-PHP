@@ -2,6 +2,8 @@
 
 namespace Framework\Templates\BasicSite\Presentation;
 
+use \Framework\Application\TemplateEngine;
+
 /**
  * This class provides functions for rendering Basic Site templates
  * 
@@ -16,7 +18,7 @@ namespace Framework\Templates\BasicSite\Presentation;
  * @version    Release: 1.0.0
  * @link       N.A
  */
-final class BasicSiteTemplate extends \Framework\WebApplication\TemplateEngine
+final class BasicSiteTemplate extends TemplateEngine
 {	
     /**
      * Used to render the required user interface template
