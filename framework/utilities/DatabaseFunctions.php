@@ -770,6 +770,9 @@ final class DatabaseFunctions
             if (!@mysqli_select_db($Id, $db))
                 throw new \Exception("Error in establishing database server connection. Details: " . mysqli_error($Id), 20);
         }
+		
+		mysqli_set_charset($Id,'utf8');
+		
         return $Id;        
     }
 

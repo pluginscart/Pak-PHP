@@ -27,5 +27,5 @@ $context = (isset($argc))?"command line":"browser";
 $parameters = ($context =="command line")?$argv:$_REQUEST;
 /** The application request is handled */
 $output  = \Framework\Application\WordPress\Application::HandleRequest($context, $parameters, "Example");
-/** The application output is echoed back */
-echo $output;
+/** If the output is not suppressed then the application output is echoed back */
+if (!defined("NO_OUTPUT"))echo $output;

@@ -18,14 +18,23 @@ namespace Framework\Object;
 class MysqlDataObject extends DataObject
 {
 	/**
-     * Name of MySQL tables that contain the required data
-	 * It should be populated by derived classes
-	 * It contains list of key,value pairs
-	 * Each pair is the type of data and then name of the MySQL table that has the data
+     * Name of the field by which to order the data
      * 
      * @since 1.0.0
      */
-    private $data_tables     = array();
+    private $order_by               = "";
+	/**
+     * Sort order
+     * 
+     * @since 1.0.0
+     */
+    private $order_by_direction     = "ASC";
+	/**
+     * The table name
+     * 
+     * @since 1.0.0		
+     */
+    protected $table_name;
 	
     /**
      * Used to set the object data
@@ -43,19 +52,19 @@ class MysqlDataObject extends DataObject
     }
 	
 	/**
-     * Used to get the field name
+     * Used to get the key field
      * 
-     * It gets the field name
+     * It gets the key field
 	 * 
      * @since 1.0.0     
 	 * 
-	 * @return string $field_name the field name for the object
+	 * @return string $key_field the key field for the object
      */
-    final public function GetFieldName()
+    final public function GetKeyField()
     {        
-        $field_name = $this->field_name;
+        $key_field = $this->key_field;
 		
-		return $field_name; 
+		return $key_field; 
     }
 	
 	/**
@@ -66,9 +75,23 @@ class MysqlDataObject extends DataObject
      * @since 1.0.0
      * @param string $field_name key field of the MySQL database table from which the data is loaded     
      */
-    final public function SetFieldName($field_name)
+    final public function SetKeyField($field_name)
     {        
-        $this->field_name = $field_name; 
+        $this->key_field = $field_name; 
+    }
+	
+	/**
+     * Used to set the order by field
+     * 
+     * It sets the order by field
+	 * 
+     * @since 1.0.0
+	 * @param string $table_name name of the MySQL database table
+     * @param string $field_name sort field of the MySQL database table
+     */
+    final public function SetOrderBy($table_name,$field_name)
+    {        
+        $this->order_by = $table_name . "." . $field_name; 
     }
 	
 	/**
@@ -168,16 +191,24 @@ class MysqlDataObject extends DataObject
      * The current object corresponds to a single database row 
      * 
      * @since 1.0.0
-	 * @param mixed $fields list of field names to fetch
-     * @param mixed $condition the condition used to fetch the data from database
+	 * @param mixed $parameters the parameters used to fetched the data. for relational data, it should have following keys:
+	 * fields => list of field names to fetch
+     * condition => the condition used to fetch the data from database
 	 * It can be a single string or integer value. in this case the previously set field name and table name are used 
 	 * Or an array with following fields: field,value,table,operation and operator
-	 * @param boolean $read_all used to indicate if all data should be returned
+	 * read_all => used to indicate if all data should be returned
+	 * In case of non relational data, it can be empty
 	 * 
 	 * @return $is_valid used to indicate that data was found in database
      */
-    final public function Read($fields,$condition,$read_all)
+    final public function Read($parameters)
     {
+    	/** The list of fields to fetch */
+    	$fields                                                        = $parameters['fields'];
+		/** The condition for fetching the data */
+    	$condition                                                     = $parameters['condition'];
+		/** Used to indicate if all data should be fetched */
+    	$read_all                                                      = $parameters['read_all'];
     	/** Used to indicate that data was found in database */
     	$data_found                                                    = true;
         /** The data array is initialized */
@@ -201,7 +232,7 @@ class MysqlDataObject extends DataObject
         $where_clause                                                  = array();	
         /** If the given condition is a string then it should be value of key field */        
 		if (is_string($condition) || is_int($condition)) {			
-            $where_clause[0]['field']                                  = $this->field_name;
+            $where_clause[0]['field']                                  = $this->key_field;
             $where_clause[0]['value']                                  = $condition;
             $where_clause[0]['table']                                  = $this->table_name;
             $where_clause[0]['operation']                              = '=';
@@ -220,6 +251,11 @@ class MysqlDataObject extends DataObject
 		else if (!$condition) {				
 		    $where_clause                                              = '';
 			$this->GetComponent("database")->df_set_table_name($this->table_name);
+		}
+		/** If the order by field is given then the data is sorted by this field */
+		if ($this->order_by) {
+		    list($order_by_table_name,$order_by)                       = explode(".",$this->order_by);
+			$this->GetComponent("database")->df_set_order_by($order_by_table_name, $order_by, $this->order_by_direction);
 		}
 		
         /** The data is fetched from database */
@@ -318,7 +354,7 @@ class MysqlDataObject extends DataObject
         $this->GetComponent("database")->df_initialize();
         
         $main_query             = array();
-        $main_query[0]['field'] = $this->field_name;
+        $main_query[0]['field'] = $this->key_field;
         $main_query[0]['table'] = $this->table_name;
         
         $counter      = 0;
@@ -337,7 +373,7 @@ class MysqlDataObject extends DataObject
         $query   = $this->GetComponent("database")->df_build_query($main_query, $where_clause, 's');
         $db_rows = $this->GetComponent("database")->df_all_rows($query);
         
-        if (isset($db_rows[0][$this->field_name]))
+        if (isset($db_rows[0][$this->key_field]))
             $record_exists = true;
         else
             $record_exists = false;
@@ -365,18 +401,18 @@ class MysqlDataObject extends DataObject
         /** The database object is initialized and cleared */
         $this->GetComponent("database")->df_initialize();
         /** If the $data contains key field information then it is updated */
-        if (isset($this->data[$this->field_name])) {
+        if (isset($this->data[$this->key_field])) {
             /** The update query fields are added to the database object */
             foreach ($this->data as $field_name => $field_value)
                 $this->GetComponent("database")->df_add_update_field($field_name, $this->table_name, $field_value, true);
             /** The where clause of the update query is set */
-            $this->GetComponent("database")->df_build_where_clause($this->field_name, $this->data[$this->field_name], true, $this->table_name, '=', '', '');
+            $this->GetComponent("database")->df_build_where_clause($this->key_field, $this->data[$this->key_field], true, $this->table_name, '=', '', '');
             /** The update query is fetched */
             $query_str = $this->GetComponent("database")->df_get_query_string('u');
             /** The update query is run */
             $this->GetComponent("database")->df_execute($query_str);
             /** The key field value for the data */
-            $record_id = $this->data[$this->field_name];
+            $record_id = $this->data[$this->key_field];
         }
         /** If the $data does not contain key field information then it is added */
         else {
@@ -397,10 +433,10 @@ class MysqlDataObject extends DataObject
 	/**
      * Used to return the data table for the given data type
      * 
-     * It returns the data table name
+     * It returns the data table name from application configuration
      * 
      * @since 1.0.0
-	 * @param string $data_type the type of the data. e.g author or sura
+	 * @param string $data_type the type of the data
 	 * 
 	 * @return string $data_table_name name of the MySQL table for the given data type
      */
@@ -426,14 +462,11 @@ class MysqlDataObject extends DataObject
      */
     final public function SetMetaInformation($meta_information)
 	{
-		/** If MySQL is to be used then the MySQL table name and field name are set */
-		if ($this->GetConfig("general","database_type") == "mysql") {		  
-		    /** The database table name for the data type */
-		    $data_type_table   = $this->GetDatabaseTableName($meta_information['data_type']);			
-		    /** The table name for the current object is set */		    				   
-		    $this->SetTableName($data_type_table);		    
-			/** The field name for the current object is set */				    
-		    $this->SetFieldName($meta_information['field_name']);		    
-		}
+		/** The database table name for the data type */
+		$data_type_table   = $this->GetDatabaseTableName($meta_information['data_type']);			
+		/** The table name for the current object is set */		    				   
+		$this->SetTableName($data_type_table);		    
+		/** The field name for the current object is set */				    
+		$this->SetKeyField($meta_information['field_name']);		    
 	}
 }

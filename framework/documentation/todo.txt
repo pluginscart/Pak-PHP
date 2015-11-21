@@ -17,7 +17,8 @@
 17) Make script for reading functions and classes. it should allow version control at the level of functions and classes. it should also allow editing functions for certain business rules
 18) Create tool for online code file editing. Connect error messages to code file
 19) Classes for generating test data automatically
-20) Tools class for transforming data so it provides multiple views 
+20) Tools class for transforming data so it provides multiple views
+21) Write articles describing following: how to create a wordpress plugin, how to unit test and functional test your application, how to write a sample web application, how to write a script, how to display html tables, how to use etl class, how to use user interface objects, data objects and data object abstraction, how to use session, api and http authentication
 
 Reference:
 
@@ -89,3 +90,4 @@ Concepts used:
 8) data source abstraction
 9) dependency inversion
 10) dependency injection
+11) support for writing etl scripts

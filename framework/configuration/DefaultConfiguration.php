@@ -46,14 +46,18 @@ class DefaultConfiguration extends Base
         else
             $configuration['general']['is_browser_application'] = (isset($_SERVER['HTTP_HOST']) || isset($_SERVER['HTTPS_HOST'])) ? true : false;
         
-        /** The application option and the option parameters are saved to application configuration */
+        /** The module name is saved to application configuration */
+        if (!isset($user_configuration['general']['module']))
+            $user_configuration['general']['module'] = str_replace(" ", "", $user_configuration['general']['application_name']);
+        
+		/** The application option and the option parameters are saved to application configuration */
         if (!isset($user_configuration['general']['default_option']))
             $user_configuration['general']['default_option'] = "Index";
-        
-        $configuration['general']['option']           = isset($user_configuration['general']['parameters']['option']) ? $user_configuration['general']['parameters']['option'] : '';
-        $configuration['general']['development_mode'] = true;
-        $configuration['general']['parameters']       = (isset($user_configuration['general']['parameters'])) ? $user_configuration['general']['parameters'] : array();
-        $configuration['general']['uploads']          = (isset($_FILES)) ? $_FILES : array();
+		
+        $configuration['general']['option']                        = isset($user_configuration['general']['parameters']['option']) ? $user_configuration['general']['parameters']['option'] : '';
+        $configuration['general']['development_mode']              = true;
+        $configuration['general']['parameters']                    = (isset($user_configuration['general']['parameters'])) ? $user_configuration['general']['parameters'] : array();
+        $configuration['general']['parameters']['uploads']         = (isset($_FILES)) ? $_FILES : array();
         /** If the application is a browser application then the current url is saved */
         if ($configuration['general']['is_browser_application'])
             $configuration['general']['current_url'] = (isset($_SERVER['HTTPS_HOST']) ? 'https://' : 'http://') . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
@@ -63,6 +67,8 @@ class DefaultConfiguration extends Base
         /** The application url mappings are set */
         $configuration['general']['application_url_mappings'] = array();
         
+		/** Used to indicate that the application will implement a presentation class that will provide template parameters */
+		$configuration['general']['use_presentation']         = false;
         /** Used to indicate if application should use sessions */
         $configuration['general']['enable_sessions'] = false;
         
@@ -99,9 +105,9 @@ class DefaultConfiguration extends Base
     }
     
     /**
-     * Used to get default http and session authentication configuration
+     * Used to get default authentication configuration
      * 
-     * It returns configuration containing http and session authentication
+     * It returns configuration containing api, http and session authentication
      * 
      * @since 1.0.0
      * @param array $configuration the default configuration
@@ -109,44 +115,27 @@ class DefaultConfiguration extends Base
      * 
      * @return array $configuration the default configuration information
      */
-    private function GetHttpSessionAuthConfig($configuration, $user_configuration)
+    private function GetAuthConfig($configuration, $user_configuration)
     {
-        /** HTTP authentication information */
-        /** Used to indicate if application should be protected by http authentication */
-        $configuration['session_auth']['enable']        = false;
-        /** The valid user names and passwords */
-        $configuration['session_auth']['credentials']   = array(
-            array(
-                "user_name" => "",
-                "password" => ""
-            )
-        );
-        /** The title of the authentication box */
-        $configuration['session_auth']['realm']         = "";
-        /** The callback function to call in case of error */
-        $configuration['session_auth']['auth_callback'] = "";
-        
-        /** Session authentication information */
-        /** Used to indicate if application should be protected by session authentication */
-        $configuration['http_auth']['enable']        = false;
-        /** The valid user names and passwords */
-        $configuration['http_auth']['credentials']   = array(
-            array(
-                "user_name" => "",
-                "password" => ""
-            )
-        );
-        /** The title of the authentication box */
-        $configuration['http_auth']['realm']         = "";
-        /** The callback function to call for checking if user is logged in */
-        $configuration['http_auth']['auth_callback'] = "";
-        /** User configuration is merged */
-        if (isset($user_configuration['http_auth']))
-            $configuration['http_auth'] = array_replace_recursive($configuration['http_auth'], $user_configuration['http_auth']);
-        
-        if (isset($user_configuration['session_auth']))
-            $configuration['session_auth'] = array_replace_recursive($configuration['session_auth'], $user_configuration['session_auth']);
-        
+    	/** The title of the authentication box */
+        $configuration['http_auth']['realm']                                   = "";
+    	/** The supported authentication methodd */
+    	$authentication_methods                                                = array("api","http","session");
+		/** The default values for each authentication method are set */
+		for ($count = 0; $count < count($authentication_methods); $count++) {
+			/** The authentication method */
+			$authentication_method                                             = $authentication_methods[$count];
+            /** Used to indicate if application should be protected by http authentication */
+            $configuration[$authentication_method.'_auth']['enable']           = false;
+            /** The valid user names and passwords */
+            $configuration[$authentication_method.'_auth']['credentials']      = array(array("user_name" => "","password" => ""));
+            /** The callback function to call for checking if user is logged in */
+            $configuration[$authentication_method.'_auth']['auth_callback']    = "";
+			/** User configuration is merged */
+            if (isset($user_configuration[$authentication_method.'_auth']))
+                $configuration[$authentication_method.'_auth'] = array_replace_recursive($configuration[$authentication_method.'_auth'], $user_configuration[$authentication_method.'_auth']);			
+		}		               
+		
         return $configuration;
     }
     
@@ -166,7 +155,7 @@ class DefaultConfiguration extends Base
         /** Test parameters */
         /** Test mode indicates the application will be tested when its run */
         $configuration['testing']['test_mode']         = false;
-        /** Test type indicates the type of application testing. i.e functional or unit */
+        /** Test type indicates the type of application testing. i.e script, functional or unit */
         $configuration['testing']['test_type']         = 'unit';
         /** Test include files indicates the files that need to be including during testin */
         $configuration['testing']['include_files']     = array();
@@ -183,6 +172,8 @@ class DefaultConfiguration extends Base
         $configuration['testing']['test_data_folder']  = "";
         /** Used to indicate if the application should save page parameters to test_data folder */
         $configuration['testing']['save_test_data']    = false;
+		/** Used to indicate if the application should append the parameters to test data file */
+        $configuration['testing']['append_test_data']  = true;
         /** Used to indicate if the application should save test results */
         $configuration['testing']['save_test_results'] = true;
         /** The name of the test results file */
@@ -265,10 +256,12 @@ class DefaultConfiguration extends Base
         
         /** The web path to the application's vendors folder */
         if (!isset($user_configuration['path']['web_vendor_path']))
-            $user_configuration['path']['web_vendor_path'] = $user_configuration['path']['application_folder_url'] . "/vendors";
-        
+            $user_configuration['path']['web_vendor_path']    = $user_configuration['path']['application_folder_url'] . "/vendors";
+		else
+			$user_configuration['path']['web_vendor_path']    = $user_configuration['path']['web_domain'] . "/" . $user_configuration['path']['relative_web_domain'] . "/" . $user_configuration['path']['web_vendor_path'];
+
         /** The path to the framework folder */
-        $configuration['path']['framework_path']            = realpath($configuration['path']['base_path'] . DIRECTORY_SEPARATOR . "framework");
+        $configuration['path']['framework_path']            = $configuration['path']['base_path'] . DIRECTORY_SEPARATOR . "framework";
         /** The path to the application folder */
         $configuration['path']['application_path']          = $configuration['path']['base_path'] . DIRECTORY_SEPARATOR . $user_configuration['path']['application_folder'];
         /** The path to the framework templates html folder */
@@ -279,7 +272,13 @@ class DefaultConfiguration extends Base
         $configuration['path']['tmp_folder_path']           = $configuration['path']['application_path'] . DIRECTORY_SEPARATOR . 'tmp';
         /** The path to the vendor folder */
         $configuration['path']['vendor_folder_path']        = $configuration['path']['application_path'] . DIRECTORY_SEPARATOR . 'vendors';
-        
+					
+		/** The folder path to the application's vendors folder */
+        if (!isset($user_configuration['path']['vendor_folder_path']))
+            $user_configuration['path']['vendor_folder_path'] = $configuration['path']['application_path'] . DIRECTORY_SEPARATOR . 'vendors';
+		else
+			$user_configuration['path']['vendor_folder_path'] = $configuration['path']['base_path'] . DIRECTORY_SEPARATOR . DIRECTORY_SEPARATOR . $user_configuration['path']['vendor_folder_path'];		
+		        
         /** User configuration is merged */
         if (isset($user_configuration['path']))
             $configuration['path'] = array_replace_recursive($configuration['path'], $user_configuration['path']);
@@ -378,12 +377,13 @@ class DefaultConfiguration extends Base
      * It sets the php settings
      * 
      * @since 1.0.0
+     * @param array $user_configuration the user configuration
      */
-    private function InitializePhpSettings()
+    private function InitializePhpSettings($user_configuration)
     {
         error_reporting(E_ALL);
         date_default_timezone_set('Asia/Karachi');
-        if ($configuration['development_mode']) {
+        if ($user_configuration['general']['development_mode']) {
             ini_set('display_errors', E_ALL);
             ini_set('display_startup_errors', true);
         } else {
@@ -411,12 +411,15 @@ class DefaultConfiguration extends Base
      * @return array $configuration the application configuration information
      */
     public function GetUpdatedConfiguration($user_configuration)
-    {
+    {	
         /** The general default configuration is fetched */
         $configuration = self::GetGeneralConfig($user_configuration);
-        
+     
+	 	/** The php error configuration is set */
+    	$this->InitializePhpSettings($configuration);
+		   
         /** The http and session authentication default configuration is fetched */
-        $configuration = array_replace_recursive($configuration, self::GetHttpSessionAuthConfig($configuration, $user_configuration));
+        $configuration = array_replace_recursive($configuration, self::GetAuthConfig($configuration, $user_configuration));
         
         /** The path default configuration is fetched */
         $configuration = array_replace_recursive($configuration, self::GetPathConfig($configuration, $user_configuration));

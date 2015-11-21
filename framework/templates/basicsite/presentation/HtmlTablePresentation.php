@@ -2,6 +2,8 @@
 
 namespace Framework\Templates\BasicSite\Presentation;
 
+use Framework\Configuration\Base as Base;
+
 /**
  * Abstract class that defines a presentation class for html tables
  * 
@@ -14,7 +16,7 @@ namespace Framework\Templates\BasicSite\Presentation;
  * @version    1.0.0
  * @link       N.A
  */
-abstract class HtmlTablePresentation
+abstract class HtmlTablePresentation extends Base
 {	
 	/**
      * Used to format the data so its suitable for displaying in html table
@@ -61,16 +63,74 @@ abstract class HtmlTablePresentation
         return $table_parameters;        
     }
 
-    /** Used to get the html row template parameters for the given table data */
-	abstract protected function GetRowParameters($table_data);
-	/** Used to get the table sort information */
-	abstract protected function GetTableSortInformation();
-	/** Used to get the table header links. Used to sort the table columns */
-	abstract protected function GetHeaderLinks($table_links);
-	/** Used to get the table headers */
-	abstract protected function GetTableHeaders($header_links);
-	/** Used to get the table header widths and header alignment */
-	abstract protected function GetHeaderWidthAlignment();
-	/** Used to get the table css class */
-	abstract protected function GetTableCssClass();
+    /**
+     * Used to get the movie data
+     * 
+     * It returns an array containing the table data
+	 * Each array element is an array that represents a table row
+     * Each element in this array is a column for a given row
+	 * 
+     * @since 1.0.0
+	 * @param array $table_data an array containing table data
+	 * 
+     * @return array $table_data each element in the array contains the data for a row
+     */
+	protected function GetRowParameters($table_data){return $table_data;}	
+	/**
+     * Used to get the table sort state
+     * 
+     * It returns an array containing the table sort state
+	 * 
+     * @since 1.0.0
+     * 
+     * @return array $table_data an array the table sort information
+     */
+	protected function GetTableSortInformation(){return array();}
+	/**
+     * Used to get the movie table column links
+     * 
+     * It returns an array containing the header links
+	 * The links allow data to be sorted by these columns
+     * 
+	 * 
+     * @since 1.0.0
+     * @param array $sort_information an array containing sort information for the column
+	 * 
+     * @return array $column_links an array containing column link information
+     */
+	protected function GetHeaderLinks($sort_information){return array();}
+	/**
+     * Used to get the table header
+     * 
+     * It returns an array containing the header text for each table header    	
+	 * 
+     * @since 1.0.0
+     * @param array $table_links the table header links
+	 * 
+     * @return array $table_header each element in the array contains the text for a header column
+     */
+	protected function GetTableHeaders($header_links){return array();}
+	/**
+     * Used to get the table header widths and column alignments
+     * 
+     * It gets the header widths and header alignments
+	 * So they can be used to display html table
+	 * 
+     * @since 1.0.0
+     * 
+     * @return array $table_data an array with two keys:
+	 * header_widths => the width of each table column
+	 * column alignment => the alignment of each table column 
+     */
+	protected function GetHeaderWidthAlignment(){return array();}
+	/**
+     * Used to get the table css class
+     * 
+     * It returns the table css class
+	 * 
+     * @since 1.0.0
+	 * 
+     * @return string $table_css_class the table css class
+     */
+	protected function GetTableCssClass(){return "";}
 }

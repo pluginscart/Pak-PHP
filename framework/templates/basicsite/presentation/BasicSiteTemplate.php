@@ -2,7 +2,7 @@
 
 namespace Framework\Templates\BasicSite\Presentation;
 
-use \Framework\Application\TemplateEngine;
+use \Framework\Application\TemplateEngine as TemplateEngine;
 
 /**
  * This class provides functions for rendering Basic Site templates

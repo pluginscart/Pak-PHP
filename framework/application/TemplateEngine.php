@@ -42,11 +42,11 @@ abstract class TemplateEngine extends Base
         /** The presentation object is fetched from application configuration */
         $presentation_object            = $this->GetComponent('presentation');
         /** Url option is converted to camelcase */
-        $function_name_suffix           = \Framework\Utilities\UtilitiesFramework::Factory("string")->CamelCase($option);                
+        $function_name_suffix           = $this->GetComponent("string")->CamelCase($option);                
         
         $function_name                  = substr($tag_name, 0, strrpos($tag_name, "."));
 		/** Functiona name is converted to camelcase */
-        $function_name                  = \Framework\Utilities\UtilitiesFramework::Factory("string")->CamelCase($function_name);
+        $function_name                  = $this->GetComponent("string")->CamelCase($function_name);
         $function_name                  = "Get" . $function_name . "ParametersFor" . $function_name_suffix;		
         /** The template parameters callback is defined */
         $template_parameters_callback   = array(
@@ -89,22 +89,17 @@ abstract class TemplateEngine extends Base
      * first is template file name
      * second is $tag_replacement_arr. this is a list of tags values that will replace the tags in the given template file 
      */
-    final function GetTemplateTagsFromFunction($tag_name)
-    {        
-        /** Configuration values are fetched from application configuration */
-        $component_list      = array(
-            "presentation"
-        );
-        $configuration_names = array(
-            "general"
-        );
-        
-        list($components, $configuration) = $this->GetComponentsAndConfiguration($component_list, $configuration_names);			
+    final public function GetTemplateTagsFromFunction($tag_name)
+    {
+		/** The application url mapping configuration */
+		$application_url_mappings         = $this->GetConfig("general","application_url_mappings");  
+		/** The application option */
+		$application_option               = $this->GetConfig("general","option");       		
         /** If no url mapping is defined for the current url option then an exception is thrown */
-        if (!isset($configuration['general']['application_url_mappings'][$configuration['general']['option']]))
+        if (!isset($application_url_mappings[$application_option]))
             throw new \Exception("Invalid url request sent to application");
         /** The list of templates defined for the given url option */
-        $url_templates = $configuration['general']['application_url_mappings'][$configuration['general']['option']]["templates"];
+        $url_templates = $application_url_mappings[$application_option]["templates"];
         
         $tag_values_found    = false;
         $tag_replacement_arr = array();
@@ -115,7 +110,7 @@ abstract class TemplateEngine extends Base
                 $function_name       = $url_templates[$count]['function_name'];
                 $template_file_name  = $url_templates[$count]['template_file_name'];
 				/** Used to indicate that function for generating template parameters should be automatically called */                
-                $template_parameters = $this->GetTemplateParameters($configuration['general']['option'], $template_file_name);
+                $template_parameters = $this->GetTemplateParameters($application_option, $template_file_name);
                 
                 /** The template callback function is defined */
                 $template_callback = array(
@@ -165,36 +160,36 @@ abstract class TemplateEngine extends Base
     final public function RenderApplicationTemplate($tag_name)
     {    			
         /** The template handling function is called with given option and parameters */
-        list($template_file_name, $tag_replacement_arr) = $this->GetTemplateTagsFromFunction($tag_name);
+        list($template_file_name, $tag_replacement_arr)   = $this->GetTemplateTagsFromFunction($tag_name);
         
         /** The path to the framework template folder is fetched */
-        $template_folder_path             = $this->GetConfig("path","template_path");
+        $template_folder_path                             = $this->GetConfig("path","template_path");
 		/** The path to the application template folder is fetched */
-        $application_template_folder_path = $this->GetConfig("path","application_template_path");
+        $application_template_folder_path                 = $this->GetConfig("path","application_template_path");
 		/** The template file path */
-		$template_file_path               = $template_folder_path. DIRECTORY_SEPARATOR . $template_file_name;
+		$template_file_path                               = $template_folder_path. DIRECTORY_SEPARATOR . $template_file_name;
 		if (!is_file($template_file_path)) {
-			$template_file_path           = $application_template_folder_path. DIRECTORY_SEPARATOR . $template_file_name;
+			$template_file_path                           = $application_template_folder_path. DIRECTORY_SEPARATOR . $template_file_name;
 		    if (!is_file($template_file_path)) throw new \Exception("Template file: ".$template_file_name." could not be found");	
 		}
 
         /** The tags in the template file are extracted */
-        list($template_contents, $template_tag_list) = \Framework\Utilities\UtilitiesFramework::Factory("template")->ExtractTemplateFileTags($template_file_path);
+        list($template_contents, $template_tag_list)      = $this->GetComponent("template_helper")->ExtractTemplateFileTags($template_file_path);
         
         /** For each extracted template tag the value for that tag is fetched */
         for ($count = 0; $count < count($template_tag_list); $count++) {
             /** First the tag value is checked in the tag replacement array returned by the template handling function */
-            $tag_name  = $template_tag_list[$count];
-            $tag_value = (isset($tag_replacement_arr[$tag_name])) ? $tag_replacement_arr[$tag_name] : '!not found!';
+            $tag_name                                     = $template_tag_list[$count];
+            $tag_value                                    = (isset($tag_replacement_arr[$tag_name])) ? $tag_replacement_arr[$tag_name] : '!not found!';
 			/** If the tag value is an array then the array is processed. This array can contain further template tags */          
             if (is_array($tag_value))
-                $tag_value = \Framework\Utilities\UtilitiesFramework::Factory("template")->ReplaceTagWithArray($tag_name, $tag_value);
+                $tag_value                                = $this->GetComponent("template_helper")->ReplaceTagWithArray($tag_name, $tag_value);
 			/** If the tag value was not found then the function is called recursively */
 			else if ($tag_value=='!not found!')$tag_value = $this->RenderApplicationTemplate($tag_name);
 			/** If the tag value was not found then an exception is thrown */
 			if ($tag_value=='!not found!')throw new \Exception("Tag value for tag: ".$tag_name." could not be found");
 			/** The tag name is replaced with the tag contents */
-            $template_contents = str_replace("{" . $tag_name . "}", $tag_value, $template_contents);
+            $template_contents                            = str_replace("{" . $tag_name . "}", $tag_value, $template_contents);
         }
         
         return $template_contents;

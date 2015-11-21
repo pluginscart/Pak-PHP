@@ -12,7 +12,7 @@ namespace Framework\Utilities;
  * @package    UtilitiesFramework
  * @author     Nadir Latif <nadir@pakjiddat.com>
  * @license    https://www.gnu.org/licenses/gpl-2.0.html GNU General Public License, version 2
- * @version    1.0.0
+ * @version    1.0.1
  * @link       N.A
  * @author 	   Nadir Latif <nadir@pakiddat.com>
  */
@@ -233,29 +233,63 @@ final class FileSystem
         if ($method == "get")
             $file_contents = file_get_contents($url);
 		else {
-				$count = 0;
-		        $ch = curl_init();
+		    $count = 0;
+		    $ch = curl_init();
 		            
-		        if (is_array($parameters)) {
-		                curl_setopt($ch, CURLOPT_HEADER, 0);
-		                if (is_array($request_headers))
-		                    curl_setopt($ch, CURLOPT_HTTPHEADER, $request_headers);
-		                curl_setopt($ch, CURLOPT_POST, count($parameters));
-		                curl_setopt($ch, CURLOPT_POSTFIELDS, $parameters);
+		    if (is_array($parameters)) {
+		        curl_setopt($ch, CURLOPT_HEADER, 0);
+		        if (is_array($request_headers))
+		            curl_setopt($ch, CURLOPT_HTTPHEADER, $request_headers);
+		            curl_setopt($ch, CURLOPT_POST, count($parameters));
+		            curl_setopt($ch, CURLOPT_POSTFIELDS, $parameters);
 		        }
 		            
-		        curl_setopt($ch, CURLOPT_URL, $url);
-		        curl_setopt($ch, CURLOPT_HEADER, 0);
-		        curl_setopt($ch, CURLOPT_USERAGENT, "User-Agent: Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US; rv:1.8.1.14) Gecko/20080404 Firefox/3.0.0.0");
-		        curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+		    curl_setopt($ch, CURLOPT_URL, $url);
+		    curl_setopt($ch, CURLOPT_HEADER, 0);
+		    curl_setopt($ch, CURLOPT_USERAGENT, "User-Agent: Mozilla/5.0 (Windows; U; Windows NT 6.0; en-US; rv:1.8.1.14) Gecko/20080404 Firefox/3.0.0.0");
+		    curl_setopt($ch, CURLOPT_TIMEOUT, 30);
 		            
-		        ob_start();
+		    ob_start();
 		            
-		        curl_exec($ch);
-		        curl_close($ch);
-		        $file_contents = ob_get_clean();
+		    curl_exec($ch);
+		    curl_close($ch);
+		    $file_contents = ob_get_clean();
 		}        
 		
 		return $file_contents;
+    }
+	
+	/**
+     * Used to determine if the given url is valid
+     *
+	 * It checks the http response headers for the given url
+	 * If the response headers contain an error code, i.e 4xx, then function returns false
+	 * Otherwise the function returns true
+	 * See http://www.w3.org/Protocols/rfc2616/rfc2616-sec10.html
+	 * 
+     * @since 1.0.1
+     * @param string $url url to be checked
+     * 			  
+     * @return boolean $is_valid indicates if the given url is valid or not
+     */
+    function IsUrlValid($url)
+    {
+    	/** Used to indicate if the url is valid or not */
+    	$is_valid = false;
+        /** The http headers for the url are fetched */
+        $url_headers      = get_headers($url);
+		/** Each header is checked for http error code */
+		for ($count = 0; $count < count($url_headers); $count++) {
+			/** The http header */
+			$http_header  = ($url_headers[$count]);
+			/** The http header is checked for 4xx code */
+			preg_match("/(http\/1\.[0,1] 4\d\d\s+[a-z]+)/i", $http_header,$matches);
+			/** Indicates if the url contains error code or not */
+			$is_valid     = (isset($matches[0]) && isset($matches[1]))?false: true;
+			/** If the http header contains an error code then no need to check other http headers */
+			if (!$is_valid) break;
+		}
+		
+		return $is_valid;
     }
 }

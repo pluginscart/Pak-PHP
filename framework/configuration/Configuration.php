@@ -138,8 +138,8 @@ abstract class Configuration extends Base
         /** All files that need to be included are included */        
         for ($count = 0; $count < count($files_to_include); $count++) {
             $file_name = $files_to_include[$count];
-			/** The {vendor_folder_path} string is replaced with the vendor folder path */
-			$file_name = str_replace('{vendor_folder_path}',$this->GetConfig('path','vendor_folder_path'),$file_name);					
+			/** The vendor_folder_path string is prepended to the include file path */
+			$file_name = $this->GetConfig('path','vendor_folder_path') . DIRECTORY_SEPARATOR . $file_name;					
             if (is_file($file_name))
                 require_once($file_name);
             else
@@ -162,21 +162,86 @@ abstract class Configuration extends Base
         /** The default configuration settings */
         $default_configuration = new DefaultConfiguration();
 		/** The default configuration is merged with user configuration and the result is returned */
-        $this->configuration   = $default_configuration->GetUpdatedConfiguration($this->user_configuration);		
-        /** The error handler object is created */
-        $this->InitializeObject("errorhandler");
-        /** All required classes are included */
-        $this->IncludeRequiredClasses();
+        $this->configuration   = $default_configuration->GetUpdatedConfiguration($this->user_configuration);
         /** Php Sessions are enabled if user requested sessions */
         $this->EnableSessions();
-		/** Session authentication is enabled if user requested session authentication */
-		$this->EnableSessionAuthentication();
-        /** Http authentication is enabled if user requested http authentication */
-		$this->EnableHttpAuthentication();
-		/** Url parameters given as parameter attribute in url are decoded and saved to application configuration */		
+		/** The application authentication and error handling is enabled */		
+        $this->EnableAuthenticationAndErrorHandling();
+        /** All required classes are included */
+        $this->IncludeRequiredClasses();			
 		$this->GetUrlParameters();		
     }
     
+	/**
+     * Used to enable authentication and error handling
+     * 		 
+     * This function checks for user defined callbacks
+	 * It replaces callbacks with objects
+	 * If the user has not defined callbacks then the default application callbacks are used
+     * 
+     * @since 1.0.0	
+     */
+    final protected function EnableAuthenticationAndErrorHandling()
+    {
+    	/** The errorhandler class object is created */
+    	$this->InitializeObject("errorhandler");    	       
+        /** The errorhandler callback is checked */
+        $errorhandler_callback                                                                               = $this->configuration['required_frameworks']['errorhandler']['parameters']['custom_error_handler'];
+		/** If the errorhandler callback is defined but is not callable, then the object string in the callback is replaced with the object */				
+		if (is_array($errorhandler_callback) && !is_callable($errorhandler_callback)) {
+			$errorhandler_callback[0]                                                                         = $this->GetComponent($errorhandler_callback[0]);
+			$this->configuration['required_frameworks']['errorhandler']['parameters']['custom_error_handler'] = $errorhandler_callback;			
+		}
+		/** Otherwise the default application errorhandler callback is used */
+		else {
+			$errorhandler_callback[0]                                                                         = $this->GetComponent("application");
+			$this->configuration['required_frameworks']['errorhandler']['parameters']['custom_error_handler'] = array($errorhandler_callback[0],"CustomErrorHandler");			
+		}
+		
+		/** The shutdown function callback is checked */
+        $shutdown_callback                                                                                    = $this->configuration['required_frameworks']['errorhandler']['parameters']['shutdown_function'];
+		/** If the shutdown function callback is defined but is not callable, then the object string in the callback is replaced with the object */				
+		if (is_array($shutdown_callback) && !is_callable($shutdown_callback)) {
+			$shutdown_callback[0]                                                                             = $this->GetComponent($shutdown_callback[0]);
+			$this->configuration['required_frameworks']['errorhandler']['parameters']['shutdown_function']    = $shutdown_callback;			
+		}
+		/** Otherwise the default application shutdown callback is used */
+		else {
+			$errorhandler_callback[0]                                                                         = $this->GetComponent("application");
+			$this->configuration['required_frameworks']['errorhandler']['parameters']['shutdown_function'] = array($errorhandler_callback[0],"CustomShutdownFunction");			
+		}
+		/** The authentication methods */
+		$authentication_methods                                                                               = array("session","http");
+		/** Both session and http authentication are enabled */
+		for ($count =0; $count < count($authentication_methods); $count++) {
+			/** The authentication method */
+			$authentication_method			                                                                  = $authentication_methods[$count];
+		    /** 
+             * If authentication is enabled						 
+             * Then authentication callback defined by the user configuration is called
+		     * If the user has not defined the authentication callback
+		     * Then the default authentication callback is called
+            */
+            if ($this->GetConfig($authentication_method.'_auth','enable')) {
+        	    /** The authentication callback is checked */
+                $auth_callback                                                                                = $this->GetConfig($authentication_method.'_auth','auth_callback');
+		        /** If the auth callback is defined but is not callable, then the object string in the callback is replaced with the object */				
+		        if (is_array($auth_callback) && !is_callable($auth_callback)) {
+   			        $auth_callback[0]                                                                         = $this->GetComponent($auth_callback[0]);
+			        $this->SetConfig($authentication_method.'_auth','auth_callback',$auth_callback); 
+		        }
+                if (is_callable($this->GetConfig($authentication_method.'_auth','auth_callback')))
+                    call_user_func($this->GetConfig($authentication_method.'_auth','auth_callback'));
+                else {
+               	    /** The application object */
+            	    $application_obj = $this->GetComponent("application");
+				    /** The default authentication callback is called */
+				    call_user_func(array($application_obj,ucfirst($authentication_method)."Authentication"));
+                }                
+            }
+        }
+    }
+
 	/**
      * Used to get url parameters
      * 		 
@@ -188,7 +253,7 @@ abstract class Configuration extends Base
     final protected function GetUrlParameters()
     {    	       
         /** The url parameters */
-		$parameters                                                    = $this->GetConfig('general','parameters');
+		$parameters                                                    = $this->GetConfig('general','parameters');		
 		/** If the url parameter called "parameter" was given then it is decoded and saved to application configuration */
 		if (isset($parameters['parameters']) && is_string($parameters['parameters'])) {
 			/** The parameters argument given in the url */			
@@ -224,53 +289,7 @@ abstract class Configuration extends Base
             $this->SetConfig('general','session',$_SESSION);
         }
     }
-	
-	/**
-     * Used to enable session authentication
-     * 		 
-     * This function registers the session authentication callback if session authentication is required
-     * 
-     * @since 1.0.0
-	 * 
-	 * @return array $configuration the application configuration
-     */
-    final protected function EnableSessionAuthentication()
-    {    	
-    	/** 
-         * If session authentication is required and application is called from browser						 
-         * Then session authentication callback is called
-         */
-        if ($this->GetConfig('session_auth','enable')) {
-            if (is_callable($this->GetConfig('session_auth','auth_callback')))
-                call_user_func($this->GetConfig('session_auth','auth_callback'));
-            else
-                throw new \Exception("Please define a valid session authentication error callback");
-        }
-    }
-	
-	/**
-     * Used to enable http authentication
-     * 		 
-     * This function registers the http authentication callback if http authentication is required
-     * 
-     * @since 1.0.0
-	 * 
-	 * @return array $configuration the application configuration
-     */
-    final protected function EnableHttpAuthentication()
-    {    	
-    	/** 
-         * If http authentication is required and application is called from browser
-         * Then the http authentication callback is called and user is asked to authenticate 
-         */
-        if ($this->GetConfig('http_auth','enable')) {
-            if (is_callable($this->GetConfig('http_auth','auth_callback')))
-                call_user_func($this->GetConfig('http_auth','auth_callback'));
-            else
-                throw new \Exception("Please define a valid http authentication error callback");
-        }
-    }
-	
+		
 	/**
      * Used to return the application configuration
      * 		 

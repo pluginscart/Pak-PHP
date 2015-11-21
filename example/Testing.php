@@ -10,7 +10,7 @@ namespace Example;
  * It tests the framework utility libraries
  * 
  * @category   Example
- * @package    Testing
+ * @package    Example
  * @author     Nadir Latif <nadir@pakjiddat.com>
  * @license    https://www.gnu.org/licenses/gpl-2.0.html GNU General Public License, version 2
  * @version    1.0.0
@@ -20,9 +20,12 @@ class Testing extends \Framework\Testing\Testing
 {
     /** 
      * Authentication function test
-     * Used to test http digest authentication		 
+     * Used to test http digest authentication
+	 * 
+	 * @since 1.0.0
+	 * @param array $test_data the test data 
      */
-    public function TestAuthentication()
+    public function TestAuthentication($test_data)
     {
         /** List of valid user credentials. used to test the http digest authentication **/
         $credentials              = array(
@@ -50,8 +53,11 @@ class Testing extends \Framework\Testing\Testing
     /** 
      * Caching function test
      * Used to test function caching
+	 * 
+	 * @since 1.0.0
+	 * @param array $test_data the test data 
      */
-    public function TestCaching()
+    public function TestCaching($test_data)
     {
         $database_obj        = $this->GetComponent("database");
         $db_link             = $database_obj->df_get_id();
@@ -83,8 +89,11 @@ class Testing extends \Framework\Testing\Testing
     /**
      * Encryption testing
      * Used to test encryption and decryption of text
+	 *
+	 * @since 1.0.0
+	 * @param array $test_data the test data 
      */
-    public function TestEncryption()
+    public function TestEncryption($test_data)
     {
         /** The encryption object is fetched **/
         $encryption_obj = $this->GetComponent("encryption");
@@ -101,8 +110,11 @@ class Testing extends \Framework\Testing\Testing
     /**
      * Database testing
      * Used to test database abstraction class
+	 * 
+	 * @since 1.0.0
+	 * @param array $test_data the test data 
      */
-    public function TestDatabase()
+    public function TestDatabase($test_data)
     {
 
         $database_obj        = $this->GetComponent("database");
@@ -127,8 +139,11 @@ class Testing extends \Framework\Testing\Testing
      * Email testing
      * Used to test email function
      * It support html content and attachments
+	 * 
+	 * @since 1.0.0
+	 * @param array $test_data the test data 
      */
-    public function TestEmail()
+    public function TestEmail($test_data)
     {
         /** 
          * The Email class object is fetched 
@@ -152,8 +167,11 @@ class Testing extends \Framework\Testing\Testing
     /**
      * String function testing
      * Used to test relative to absolute conversion function
+	 * 
+	 * @since 1.0.0
+	 * @param array $test_data the test data 
      */
-    public function TestString()
+    public function TestString($test_data)
     {
         /** The String class object is fetched **/
         $string_obj = $this->GetComponent("string");
@@ -167,11 +185,14 @@ class Testing extends \Framework\Testing\Testing
     /**
      * Template function testing
      * Used to test template rendering
+	 * 
+	 * @since 1.0.0
+	 * @param array $test_data the test data 
      */
-    public function TestTemplate()
+    public function TestTemplate($test_data)
     {
         /** The Template class object is fetched */
-        $template_obj = $this->GetComponent("template");
+        $template_obj = $this->GetComponent("template_helper");
 		$template_path = realpath(__DIR__.DIRECTORY_SEPARATOR."..".DIRECTORY_SEPARATOR."framework".DIRECTORY_SEPARATOR."utilities".DIRECTORY_SEPARATOR).DIRECTORY_SEPARATOR."templates".DIRECTORY_SEPARATOR."example.html";  
 		$tag_replacement_arr = array(array("title"=>"Page title","body"=>"Body title"));
 		/** The example template file is rendered */

@@ -27,12 +27,6 @@ abstract class DataObject extends Base
      */
     protected $key_field;
     /**
-     * The table name
-     * 
-     * @since 1.0.0		
-     */
-    protected $table_name;
-    /**
      * Object data
      * 
      * @since 1.0.0		
@@ -63,18 +57,18 @@ abstract class DataObject extends Base
      * @since 1.0.0
      * @param string $key_field the field name of the data 
      */
-    abstract public function SetFieldName($key_field);   
+    abstract public function SetKeyField($key_field);   
 	
 	/**
-     * Used to get the field name
+     * Used to get the key field
      * 
-     * It gets the field name of the table          	
+     * It gets the key field  	
      * 
      * @since 1.0.0
 	 * 
      * @return string $key_field the field name of the data 
      */
-    abstract public function GetFieldName();
+    abstract public function GetKeyField();
 	
     /**
      * Used to set the object data
@@ -127,12 +121,10 @@ abstract class DataObject extends Base
      * It uses the field name value given as parameter     
      * 
      * @since 1.0.0
-	 * @param array $fields list of field names to fetch
-     * @param mixed $condition the condition used to fetch the data from database
-	 * @param boolean $read_all used to indicate if all data should be returned      
+	 * @param mixed $parameters the parameters used to read the data
      */
-    abstract public function Read($fields,$condition,$read_all);
-	    
+    public function Read($parameters){}
+	
     /**
      * Used to get the value of required field
      * 

@@ -122,6 +122,11 @@ class Testing extends Base
      */
     final private function ValidateHTML($html_content)
     {
+    	/** If the html does not have the html5 <!DOCTYPE html> text then the html is inserted into a base page template */
+    	if (strpos($html_content,"<!DOCTYPE html>") === false) {
+    		$html_content       = $this->InsertHtmlToTemplate($html_content, "template");			
+    	}
+		
         $filesystem_obj         = \Framework\Utilities\UtilitiesFramework::Factory("filesystem");
         $is_browser_application = $this->GetConfig("general", "is_browser_application");
         $test_parameters        = $this->GetConfig("testing");
@@ -196,53 +201,59 @@ class Testing extends Base
      * @since 1.0.0
      */
     final public function SaveTestData()
-    {
-        /** The test data file path */
+    {        
         /** If the test data folder path is not defined then an exception is thrown */
         if (!is_dir($this->GetConfig("testing", "test_data_folder")))
             throw new \Exception("Invalid test data folder path");
-        $test_data_file_path = $this->GetConfig("testing", "test_data_folder") . DIRECTORY_SEPARATOR . $this->GetConfig('general', 'option') . "_test_data.json";
+		
+		/** The test data file path */
+        $test_data_file_path        = $this->GetConfig("testing", "test_data_folder") . DIRECTORY_SEPARATOR . $this->GetConfig('general', 'option') . "_test_data.json";
         /** The application parameters are fetched */
-        $test_data           = $this->GetConfig('general', 'parameters');
-        $test_data           = array(
-            $test_data
-        );
-        /** The test data is read from local file */
-        $current_test_data   = $this->GetComponent("filesystem")->ReadLocalFile($test_data_file_path);
-        /** Used to indicate if the test data exists in the test data file */
-        $test_data_exists    = false;
-        /**
-         * If the current test data file has contents then it is json decoded
-         * If the current test data file does not have the application parameters
-         * Then it is appended to current application parameters
-         */
-        if ($current_test_data != "") {
-            $current_test_data = json_decode($current_test_data, true);
-            /** Each of the test data elements are checked */
-            for ($count = 0; $count < count($current_test_data); $count++) {
-                /** Used to indicate that test data exists */
-                $test_data_exists  = true;
-                /** Test data element */
-                $test_data_element = $current_test_data[$count];
-                /** Each item in the test data element is checked */
-                foreach ($test_data_element as $key => $value) {
-                    /** If the test data item key does not exist or it exists but the value is not equal to the value of the current test data */
-                    if ((!isset($test_data[0][$key])) || (isset($test_data[0][$key]) && $test_data[0][$key] != $value)) {
-                        $test_data_exists = false;
-                        break;
+        $test_data                  = $this->GetConfig('general', 'parameters');
+		/** This configuration determines if the test data should be appended or not */
+        $append_test_data           = $this->GetConfig('testing', 'append_test_data');
+		/** If the test data should be appended to the test data file */
+		if ($append_test_data) {
+            $test_data                  = array($test_data);
+            /** The test data is read from local file if it exists */
+            if (is_file($test_data_file_path))
+                $current_test_data      = $this->GetComponent("filesystem")->ReadLocalFile($test_data_file_path);
+		    else
+			    $current_test_data      = array();				
+            /** Used to indicate if the test data exists in the test data file */
+            $test_data_exists           = false;
+            /**         
+		     * If the current test data file has contents then it is json decoded
+             * If the current test data file does not have the application parameters
+             * Then it is appended to current application parameters
+             */
+            if ($current_test_data != "") {
+        	    /** The current test data is json decoded */
+                $current_test_data      = json_decode($current_test_data, true);		
+                /** Each of the test data elements are checked */
+                for ($count = 0; $count < count($current_test_data); $count++) {
+                    /** Used to indicate that test data exists */
+                    $test_data_exists   = true;
+                    /** Test data element */
+                    $test_data_element  = $current_test_data[$count];
+                    /** Each item in the test data element is checked */
+                    foreach ($test_data_element as $key => $value) {
+                        /** If the test data item key does not exist or it exists but the value is not equal to the value of the current test data */
+                        if ((!isset($test_data[0][$key])) || (isset($test_data[0][$key]) && $test_data[0][$key] != $value)) {
+                            $test_data_exists = false;
+                            break;
+                        }
                     }
+                    if ($test_data_exists)
+                        break;
+                 }
+                if (!$test_data_exists) {
+                    $test_data          = array_merge($current_test_data, $test_data);
                 }
-                if ($test_data_exists)
-                    break;
-            }
-            if (!$test_data_exists) {
-                $test_data = array_merge($current_test_data, $test_data);
             }
         }
-        /**
-         * The application parameters are json encoded		 
-         */
-        $test_data = json_encode($test_data);
+        /** The application parameters are json encoded */
+        $test_data                      = json_encode($test_data);
         /** If the test data is not empty then the application parameters are written to test data file */
         if ($test_data != "") {
             $this->GetComponent("filesystem")->WriteLocalFile($test_data, $test_data_file_path);
@@ -362,25 +373,30 @@ class Testing extends Base
     final public function RunUnitTests()
     {
         /** The number of unit tests run */
-        $test_count   = 0;
+        $test_count               = 0;
         /** The results of testing all functions*/
-        $test_results = $this->GetConfig('general', 'line_break');
+        $test_results             = $this->GetConfig('general', 'line_break');
         /** The result of testing single function */
-        $test_result  = "";
+        $test_result              = "";
         /** The classes to be unit tested */
-        $test_classes = $this->GetConfig('testing', 'test_classes');
+        $test_classes             = $this->GetConfig('testing', 'test_classes');
         /** Start time for the unit tests */
-        $start_time   = time();
+        $start_time               = time();
         /** For each class all functions that start with Test are called */
         for ($count = 0; $count < count($test_classes); $count++) {
-            $object_name        = $test_classes[$count];
+            $object_name          = $test_classes[$count];
             /** The required frameworks configuration */
-            $require_frameworks = $this->GetConfig('required_frameworks');
-            $class_name         = $require_frameworks[$object_name]['class_name'];
+            $require_frameworks   = $this->GetConfig('required_frameworks');
+            $class_name           = $require_frameworks[$object_name]['class_name'];
             /** The class methods are fetched */
-            $class_methods      = get_class_methods($class_name);
+            $class_methods        = get_class_methods($class_name);
             /** The class object is fetched from application configuration */
-            $test_object        = $this->GetComponent($object_name);
+            $test_object          = $this->GetComponent($object_name);
+			/** 
+			 * The total number of asserts before calling the given function
+			 * It is used to find number of asserts by the given function
+			 */
+			$current_assert_count = 0;
             /** Each object function that starts with "Test" is called */
             for ($count1 = 0; $count1 < count($class_methods); $count1++) {
                 $class_function = $class_methods[$count1];
@@ -393,14 +409,12 @@ class Testing extends Base
                     try {
                         /** The test count is increased by 1 */
                         $test_count++;
-                        /** The current assert count */
-                        $current_assert_count = $this->valid_assert_count;
                         /** If the callback function is callable then it is called with parameters in test data file */
                         if (is_callable($testing_callback)) {
                             /** The test data */
                             $test_data           = $this->LoadTestData($class_function);
                             /** The number of test cases of the test function */
-                            $test_cases          = 0;
+                            $test_cases          = 0;						
                             /** The test function is called for each parameter in test data file */
                             for ($count2 = 0; $count2 < count($test_data); $count2++) {
                                 call_user_func_array($testing_callback, $test_data);
@@ -415,6 +429,8 @@ class Testing extends Base
                         $this->GetConfig('general', 'line_break')."Number of asserts: " . ($this->valid_assert_count - $current_assert_count).
                         $this->GetConfig('general', 'line_break').
                         $this->GetConfig('general', 'line_break');
+						/** The current assert count */
+                        $current_assert_count = $this->valid_assert_count;
                     }
                     catch (Exception $e) {
                         $errorhandler_obj = $this->GetComponent("errorhandler");
@@ -488,13 +504,14 @@ class Testing extends Base
                 }
             }
             /** The full path to the test data file */
-            $test_file_name = $option . ".json";
+            $test_file_name = $option . "_test_data.json";
             /** the testing configuration parameters */
             $testing        = $this->GetConfig('testing');
             /** If the test data folder path is not defined then an exception is thrown */
             if (!isset($testing['test_data_folder']))
                 throw new \Exception("Invalid test data folder path");
             $test_data_file_path = $this->GetConfig('testing', 'test_data_folder') . DIRECTORY_SEPARATOR . $test_file_name;
+			
             /** If the test data file does not exist then an exception is thrown */
             if (!is_file($test_data_file_path))
                 throw new \Exception("Invalid test data file path");
@@ -503,8 +520,8 @@ class Testing extends Base
             /** The test data is json decoded */
             $application_parameters = json_decode($application_parameters, true);
             /** The test data is saved to application configuration */
-            $updated_general_config = array_replace_recursive($this->GetConfig("general"), $application_parameters);
-            $this->SetConfig("general", "", $updated_general_config);
+            $updated_application_parameters = array_replace_recursive($this->GetConfig("general","parameters"), $application_parameters);			
+            $this->SetConfig("general","parameters",$updated_application_parameters);
             
             /** If a controller is defined for the current url option then it is called */
             if (isset($option_data['controller'])) {
@@ -515,7 +532,7 @@ class Testing extends Base
             /** If no controller is defined for the current url option and a template is defined then the template is rendered and then displayed in the browser */
             else if (isset($option_data['templates'])) {
                 /** The application template is rendered */
-                $template_contents = $this->GetComponent("application")->RenderApplicationTemplate($option);
+                $template_contents = $this->GetComponent("template")->Render("root", array());
                 $test_result       = $this->ValidateOutput("html", $template_contents);
             }
             /** If no controller and no template is defined for the current url option then an exception is thrown */
@@ -563,7 +580,7 @@ class Testing extends Base
     protected function LoadTestData($function_name)
     {
     	/** The test data */
-    	$test_data                          = array();
+    	$test_data                          = array(0);
     	/** The test data folder */
     	$test_data_folder                   = $this->GetConfig("testing", "test_data_folder");
 		/** If the test data folder is not defined then empty test data is returned */
@@ -589,6 +606,9 @@ class Testing extends Base
         $test_data                          = $this->GetComponent("filesystem")->ReadLocalFile($test_file_name);
         /** The test data is json decoded */
         $test_data                          = json_decode($test_data, true);
+		/** If there is no test data, then a sample value is added to the test data so the test function runs at least once */
+		$test_data                          = (count($test_data)==0)?array(0):$test_data;
+		
         /** The test data is returned */
         return $test_data;
     }
@@ -602,7 +622,7 @@ class Testing extends Base
      * 
      * @since 1.0.0
      * @param string $html the html to be added to the html5 template
-     * @param string $template_name the name of the template object to use. it must support the base_page option
+     * @param string $template_object_name the name of the template object to use. it must support the base_page template
      * 
      * @return string $page_html the html string of the complete page
      */

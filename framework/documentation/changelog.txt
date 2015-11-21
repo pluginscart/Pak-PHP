@@ -1,5 +1,11 @@
 Changelog:
 
+1.0.8 (November 23, 2015)
+    1) Added new MemcacheDataObject class. it allows using a Memcache server as a data source
+    2) Added default functions for session,http and api athentication. also added default error handler and shutdown functions
+    3) Renamed SetFieldName to SetKeyField and GetFieldName to GetKeyField in the DataObject classes
+    4) Added new function IsUrlValid to FileSystem.php file
+    
 1.0.7 (November 20, 2015)
     1) Added new DataObjectAbstraction class. it allows using different data sources from a single interface
     2) Added new DataObjectEtl class. it provides simple functions for writing etl scripts
