@@ -514,7 +514,7 @@ class Testing extends Base
 			
             /** If the test data file does not exist then an exception is thrown */
             if (!is_file($test_data_file_path))
-                throw new \Exception("Invalid test data file path");
+                throw new \Exception("Invalid test data file path for option: ".$option);
             /** The contents of the test data file are read */
             $application_parameters = $this->GetComponent('filesystem')->ReadLocalFile($test_data_file_path);
             /** The test data is json decoded */

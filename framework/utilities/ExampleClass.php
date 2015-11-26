@@ -191,7 +191,7 @@ final class ExampleClass
         /** Used to indicate if the error message should be displayed */
         $parameters['development_mode']       = true;
         /** The email address that will get the error message email */
-        $parameters['email']                  = array("address"=>"nadir@pakjiddat.com","headers"=>"From: admin@pakjiddat.com\r\nSubject: Test email");
+        $parameters['email']                  = array("email_address"=>"nadir@pakjiddat.com","email_header"=>"From: admin@pakjiddat.com\r\nSubject: Test email");
         /** The error log file name */
         $parameters['log_file_name']          = "";
         /** Custom error handling function */

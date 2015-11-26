@@ -122,29 +122,39 @@ abstract class Configuration extends Base
         $test_mode = $this->GetConfig("testing","test_mode");
         /** The list of files to be included for testing is fetched from configuration */
         if ($test_mode)
-            $test_include_files                               = $this->GetConfig('testing','include_files');
+            $include_files                               = $this->GetConfig('testing','include_files');
+		/** The list of files to be included for application requests is fetched from configuration */
         else
-            $test_include_files                               = array();		
-        /** Each file that needs to be included for the current url is included */
-        $application_url_mappings                             = $this->GetConfig("general","application_url_mappings");
-		$option                                               = $this->GetConfig("general","option");		
+            $include_files                               = $this->GetConfig('path','include_files');
+		
+        /** The application url mappings */
+        $application_url_mappings                        = $this->GetConfig("general","application_url_mappings");
+		/** The current application option */
+		$option                                          = $this->GetConfig("general","option");
+		/** 
+		 * The files to be included for the current application request are merged with the files to include for testing
+		 * Or they are merged with the files to include for all application requests
+		 */		
         if (isset($application_url_mappings[$option]) && isset($application_url_mappings[$option]['include_files']))
-            $files_to_include                                 = $application_url_mappings[$option]['include_files'];
-        else
-            $files_to_include                                 = array();
-        
-        /** The files to include from test configuration are merged with the files to include from application configuration */
-        $files_to_include = array_merge($test_include_files, $files_to_include);
-        /** All files that need to be included are included */        
-        for ($count = 0; $count < count($files_to_include); $count++) {
-            $file_name = $files_to_include[$count];
-			/** The vendor_folder_path string is prepended to the include file path */
-			$file_name = $this->GetConfig('path','vendor_folder_path') . DIRECTORY_SEPARATOR . $file_name;					
-            if (is_file($file_name))
-                require_once($file_name);
-            else
-                throw new \Exception("Invalid include file name: " . $file_name . " given for page option: " . $this->GetConfig("general","option"));
-        }
+            $include_files                               = array_merge_recursive($include_files,$application_url_mappings[$option]['include_files']);
+
+        /** All files that need to be included are included */
+        foreach ($include_files as $include_type => $include_files) {       
+            for ($count = 0; $count < count($include_files); $count++) {
+                $file_name = $include_files[$count];
+			    /** If the include type is equal to vendors then the vendor folder path is prepended to the include file path */
+			    if ($include_type == "vendors")
+			        $file_name = $this->GetConfig('path','vendor_folder_path') . DIRECTORY_SEPARATOR . $file_name;
+				/** If the include type is equal to pear then the pear folder path is prepended to the include file path */
+			    if ($include_type == "pear")
+			        $file_name = $this->GetConfig('path','pear_folder_path') . DIRECTORY_SEPARATOR . $file_name;
+				
+                if (is_file($file_name))
+                    require_once($file_name);
+                else
+                    throw new \Exception("Invalid include file name: " . $file_name . " given for page option: " . $this->GetConfig("general","option"));
+		    }
+		}
     }
     
     /**

@@ -35,9 +35,9 @@ abstract class Configuration extends \Framework\Configuration\Configuration
 		/** The configuration object for the current object is set */
     	$this->SetConfigurationObject($this);        
         /** User configuration settings are merged with default configuration settings */
-        $default_configuration = new DefaultConfiguration();
+        $default_configuration          = new DefaultConfiguration();
 		/** The default configuration is merged with user configuration and the result is returned */
-        $this->configuration   = $default_configuration->GetUpdatedConfiguration($this->user_configuration);		
+        $this->configuration            = $default_configuration->GetUpdatedConfiguration($this->user_configuration);		
         /** The error handler object is created */
         $this->InitializeObject("errorhandler");		
         /** All required classes are included */
@@ -51,38 +51,53 @@ abstract class Configuration extends \Framework\Configuration\Configuration
 		$this->GetComponent("application")->WP_AddAction( 'admin_enqueue_scripts', $this->GetComponent("application"), 'WP_AdminEnqueueStyles' );
 		/** The javascript files for admin pages are registered */
 		$this->GetComponent("application")->WP_AddAction( 'admin_enqueue_scripts', $this->GetComponent("application"), 'WP_AdminEnqueueScripts' );
-		/** The dashboard setup function is called. If the user has specified dashboards in the application configuration, then this function will register the dashboards */
-		$this->GetComponent("application")->WP_AddAction( 'wp_dashboard_setup', $this->GetComponent("application"), 'WP_DashboardSetupHooks' );
-		/** The function that is run when the Admin Head Hook is called by WordPress */
-		$this->GetComponent("application")->WP_AddAction( 'admin_head', $this->GetComponent("application"), 'WP_AdminHeadHooks' );	
 		/** The javascript files for public pages are registered */
 		$this->GetComponent("application")->WP_AddAction( 'wp_enqueue_scripts', $this->GetComponent("application"), 'WP_EnqueueScripts' );
 		/** The css files for public pages are registered */
 		$this->GetComponent("application")->WP_AddAction( 'wp_enqueue_scripts', $this->GetComponent("application"), 'WP_EnqueueStyles' );
 		/** If the plugin should have a settings page and the admin user is logged in then the admin page is initialized and the settings page is created */
-		if(is_admin()&&static::GetConfig('wordpress','use_settings')) {
+		if(is_admin()&&$this->GetConfig('wordpress','use_settings')) {
 		    $this->GetComponent("application")->WP_AddAction( 'admin_menu', $this->GetComponent("application"), 'WP_DisplaySettings' );
 			$this->GetComponent("application")->WP_AddAction( 'admin_init', $this->GetComponent("application"), 'WP_InitAdmin' );
 		}
-		/** All the custom actions are registered */
-		for($count=0; $count<count(static::GetConfig('wordpress','custom_actions')); $count++) {
-		    /** The custom actions */
-			$custom_actions                                                                                      = $this->GetConfig('wordpress','custom_actions');
-			/** A custom action */
-			$custom_action                                                                                       = $custom_actions[$count];
-			/** The name of the custom action */
-			$name                                                                                                = $custom_action['name'];
-			/** The callback of the custom action */
-			$callback                                                                                            = $custom_action['callback'];
-			$custom_callback                                                                                     = array($this->GetComponent($callback[0]),$callback[1]);
-			/** If the custom callback is not callable then an exception is thrown */
-			if(!is_callable($custom_callback))throw new \Exception("Invalid custom callback function given. Details: ".var_export($callback, true));
-			/** The custom action is registered */
-			$this->GetComponent("application")->WP_AddAction(
-			    $custom_action['name'],
-				$this->GetComponent($callback[0]),
-				$callback[1]
-			);
-		}
+		/** The custom actions */
+	    $custom_actions                                                                                          = $this->GetConfig('wordpress','custom_actions');
+		/** The custom filters */
+	    $custom_filters                                                                                          = $this->GetConfig('wordpress','custom_filters');
+		/** The custom actions and filters */
+	    $custom_actions_filters                                                                                  = array("actions"=>$custom_actions,"filters"=>$custom_filters);		
+		/** All the custom actions and filters are registered */
+		foreach ($custom_actions_filters as $hook_name => $hooks) {
+		    for($count=0; $count<count($hooks); $count++) {		    
+			    /** A custom action or filter */
+			    $custom_hook                                                                                     = $custom_actions_filters[$hook_name][$count];
+			    /** The name of the custom hook */
+			    $name                                                                                            = $custom_hook['name'];
+			    /** The callback of the custom hook */
+			    $callback                                                                                        = $custom_hook['callback'];
+			    /** The object used in callback function is fetched */
+			    $custom_callback                                                                                 = array($this->GetComponent($callback[0]),$callback[1]);
+			    /** If the custom callback is not callable then an exception is thrown */
+			    if(!is_callable($custom_callback))throw new \Exception("Invalid custom callback function given. Details: ".var_export($callback, true));
+				/** If the current hook type is action then the custom action is registered */
+				if ($hook_name == "actions") {
+			        /** The custom action is registered */
+			        $this->GetComponent("application")->WP_AddAction(
+			            $custom_hook['name'],
+				        $custom_callback[0],
+				        $custom_callback[1]
+			        );
+			    }
+				else if ($hook_name == "filters") {
+			        /** The custom filter is registered */
+			        $this->GetComponent("application")->WP_AddFilter(
+			            $custom_hook['name'],
+				        $custom_callback[0],
+				        $custom_callback[1]
+			        );
+			    }
+            }
+        }
+        
 	}
 }

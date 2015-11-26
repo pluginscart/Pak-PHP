@@ -22,7 +22,7 @@ class Application extends \Framework\Application\Application
 	 *
 	 * This function is called when the plugin is activated
 	 *
-	 * @since    1.0.0
+	 * @since 1.0.0
 	 */
 	public static function WP_Activate() {
 
@@ -33,7 +33,7 @@ class Application extends \Framework\Application\Application
 	 *
 	 * This function is called when the plugin is deactivated
 	 *
-	 * @since    1.0.0
+	 * @since 1.0.0
 	 */
 	public static function WP_Deactivate() {
 
@@ -52,16 +52,15 @@ class Application extends \Framework\Application\Application
     public function WP_AddAction($hook, $component, $callback, $priority = 10, $accepted_args = 1)
     {
     	 /** The WordPress callback function is defined */
-    	 $wordpress_callback=array($component,$callback);
+    	 $wordpress_callback                 = array($component,$callback);
     	 /** If the function is not callable then an exception is thrown */
          if (!is_callable($wordpress_callback))throw new \Exception("Function : " . $callback . " was not found");
          /** The wordpress configuration is fetched */
-		 $wordpress_configuration=$this->GetConfig("wordpress");
-		 $actions=$wordpress_configuration['actions'];         
+		 $wordpress_configuration            = $this->GetConfig("wordpress");
+		 $actions                            = $wordpress_configuration['actions'];         
 		 /** The new action is added to the WordPress actions array */
-         $actions = $this->WP_Add($actions, $hook, $component, $callback, $priority, $accepted_args);
-		 /** The updated actions data is saved to the application configuration */
-		 $wordpress_configuration['actions']=$actions;
+         $actions                            = $this->WP_Add($actions, $hook, $component, $callback, $priority, $accepted_args);
+		 /** The updated actions data is saved to the application configuration */		 
 		 $this->SetConfig("wordpress", "actions", $actions);
     }
     
@@ -78,17 +77,17 @@ class Application extends \Framework\Application\Application
     public function WP_AddFilter($hook, $component, $callback, $priority = 10, $accepted_args = 1)
     {
     	/** The WordPress callback function is defined */
-    	 $wordpress_callback=array($component,$callback);
+    	 $wordpress_callback                  = array($component,$callback);
     	 /** If the function is not callable then an exception is thrown */
-         if (!is_callable($wordpress_callback))throw new \Exception("Function : " . $callback . " was not found");
+         if (!is_callable($wordpress_callback))
+             throw new \Exception("Function : " . $callback . " was not found");
 
 		/** The wordpress configuration is fetched */
-		$wordpress_configuration=$this->GetConfig("wordpress");
-		$filters=$wordpress_configuration['filters'];         
+		$wordpress_configuration              = $this->GetConfig("wordpress");
+		$filters                              = $wordpress_configuration['filters'];         
 		/** The new filter is added to the WordPress filters array */
-        $filters = $this->Add($filters, $hook, $component, $callback, $priority, $accepted_args);
+        $filters                              = $this->WP_Add($filters, $hook, $component, $callback, $priority, $accepted_args);
 		/** The updated actions data is saved to the application configuration */
-		$wordpress_configuration['filters']=$filters;
 		$this->SetConfig("wordpress", "filters", $filters);
     }
     
@@ -122,7 +121,7 @@ class Application extends \Framework\Application\Application
 	/**
 	 * Load the plugin text domain for translation.
 	 *
-	 * @since    1.0.0
+	 * @since 1.0.0
 	 */
 	public function WP_LoadPluginTextDomain() {
 		
@@ -137,7 +136,7 @@ class Application extends \Framework\Application\Application
 	/**
 	 * The css files for admin pages are registered
 	 *
-	 * @since    1.0.0
+	 * @since 1.0.0
 	 */
 	public function WP_AdminEnqueueStyles() {
 		$this->WP_Enqueue("admin_styles",false);
@@ -146,34 +145,16 @@ class Application extends \Framework\Application\Application
 	/**
 	 * The javascript files for admin pages are registered
 	 *
-	 * @since    1.0.0
+	 * @since 1.0.0
 	 */
 	public function WP_AdminEnqueueScripts() {
 		$this->WP_Enqueue("admin_scripts",true);
-	} 
-	
-	/**
-	 * The dashboard setup function is called. If the user has specified dashboards in the application configuration, then this function will register the dashboards
-	 *
-	 * @since    1.0.0
-	 */
-	public function WP_DashboardSetupHooks() {
-		
-	} 
-	
-	/**
-	 * The function that is run when the Admin Head Hook is called by WordPress
-	 *
-	 * @since    1.0.0
-	 */
-	public function WP_AdminHeadHooks() {
-					
 	}
 	
 	/**
 	 * The javascript files for public pages are registered
 	 *
-	 * @since    1.0.0
+	 * @since 1.0.0
 	 */
 	public function WP_EnqueueScripts() {
 		$this->WP_Enqueue("public_scripts",true);
@@ -182,7 +163,7 @@ class Application extends \Framework\Application\Application
 	/**
 	 * The css files for public pages are registered
 	 *
-	 * @since    1.0.0
+	 * @since 1.0.0
 	 */
 	public function WP_EnqueueStyles() {			
 		$this->WP_Enqueue("public_styles",false);
@@ -191,15 +172,15 @@ class Application extends \Framework\Application\Application
 	/**
 	 * The WordPress settings menu is created
 	 *
-	 * @since    1.0.0
+	 * @since 1.0.0
 	 */
 	public function WP_DisplaySettings() {
 		/** The wordpress configuration is fetched */
-		$wordpress_configuration=$this->GetConfig("wordpress");
+		$wordpress_configuration                                       = $this->GetConfig("wordpress");
 		/** The object used to set the settings page content is fetched */
-		$object_name=$wordpress_configuration['settings_page_content_callback'][0];
-		$object=$this->GetComponent($object_name);
-		$wordpress_configuration['settings_page_content_callback'][0]=$object;
+		$object_name                                                   = $wordpress_configuration['settings_page_content_callback'][0];
+		$object                                                        = $this->GetComponent($object_name);
+		$wordpress_configuration['settings_page_content_callback'][0]  = $object;
 		/** If the settings page callback is not callable then an exception is thrown */
 		if(!is_callable($wordpress_configuration['settings_page_content_callback']))throw new \Exception("Invalid callback function defined for settings page");				
 		/** The settings menu is created */			
@@ -215,17 +196,18 @@ class Application extends \Framework\Application\Application
 	/**
 	 * The WordPress admin page is initialized
 	 *
-	 * @since    1.0.0
+	 * @since 1.0.0
 	 */
 	public function WP_InitAdmin() {		
 		/** The wordpress configuration is fetched */
-		$wordpress_configuration=$this->GetConfig("wordpress");
+		$wordpress_configuration                                        = $this->GetConfig("wordpress");
 		/** The object used to set the settings page content is fetched */
-		$object_name=$wordpress_configuration['admin_init_callback'][0];
-		$object=$this->GetComponent($object_name);
-		$wordpress_configuration['admin_init_callback'][0]=$object;		
+		$object_name                                                    = $wordpress_configuration['admin_init_callback'][0];
+		$object                                                         = $this->GetComponent($object_name);
+		$wordpress_configuration['admin_init_callback'][0]              = $object;		
 		/** If the init admin page callback is not callable then an exception is thrown */
-		if(!is_callable($wordpress_configuration['admin_init_callback']))throw new \Exception("Invalid callback function defined for initializing admin page");
+		if(!is_callable($wordpress_configuration['admin_init_callback']))
+		    throw new \Exception("Invalid callback function defined for initializing admin page");
 		/** If the init admin page callback is callable then it is called */		
 		call_user_func($wordpress_configuration['admin_init_callback']);
 	}
@@ -233,14 +215,14 @@ class Application extends \Framework\Application\Application
 	/**
 	 * The given wordpress scripts/styles are enqueued
 	 *
-	 * @since    1.0.0
+	 * @since 1.0.0
 	 * @param $configuration_name the name of the application configuration that contains the scripts/styles to enqueue
 	 * @param $is_script used to indicate if the given application configuration is a script or style
 	 */
 	public function WP_Enqueue($configuration_name,$is_script) {		
 		/** The wordpress configuration is fetched */
 		$wordpress_configuration=$this->GetConfig("wordpress");
-		for($count=0;$count<count($wordpress_configuration[$configuration_name]);$count++) {
+		for($count = 0; $count < count($wordpress_configuration[$configuration_name]); $count++) {
             	 
             if(!$is_script)wp_enqueue_style( 
             $wordpress_configuration[$configuration_name][$count]['name'], 
@@ -271,7 +253,7 @@ class Application extends \Framework\Application\Application
 	 *
 	 * It fetches the plugin options
 	 * 
-	 * @since    1.0.0
+	 * @since 1.0.0
 	 * @param string $option_id id of the option to fetch
 	 * 
 	 * @return array $options the plugin options
@@ -291,7 +273,7 @@ class Application extends \Framework\Application\Application
 	 *
 	 * It adds the given dashboard widget
 	 * 
-	 * @since    1.0.0
+	 * @since 1.0.0
 	 * @param string $option_id id of the option to fetch
 	 * 
 	 * @return array $options the plugin options
@@ -306,7 +288,7 @@ class Application extends \Framework\Application\Application
 	 * It fetches the options id
 	 * The options id is the option name with plugin prefix as the prefix and user id as the suffix
 	 * 
-	 * @since    1.0.0	 
+	 * @since 1.0.0	 
 	 * @param string $option_name the name of the option
 	 * 
 	 * @return string $option_id the id of the option
@@ -324,11 +306,125 @@ class Application extends \Framework\Application\Application
 	}
 	
 	/**
-	 * The plugin options are saved
+	 * Used to add a new custom taxonomy type
 	 *
-	 * It saves the plugin options
+	 * It adds a new custom taxonomy type using the given parameters
+	 * If some parameters are not given. e.g the labels and args parameters are not given
+	 * Then they are auto generated
+	 * The user given parameters are merged with the default parameters
 	 * 
-	 * @since    1.0.0
+	 * @since 1.0.0
+	 * @param string $name the full name of the custom taxonomy
+	 * @param string $singular_name the singular name for the custom taxonomy
+	 * @param string $post_type the post type or custom post type that will be used as object type of the taxonomy
+	 * @param array $labels the labels for the new custom taxonomy
+	 * @param array $args the parameters for the new custom taxonomy
+	 */
+	public function AddNewCustomTaxonomy($name,$singular_name,$labels="",$args="") {
+		
+		/** The default labels for new custom taxonomy */		
+	    $default_labels                = array(
+												'name'                       => _x($name,$singular_name),
+												'singular_name'              => _x($singular_name,$singular_name),
+												'search_items'               => __('Search '.$singular_name),
+												'popular_items'              => __('Popular '.$singular_name),
+												'all_items'                  => __('All '.$singular_name),
+												'parent_item'                => null,
+												'parent_item_colon'          => null,
+												'edit_item'                  => __('Edit '.$singular_name),
+												'update_item'                => __('Update '.$singular_name),
+												'add_new_item'               => __('Add New '.$singular_name),
+												'new_item_name'              => __('New '.$singular_name.' Name'),
+												'separate_items_with_commas' => __('Separate '.$name.' with commas' ),
+												'add_or_remove_items'        => __('Add or remove '.$name),
+												'choose_from_most_used'      => __('Choose from the most used '.$name),
+												'not_found'                  => __('No '.$name.' found.'),
+												'menu_name'                  => __($name),
+		);
+		/** The default arguments for the new custom taxonomy */
+		$default_args                  = array(
+												'hierarchical'          => false,
+												'labels'                => $labels,
+												'show_ui'               => true,
+												'show_admin_column'     => true,
+												'update_count_callback' => '_update_post_term_count',
+												'query_var'             => true,
+												'rewrite'               => array( 'slug' => strtolower($singular_name)),
+		);
+		/** The default labels are merged with user given labels */
+		$default_labels                = array_merge($default_labels,$labels);
+		/** The default arguments are merged with user given arguments */
+		$default_args                  = array_merge($default_args,$args);
+		/** The labels are added to the arguments */
+		$args['labels'] = $labels;
+		/** The new custom taxonomy is registered */
+		register_taxonomy(strtolower($singular_name),$post_type, $args );
+	}
+
+	/**
+	 * Used to add a new custom post type
+	 *
+	 * It adds a new custom post type using the given parameters
+	 * If some parameters are not given. e.g the labels and args parameters are not given
+	 * Then they are auto generated
+	 * The user given parameters are merged with the default parameters
+	 * 
+	 * @since 1.0.0
+	 * @param string $name the full name of the custom post type
+	 * @param string $singular_name the singular name for the custom post type
+	 * @param array $labels the labels for the new custom post type
+	 * @param array $args the parameters for the new custom post type
+	 */
+	public function AddNewCustomPostType($name,$singular_name,$labels="",$args="") {
+		
+		/** The default labels for new custom post type */		
+	    $default_labels                = array(
+											'name'               => _x($name,$name,$plugin_text_domain),
+											'singular_name'      => _x($singular_name,$name,$plugin_text_domain),
+											'menu_name'          => _x($name,$name,$plugin_text_domain),
+											'name_admin_bar'     => _x($singular_name,$name,$plugin_text_domain),
+											'add_new'            => _x('Add New',$name,$plugin_text_domain),
+											'add_new_item'       => __('Add New '.$singular_name,$plugin_text_domain),
+											'new_item'           => __('New '.$singular_name,$plugin_text_domain),
+											'edit_item'          => __('Edit '.$singular_name,$plugin_text_domain),
+											'view_item'          => __('View '.$singular_name,$plugin_text_domain),
+											'all_items'          => __('All '.$name,$plugin_text_domain),
+											'search_items'       => __('Search '.$name,$plugin_text_domain),
+											'parent_item_colon'  => __('Parent :'.$name,$plugin_text_domain),
+											'not_found'          => __('No '.$name.' found.',$plugin_text_domain),
+											'not_found_in_trash' => __('No '.$name.' found in Trash.',$plugin_text_domain)
+		 );
+		/** The default arguments for the new custom post type */
+		$default_args                  = array(
+											'public'             => true,
+											'publicly_queryable' => true,
+											'show_ui'            => true,
+											'show_in_menu'       => true,
+											'query_var'          => true,
+											'rewrite'            => array( 'slug' => strtolower($singular_name)),
+											'capability_type'    => 'post',
+											'has_archive'        => false,
+											'hierarchical'       => false,
+											'menu_position'      => null,
+											'supports'           => array( 'title', 'custom-fields')
+        );
+		/** The default labels are merged with user given labels */
+		$default_labels                = array_merge($default_labels,$labels);
+		/** The default arguments are merged with user given arguments */
+		$default_args                  = array_merge($default_args,$args);
+		/** The labels are added to the arguments */
+		$args['labels'] = $labels;
+		/** The new custom post type is registered */
+		register_post_type($name,$args);
+	}
+	
+	/**
+	 * Used to add a cutom post type
+	 *
+	 * It adds a new custom post type
+	 * It takes the given parameters and creates a new post type
+	 * 
+	 * @since 1.0.0
 	 * @param array $options the plugin options
 	 * @param string $option_id id of the option to save
 	 */
@@ -340,7 +436,7 @@ class Application extends \Framework\Application\Application
     /**
      * Register the filters and actions with WordPress.
      *
-     * @since    1.0.0
+     * @since 1.0.0
 	 * 
 	 * @return boolean $output used to indicate that application has no output
 	 * all output is sent by wordpress actions
@@ -348,14 +444,14 @@ class Application extends \Framework\Application\Application
     public function Main()
     {
     	/** The wordpress configuration is fetched */
-		$wordpress_configuration=$this->GetConfig("wordpress");		
+		$wordpress_configuration    = $this->GetConfig("wordpress");		
     	/** Used to register the function that will be called when the plugin is activated */
 		\register_activation_hook( $this->GetConfig("wordpress","plugin_file_path"), array( 'Application', 'WP_Activate' ) );
 		/** Used to register the function that will be called when the plugin is deactivated */
 		\register_activation_hook( $this->GetConfig("wordpress","plugin_file_path"), array( 'Application', 'WP_Deactivate' ) );
 				
-		$filters=$wordpress_configuration['filters'];         
-		$actions=$wordpress_configuration['actions'];
+		$filters                    = $wordpress_configuration['filters'];         
+		$actions                    = $wordpress_configuration['actions'];
 		/** The filters are registered with WordPress */			
         foreach ($filters as $hook) {
             \add_filter($hook['hook'], array($hook['component'],$hook['callback']), $hook['priority'], $hook['accepted_args']);

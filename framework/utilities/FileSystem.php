@@ -228,21 +228,21 @@ final class FileSystem
      * 			  
      * @return string $file_contents. the contents of the file
      */
-    function GetFileContent($url, $method = "get", $parameters = "", $request_headers = "")
+    function GetFileContent($url, $method = "GET", $parameters = "", $request_headers = "")
     {
-        if ($method == "get")
+        if ($method == "GET")
             $file_contents = file_get_contents($url);
 		else {
 		    $count = 0;
 		    $ch = curl_init();
 		            
-		    if (is_array($parameters)) {
+		    if ($parameters != "") {
 		        curl_setopt($ch, CURLOPT_HEADER, 0);
 		        if (is_array($request_headers))
 		            curl_setopt($ch, CURLOPT_HTTPHEADER, $request_headers);
-		            curl_setopt($ch, CURLOPT_POST, count($parameters));
-		            curl_setopt($ch, CURLOPT_POSTFIELDS, $parameters);
-		        }
+		        curl_setopt($ch, CURLOPT_POST, true);
+		        curl_setopt($ch, CURLOPT_POSTFIELDS, $parameters);
+		    }
 		            
 		    curl_setopt($ch, CURLOPT_URL, $url);
 		    curl_setopt($ch, CURLOPT_HEADER, 0);

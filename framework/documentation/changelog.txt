@@ -1,14 +1,21 @@
 Changelog:
 
+1.0.9 (November 26, 2015)
+    1) Added check for attachment files to SendEmail function in Email.php file
+    2) Added pear path to DefaultConfiguration.php
+    3) Added the functions AddNewCustomTaxonomy and AddNewCustomPostType to WordPress Application.php file. The functions allow adding new custom post types and custom taxonomy types  
+    4) Added the configuration option [wordpress][custom_filters] to WordPress DefaultConfiguration.php file
+    5) Added error reporting and timezone default configuration options
+    
 1.0.8 (November 23, 2015)
-    1) Added new MemcacheDataObject class. it allows using a Memcache server as a data source
-    2) Added default functions for session,http and api athentication. also added default error handler and shutdown functions
+    1) Added new MemcacheDataObject class. It allows using a Memcache server as a data source
+    2) Added default functions for session,http and api athentication. Also added default error handler and shutdown functions
     3) Renamed SetFieldName to SetKeyField and GetFieldName to GetKeyField in the DataObject classes
     4) Added new function IsUrlValid to FileSystem.php file
     
 1.0.7 (November 20, 2015)
-    1) Added new DataObjectAbstraction class. it allows using different data sources from a single interface
-    2) Added new DataObjectEtl class. it provides simple functions for writing etl scripts
+    1) Added new DataObjectAbstraction class. It allows using different data sources from a single interface
+    2) Added new DataObjectEtl class. It provides simple functions for writing etl scripts
 
 1.0.6 (October 19, 2015)
     1) Renamed application configuration variables
@@ -19,15 +26,15 @@ Changelog:
 1.0.5 (October 6, 2015)
     1) Renamed frontcontroller namespace to webapplication
     2) Added presentation object to UiObject class
-    3) Created a new namespace called templates. added basicsite template to the template namespace
-    4) Added HtmlTablePresentation abstract class to the basicsite template. it can be used as presentation object in applications that work with tables    
+    3) Created a new namespace called templates. Added basicsite template to the template namespace
+    4) Added HtmlTablePresentation abstract class to the basicsite template. It can be used as presentation object in applications that work with tables    
     
 1.0.4 (October 4, 2015)
     1) Updated ErrorHandling.php file so it displays error messages using html template files
     2) Organized configuration options into categories
     
 1.0.3 (October 1, 2015)
-    1) Renamed browser application folder to frontendcontroller. moved presentation, testing and template files to frontendcontroller folder
+    1) Renamed browser application folder to frontendcontroller. Moved presentation, testing and template files to frontendcontroller folder
     2) Created new framework module called api
     3) Added new utilities class file Template.php
     4) Added new framework module called wordpress
@@ -36,7 +43,7 @@ Changelog:
 	1) Changed file system structure so all fully qualified class names follow the file system structure
 	2) Updated namespaces of all the classes
 	3) Updated framework example application
-	4) Removed template and vendors folders. renamed include folder to framework
+	4) Removed template and vendors folders. Renamed include folder to framework
 	5) Updated file system structure so the example application, framework folder, index.php and autoload.php are at the base of the application folder at the same folder level.
 	
 1.0.1 (September 21, 2015)

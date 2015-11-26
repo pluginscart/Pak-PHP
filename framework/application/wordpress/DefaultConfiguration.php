@@ -59,6 +59,10 @@ class DefaultConfiguration extends \Framework\Configuration\DefaultConfiguration
 		$configuration['wordpress']['settings_page_content_callback']                           = array();
 		/** The callback used to initialize the admin page. This callback can be used to register fields using the WordPress settings api */
 		$configuration['wordpress']['admin_init_callback']                                      = array();
+		/** The custom actions. e.g ajax function calls */		
+        $configuration['wordpress']['custom_actions']                                           = array();
+		/** The custom filters */		
+        $configuration['wordpress']['custom_filters']                                           = array();
 		
 		/** The name of the WordPress plugin folder is determined */
 		$temp_arr                                                                               = explode(DIRECTORY_SEPARATOR,$configuration['path']['base_path']);

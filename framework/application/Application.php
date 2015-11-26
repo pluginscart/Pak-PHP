@@ -249,7 +249,7 @@ abstract class Application extends Base
 		        $response                    = $this->GetComponent("encryption")->DecryptText($response);
 		    }
 		    /** The api response is json decoded */		
-		    $response                        = json_decode($response,true);		
+		    $response                        = json_decode($response,true);				
 		    /** If the server response contains an error then an exception is thrown */
 		    if($response['result']!='success')
 		        throw new \Exception("Invalid api response was returned. API resonse: ".var_export($response,true).". Parameters: ".var_export($parameters,true));
@@ -359,9 +359,9 @@ abstract class Application extends Base
 		/** The application output */
 		$response                                         = $configuration->RunApplication();		
 		/** If the application type is api then success string is added to response */
-		if (isset($parameters['application_type']) && $parameters['application_type'] == "api") {			
+		if (isset($parameters['request_type']) && $parameters['request_type'] == "api") {			
 		    /** Success string is added to response */
-		    $response                                     = array("result"=>"success","text"=>$response);			
+		    $response                                     = array("result"=>"success","message"=>$response);			
 		    /** The response is json encoded */			
 		    $response                                     = json_encode($response);
 		}

@@ -157,7 +157,7 @@ class DefaultConfiguration extends Base
         $configuration['testing']['test_mode']         = false;
         /** Test type indicates the type of application testing. i.e script, functional or unit */
         $configuration['testing']['test_type']         = 'unit';
-        /** Test include files indicates the files that need to be including during testin */
+        /** Indicates the files that need to be included during testing */
         $configuration['testing']['include_files']     = array();
         /** The application test class */
         $configuration['testing']['test_class']        = "";
@@ -272,7 +272,11 @@ class DefaultConfiguration extends Base
         $configuration['path']['tmp_folder_path']           = $configuration['path']['application_path'] . DIRECTORY_SEPARATOR . 'tmp';
         /** The path to the vendor folder */
         $configuration['path']['vendor_folder_path']        = $configuration['path']['application_path'] . DIRECTORY_SEPARATOR . 'vendors';
-					
+		/** The path to the pear folder */
+        $configuration['path']['pear_folder_path']          = DIRECTORY_SEPARATOR . "usr" . DIRECTORY_SEPARATOR . "share" . DIRECTORY_SEPARATOR . "pear";		
+		/** Indicates the files that need to be included for all application requests */
+        $configuration['path']['include_files']             = array();
+		
 		/** The folder path to the application's vendors folder */
         if (!isset($user_configuration['path']['vendor_folder_path']))
             $user_configuration['path']['vendor_folder_path'] = $configuration['path']['application_path'] . DIRECTORY_SEPARATOR . 'vendors';
@@ -381,8 +385,14 @@ class DefaultConfiguration extends Base
      */
     private function InitializePhpSettings($user_configuration)
     {
-        error_reporting(E_ALL);
-        date_default_timezone_set('Asia/Karachi');
+		/** The time zone used by the application */
+		$default_timezone          = (isset($user_configuration['general']['timezone']))?$user_configuration['general']['timezone']:'Asia/Karachi';
+		/** The error reporting used by the application */
+		$default_error_reporting   = (isset($user_configuration['general']['error_reporting']))?$user_configuration['general']['error_reporting']:E_ALL;
+		/** All error reporting value is set */    	
+        error_reporting($default_error_reporting);
+		/** The default time zone is set */
+        date_default_timezone_set($default_timezone);
         if ($user_configuration['general']['development_mode']) {
             ini_set('display_errors', E_ALL);
             ini_set('display_startup_errors', true);
