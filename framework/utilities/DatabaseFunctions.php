@@ -104,11 +104,12 @@ final class DatabaseFunctions
      * 
      * @since 1.0.0     
      * @param array $parameters database server connection information contains following keys:
-     * host=> database server host
-     * user=> database user
-     * password=> database
-     * database=> name of the database
-     * debug=> 0 implies no debugging. 1 implies logging sql queries. 2 implies logging query execution time		
+     * host => database server host
+     * user => database user
+     * password => database
+     * database => name of the database
+     * debug => 0 implies no debugging. 1 implies logging sql queries. 2 implies logging query execution time
+	 * charset => the charset for database connection
      * @throws Exception object if database connection could not be established or an error occured
      */
     function __construct()
@@ -138,9 +139,9 @@ final class DatabaseFunctions
         $this->debug                  = (isset($parameters['debug'])) ? $parameters['debug'] : 0; // 0=silent, 1=normal, 2=debug, 3=trace       	
         // Try to connect when instance is created
         if ($parameters['host'] !== '') {
-            $this->id = $this->internal_df_connect($parameters['host'], $parameters['user'], $parameters['password'], $parameters['database']);
+            $this->id = $this->internal_df_connect($parameters['host'], $parameters['user'], $parameters['password'], $parameters['database'], $parameters['charset']);
             if (!$this->id)
-                throw new \Exception("Error in establishing database server connection. Details: " . mysqli_error($this->id), 80);
+                throw new \Exception("Error in establishing database server connection. Details: " . mysqli_error($this->id));
         }        
     }
 
@@ -157,18 +158,19 @@ final class DatabaseFunctions
      * @param string $db database name
      * @param string $debug used to allow debugging of the sql queries
      * @param string $type type of database query. u=>update,s=>select,i=>insert,d=>delete
+	 * @param string $charset the charset for the database connection 
      * @throws Exception object if database connection could not be established or an error occured
      */
-    public function DatabaseFunctionsDirect($srv = '', $uid = '', $pwd = '', $db = '', $debug = 0, $type = 's')
+    public function DatabaseFunctionsDirect($srv = '', $uid = '', $pwd = '', $db = '', $debug = 0, $type = 's', $charset = 'utf8')
     {        
         $this->id = 0;
         $this->df_initialize();
         $this->debug = $debug;
         // Try to connect when instance is created
         if ($srv !== '') {
-            $this->id = $this->internal_df_connect($srv, $uid, $pwd, $db);
+            $this->id = $this->internal_df_connect($srv, $uid, $pwd, $db, $charset);
             if (!$this->id)
-                throw new \Exception("Error in establishing database server connection. Details: " . mysqli_error($this->id), 80);
+                throw new \Exception("Error in establishing database server connection. Details: " . mysqli_error($this->id));
         }       
     }
 
@@ -183,18 +185,19 @@ final class DatabaseFunctions
      * @param string $pwd database password
      * @param string $db database name
      * @param string $debug used to allow debugging of the sql queries
-     * @param string $type type of database query. u=>update,s=>select,i=>insert,d=>delete     
+     * @param string $type type of database query. u=>update,s=>select,i=>insert,d=>delete
+	 * @param string $charset the charset for the database connection
      * @throws Exception object if database connection could not be established or an error occured
 	 * 
 	 * @return boolean $is_valid returns true if database connection succeeded. throws exeption otherwise 
      */
-    public function df_connect($srv, $uid, $pwd, $db, $debug = 0, $type = 's')
+    public function df_connect($srv, $uid, $pwd, $db, $debug = 0, $type = 's', $charset = 'utf8')
     {        
         $this->query_type = $type;
         $this->debug      = $debug;
-        $this->id         = $this->internal_df_connect($srv, $uid, $pwd, $db);
+        $this->id         = $this->internal_df_connect($srv, $uid, $pwd, $db, $charset);
         if ($this->id === false)
-            throw new \Exception("Error in establishing database server connection. Details: " . mysqli_error($this->id), 80, $e);
+            throw new \Exception("Error in establishing database server connection. Details: " . mysqli_error($this->id), $e);
         return true;       
     }
 
@@ -543,11 +546,11 @@ final class DatabaseFunctions
             if ($this->where_clause != "")
                 $this->query .= " WHERE " . $this->where_clause;
             
-            if ($this->sort_by != "" && $this->order_by != "")
-                $this->query .= " ORDER BY " . $this->sort_by . " " . $this->order_by;
-            
 			if ($this->group_by != "")
 			    $this->query .= " GROUP BY " . $this->group_by;
+						
+            if ($this->sort_by != "" && $this->order_by != "")
+                $this->query .= " ORDER BY " . $this->sort_by . " " . $this->order_by;           
 			
             if ($this->start < $this->end)
                 $this->query .= " LIMIT " . $this->start . "," . $this->end;
@@ -584,7 +587,7 @@ final class DatabaseFunctions
             if ($this->where_clause != "")
                 $this->query .= " WHERE " . $this->where_clause;
         } else
-            throw new \Exception("Invalid query type given", 20);
+            throw new \Exception("Invalid query type given");
         
         return $this->query;        
     }
@@ -710,7 +713,7 @@ final class DatabaseFunctions
     public function df_commit()
     {        
         if (!mysqli_commit($this->id))
-            throw new \Exception("Error in commiting transaction. Details: " . mysqli_error($this->id), 80, $e);        
+            throw new \Exception("Error in commiting transaction. Details: " . mysqli_error($this->id), $e);        
     }
 
     /**
@@ -728,7 +731,7 @@ final class DatabaseFunctions
     public function df_rollback()
     {        
         if (!mysqli_rollback($this->id))
-            throw new \Exception("Error in rolling back transaction. Details: " . mysqli_error($this->id), 80, $e);        
+            throw new \Exception("Error in rolling back transaction. Details: " . mysqli_error($this->id), $e);        
     }
 
     /**
@@ -747,7 +750,7 @@ final class DatabaseFunctions
     public function df_toggle_autocommit($is_enable)
     {        
         if (!mysqli_autocommit($this->id, $is_enable))
-            throw new \Exception("Error in changing autocommit value. Details: " . mysqli_error($this->id), 80, $e);        
+            throw new \Exception("Error in changing autocommit value. Details: " . mysqli_error($this->id), $e);        
     }
 
     /**
@@ -758,20 +761,21 @@ final class DatabaseFunctions
      * @param string $srv database server host name
      * @param string $uid database user name
      * @param string $pwd database password
-     * @param string $db database name		 
+     * @param string $db database name
+	 * @param string $charset database connection charset	 		 
      * @throws Exception object if an error occured
      * 
      * @return boolean $is_valid returns true if database connection succeeded. throws exeption otherwise 
      */
-    private function internal_df_connect($srv, $uid, $pwd, $db)
+    private function internal_df_connect($srv, $uid, $pwd, $db, $charset)
     {        
         $Id = @mysqli_connect($srv, $uid, $pwd);
         if (($Id !== false) and ($db !== '')) {
             if (!@mysqli_select_db($Id, $db))
-                throw new \Exception("Error in establishing database server connection. Details: " . mysqli_error($Id), 20);
+                throw new \Exception("Error in establishing database server connection. Details: " . mysqli_error($Id));
         }
 		
-		mysqli_set_charset($Id,'utf8');
+		mysqli_set_charset($Id,$charset);
 		
         return $Id;        
     }
@@ -823,7 +827,7 @@ final class DatabaseFunctions
         if ($rsid)
             return $rsid;
         else
-            throw new \Exception("Error in executing mysql query. Details: " . mysqli_error($this->id) . " sql: " . $sql, 80);        
+            throw new \Exception("Error in executing mysql query. Details: " . mysqli_error($this->id) . " sql: " . $sql);        
     }
 
     /**

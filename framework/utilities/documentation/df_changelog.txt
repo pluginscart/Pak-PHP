@@ -1,0 +1,17 @@
+Changelog:
+
+1.2.3 (November 27, 2015)
+	1) Corrected error in group by and order by clause positions
+	2) Added charset parameter to class constructor and class initialization functions
+	
+1.2.2 (November 21, 2015)
+	1) Added group by function to DatabaseFunctions.php
+	
+1.2.1 (October 9, 2015)
+	1) Added is_string attribute to where clause
+	
+1.1.0 (September 19, 2015)
+	1) Formtted source code according to psr-1 and psr-2 standards
+	
+1.0.0 (January 3, 2015)
+	1) Initial release
