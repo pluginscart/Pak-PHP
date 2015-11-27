@@ -3,8 +3,7 @@
 namespace Framework\Utilities;
 
 final class ExampleClass
-{
-    
+{    
     /** 
      * Authentication function test
      * Used to test http digest authentication		 
@@ -49,7 +48,8 @@ final class ExampleClass
             "user" => "nadir",
             "password" => "kcbW5eFSCbPXbJGLHvUGG8T8",
             "database" => "dev_pakphp",
-            "debug" => "1"
+            "debug" => "1",
+            "charset" => "utf8"
         );
         $database_obj        = UtilitiesFramework::Factory("database", $database_parameters);
         $db_link             = $database_obj->df_get_id();
@@ -107,7 +107,8 @@ final class ExampleClass
             "user" => "nadir",
             "password" => "kcbW5eFSCbPXbJGLHvUGG8T8",
             "database" => "dev_pakphp",
-            "debug" => "1"
+            "debug" => "1",
+            "charset" => "utf8"
         );
         $database_obj        = UtilitiesFramework::Factory("database", $database_parameters);
         /** The $database_obj is initialized and cleared */

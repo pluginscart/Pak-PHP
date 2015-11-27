@@ -2,9 +2,9 @@ Changelog:
 
 1.0.10 (November 27, 2015)
     1) Updated DatabaseFunctions.php file in utilities package. Corrected error in group by and order by clause positions
-    2) Added charset parameter to DatabaseFunctions class constructor and class initialization functions
-    3) Added changelog file and example file for DatabaseFunctions class
-
+	2) Added charset parameter to DatabaseFunctions class constructor and class initialization functions
+	3) Added changelog file and example file for DatabaseFunctions class
+    
 1.0.9 (November 26, 2015)
     1) Added check for attachment files to SendEmail function in Email.php file
     2) Added pear path to DefaultConfiguration.php

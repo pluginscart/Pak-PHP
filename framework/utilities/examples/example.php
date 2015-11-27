@@ -2,7 +2,8 @@
 
 namespace Framework\Utilities;
 
-require("autoload.php");
+require("../autoload.php");
+require("ExampleClass.php");
 
 $example_obj=new ExampleClass();
 $example_obj->AuthenticationTest();

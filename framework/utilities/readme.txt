@@ -4,4 +4,4 @@ The Utilities Framework package is a set of utility classes that provide easy ac
 
 $encryption=UtilitiesFramework.Factory("encryption");
 
-This creates an object of the Encryption class which can be used to encrypt and decrypt text. See the file example.php and example.class.php for examples on how to use the UtilitiesFramework classes. See the file documentation\documentation.html for further documentation on the Utilities Framework
+This creates an object of the Encryption class which can be used to encrypt and decrypt text. See the file documentation/example.php and example.class.php for examples on how to use the UtilitiesFramework classes. See the file documentation\documentation.html for further documentation on the Utilities Framework
