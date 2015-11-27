@@ -304,57 +304,54 @@ class DefaultConfiguration extends Base
     private function GetRequiredFrameworksConfig($configuration, $user_configuration)
     {
         /** The parameters array is initialized */
-        $error_handler_parameters                           = $db_parameters = $filesystem_parameters = array();
+        $error_handler_parameters                                  = $db_parameters = $filesystem_parameters = array();
         /** The logging class parameters are set */
         /** The shutdown function callable */
-        $error_handler_parameters['shutdown_function']      = "";
+        $error_handler_parameters['shutdown_function']             = "";
         /** Used to indicate if application should use custom error handler */
-        $error_handler_parameters['register_error_handler'] = true;
+        $error_handler_parameters['register_error_handler']        = true;
         /** Used to indicate if application is in development mode */
-        $error_handler_parameters['development_mode']       = (isset($user_configuration['general']['development_mode'])) ? $user_configuration['general']['development_mode'] : true;
+        $error_handler_parameters['development_mode']              = (isset($user_configuration['general']['development_mode'])) ? $user_configuration['general']['development_mode'] : true;
         /** Custom error handler callback */
-        $error_handler_parameters['custom_error_handler']   = "";
+        $error_handler_parameters['custom_error_handler']          = "";
         /** Used to indicate if the error message should be emailed to user */
-        $error_handler_parameters['email']['enable']        = (isset($user_configuration['required_frameworks']['errorhandler']['parameters']['enable'])) ? $user_configuration['required_frameworks']['errorhandler']['parameters']['enable'] : false;
+        $error_handler_parameters['email']['enable']               = (isset($user_configuration['required_frameworks']['errorhandler']['parameters']['enable'])) ? $user_configuration['required_frameworks']['errorhandler']['parameters']['enable'] : false;
         /** Used to indicate if application is being run from browser */
-        $error_handler_parameters['is_browser_application'] = $configuration['general']['is_browser_application'];
+        $error_handler_parameters['is_browser_application']        = $configuration['general']['is_browser_application'];
         /** The email at which log message is sent */
-        $error_handler_parameters['email']['email_address'] = '';
+        $error_handler_parameters['email']['email_address']        = '';
         /** Subject of the notification email */
-        $error_handler_parameters['email']['email_subject'] = '';
+        $error_handler_parameters['email']['email_subject']        = '';
         /** Addition log email smtp headers such as From: */
-        $error_handler_parameters['email']['email_header']  = "";
+        $error_handler_parameters['email']['email_header']         = "";
         /** Full path of error log file */
-        $error_handler_parameters['log_file_name']          = "";
+        $error_handler_parameters['log_file_name']                 = "";
         /** Used to indicate if error should be logged using web hook */
-        $error_handler_parameters['web_hook']['enable']     = "";
-        $error_handler_parameters['web_hook']['url']        = "";
+        $error_handler_parameters['web_hook']['enable']            = "";
+        $error_handler_parameters['web_hook']['url']               = "";
         /** The database class parameters are set */
-        $db_parameters                                      = array(
-            "host" => "",
-            "user" => "",
-            "password" => "",
-            "database" => "",
-            "debug" => ""
-        );
+        $db_parameters                                             = array(
+																            "host" => "",
+																            "user" => "",
+																            "password" => "",
+																            "database" => "",
+																            "debug" => "",
+																            "charset" => "utf8"
+																        );
         
         /** The utilities class parameters are set */
-        $filesystem_parameters['table_prefix']            = "";
-        $filesystem_parameters['function_cache_duration'] = array();
-        $filesystem_parameters['upload_folder']           = $configuration['path']['tmp_folder_path'];
-        $filesystem_parameters['allowed_extensions']      = array(
-            "xls",
-            "xlsx",
-            "txt"
-        );
-        $filesystem_parameters['max_allowed_file_size']   = "2048";
-        $filesystem_parameters['link']                    = '';
+        $filesystem_parameters['table_prefix']                     = "";
+        $filesystem_parameters['function_cache_duration']          = array();
+        $filesystem_parameters['upload_folder']                    = $configuration['path']['tmp_folder_path'];
+        $filesystem_parameters['allowed_extensions']               = array(
+															            "xls",
+															            "xlsx",
+															            "txt"
+															        );
+        $filesystem_parameters['max_allowed_file_size']            = "2048";
+        $filesystem_parameters['link']                             = '';
         /** The required framework objects are defined */
-        $configuration['required_frameworks']             = array(
-            "errorhandler" => array(
-                "class_name" => "Framework\Utilities\ErrorHandler",
-                "parameters" => $error_handler_parameters
-            ),
+        $configuration['required_frameworks']                      = array(            
             "application" => array(
                 "class_name" => "",
                 "parameters" => array()
@@ -368,10 +365,17 @@ class DefaultConfiguration extends Base
                 "parameters" => $filesystem_parameters
             )
         );
+        /** If the user did not disable error handling then the errorhandler object is added to the required frameworks list */
+        if(!isset($user_configuration['general']['parameters']['disable_error_handling'])) {
+            $configuration['required_frameworks']["errorhandler"]   =  array(
+                "class_name" => "Framework\Utilities\ErrorHandler",
+                "parameters" => $error_handler_parameters
+            );
+        }
         
         /** User configuration is merged */
         if (isset($user_configuration['required_frameworks']))
-            $configuration['required_frameworks'] = array_replace_recursive($configuration['required_frameworks'], $user_configuration['required_frameworks']);
+            $configuration['required_frameworks']                   = array_replace_recursive($configuration['required_frameworks'], $user_configuration['required_frameworks']);
         
         return $configuration;
     }

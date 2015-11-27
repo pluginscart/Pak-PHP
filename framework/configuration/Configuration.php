@@ -193,33 +193,36 @@ abstract class Configuration extends Base
      */
     final protected function EnableAuthenticationAndErrorHandling()
     {
-    	/** The errorhandler class object is created */
-    	$this->InitializeObject("errorhandler");    	       
-        /** The errorhandler callback is checked */
-        $errorhandler_callback                                                                               = $this->configuration['required_frameworks']['errorhandler']['parameters']['custom_error_handler'];
-		/** If the errorhandler callback is defined but is not callable, then the object string in the callback is replaced with the object */				
-		if (is_array($errorhandler_callback) && !is_callable($errorhandler_callback)) {
-			$errorhandler_callback[0]                                                                         = $this->GetComponent($errorhandler_callback[0]);
-			$this->configuration['required_frameworks']['errorhandler']['parameters']['custom_error_handler'] = $errorhandler_callback;			
-		}
-		/** Otherwise the default application errorhandler callback is used */
-		else {
-			$errorhandler_callback[0]                                                                         = $this->GetComponent("application");
-			$this->configuration['required_frameworks']['errorhandler']['parameters']['custom_error_handler'] = array($errorhandler_callback[0],"CustomErrorHandler");			
-		}
+    	/** If the user configuration includes error handler */
+    	if (isset($this->user_configuration['required_frameworks']['errorhandler'])) {
+    	    /** The errorhandler class object is created */
+    	    $this->InitializeObject("errorhandler");    	       
+            /** The errorhandler callback is checked */
+            $errorhandler_callback                                                                                = $this->configuration['required_frameworks']['errorhandler']['parameters']['custom_error_handler'];
+		    /** If the errorhandler callback is defined but is not callable, then the object string in the callback is replaced with the object */				
+		    if (is_array($errorhandler_callback) && !is_callable($errorhandler_callback)) {
+ 			    $errorhandler_callback[0]                                                                         = $this->GetComponent($errorhandler_callback[0]);
+			    $this->configuration['required_frameworks']['errorhandler']['parameters']['custom_error_handler'] = $errorhandler_callback;			
+		    }
+		    /** Otherwise the default application errorhandler callback is used */
+		    else {
+			    $errorhandler_callback[0]                                                                         = $this->GetComponent("application");
+			    $this->configuration['required_frameworks']['errorhandler']['parameters']['custom_error_handler'] = array($errorhandler_callback[0],"CustomErrorHandler");			
+		    }
 		
-		/** The shutdown function callback is checked */
-        $shutdown_callback                                                                                    = $this->configuration['required_frameworks']['errorhandler']['parameters']['shutdown_function'];
-		/** If the shutdown function callback is defined but is not callable, then the object string in the callback is replaced with the object */				
-		if (is_array($shutdown_callback) && !is_callable($shutdown_callback)) {
-			$shutdown_callback[0]                                                                             = $this->GetComponent($shutdown_callback[0]);
-			$this->configuration['required_frameworks']['errorhandler']['parameters']['shutdown_function']    = $shutdown_callback;			
-		}
-		/** Otherwise the default application shutdown callback is used */
-		else {
-			$errorhandler_callback[0]                                                                         = $this->GetComponent("application");
-			$this->configuration['required_frameworks']['errorhandler']['parameters']['shutdown_function'] = array($errorhandler_callback[0],"CustomShutdownFunction");			
-		}
+		    /** The shutdown function callback is checked */
+            $shutdown_callback                                                                                    = $this->configuration['required_frameworks']['errorhandler']['parameters']['shutdown_function'];
+		    /** If the shutdown function callback is defined but is not callable, then the object string in the callback is replaced with the object */				
+		    if (is_array($shutdown_callback) && !is_callable($shutdown_callback)) {
+    			$shutdown_callback[0]                                                                             = $this->GetComponent($shutdown_callback[0]);
+			    $this->configuration['required_frameworks']['errorhandler']['parameters']['shutdown_function']    = $shutdown_callback;			
+		    }
+		    /** Otherwise the default application shutdown callback is used */
+		    else {
+    			$errorhandler_callback[0]                                                                         = $this->GetComponent("application");
+			    $this->configuration['required_frameworks']['errorhandler']['parameters']['shutdown_function'] = array($errorhandler_callback[0],"CustomShutdownFunction");			
+		    }
+	    }
 		/** The authentication methods */
 		$authentication_methods                                                                               = array("session","http");
 		/** Both session and http authentication are enabled */
