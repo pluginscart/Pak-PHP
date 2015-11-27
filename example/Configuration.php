@@ -57,7 +57,8 @@ class Configuration extends \Framework\Configuration\Configuration
             "user" => "nadir",
             "password" => "kcbW5eFSCbPXbJGLHvUGG8T8",
             "database" => "dev_pakphp",
-            "debug" => "1"
+            "debug" => "1",
+            "charset" => "utf8"
         );
 					
 		/** The application url mappings are defined */

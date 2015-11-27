@@ -116,7 +116,6 @@ class Testing extends \Framework\Testing\Testing
      */
     public function TestDatabase($test_data)
     {
-
         $database_obj        = $this->GetComponent("database");
         /** The $database_obj is initialized and cleared **/
         $database_obj->df_initialize();

@@ -1,0 +1,7 @@
+{
+    "name": "pakjiddat/pak-php",
+    "description": "A PHP micro framework. The goal of the framework is to assist in the development of well tested php applications",
+    "require": {
+        "php": ">=5.3.0"
+    }
+}
