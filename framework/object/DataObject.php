@@ -40,47 +40,35 @@ abstract class DataObject extends Base
     protected $readonly=true;
 	
 	/**
-     * Used to set the readonly property
-     * 
-     * It sets the object property that indicated if object data is read only      	
-     * 
-     * @since 1.0.0
-     * @param boolean $readonly used to indicate if object data is read only 
-     */
-    abstract public function SetReadOnly($readonly);
-	
-	/**
-     * Used to set the field name
-     * 
-     * It sets the field name of the table          	
-     * 
-     * @since 1.0.0
-     * @param string $key_field the field name of the data 
-     */
-    abstract public function SetKeyField($key_field);   
-	
-	/**
      * Used to get the key field
-     * 
-     * It gets the key field  	
-     * 
-     * @since 1.0.0
+     *
+     * It gets the name of the key field
+	 * The key field is used to search for the data
 	 * 
-     * @return string $key_field the field name of the data 
+     * @since 1.0.0     
+	 * 
+	 * @return string $field_name the field name for the object
      */
-    abstract public function GetKeyField();
-	
-    /**
-     * Used to set the object data
-     * 
-     * It sets the object data
-     * The data must be suitable for saving to database     		
-     * 
-     * @since 1.0.0
-     * @param array $data the object data     
-     */
-    abstract public function Load($data);   
+    public function GetKeyField()
+    {        
+        $key_field = $this->key_field;
 		
+		return $key_field; 
+    }
+	
+	/**
+     * Used to set the key field
+     * 
+     * It sets the key field
+	 * 
+     * @since 1.0.0
+     * @param string $key_field key field used to search for the data     
+     */
+    public function SetKeyField($key_field)
+    {        
+        $this->key_field = $key_field; 
+    }
+	
     /**
      * Used to get the object data
      * 
@@ -90,8 +78,12 @@ abstract class DataObject extends Base
 	 * 
      * @return $object_data array the object's data property is returned          	
      */
-    abstract public function GetData();
-	       
+    public function GetData()
+    {        
+        /** The object data is returned */
+        return $this->data;        
+    }
+	
     /**
      * Used to set the object data
      * 
@@ -100,8 +92,12 @@ abstract class DataObject extends Base
      * @since 1.0.0
      * @param $data array the object data to be set 		 	
      */
-    abstract public function SetData($data);
-	   
+    public function SetData($data)
+    {        
+        /** The  object data is set */
+        $this->data = $data;        
+    }
+	
     /**
      * Used to edit the object data
      * 
@@ -112,19 +108,27 @@ abstract class DataObject extends Base
      * @param string $field_name name of the field
      * @param string $field_value new value of the field
      */
-    abstract public function Edit($field_name, $field_value);
+   public function Edit($field_name, $field_value)
+   {        
+        /** The field value is added to the $data property */
+        $this->data[$field_name] = $field_value;       
+   }
 
-    /**
-     * Used to load the data from database to the data property of the object
+	/**
+     * Used to set the readonly property
      * 
-     * It reads data from database and loads it to the $data property of the object
-     * It uses the field name value given as parameter     
+     * It sets the object property that indicated if object data is read only    
+	 * It calls the SetReadOnly function of the underlying data object  	
      * 
      * @since 1.0.0
-	 * @param mixed $parameters the parameters used to read the data
+     * @param boolean $readonly used to indicate if object data is read only 
      */
-    public function Read($parameters){}
-	
+    public function SetReadonly($readonly)
+	{
+		/** The readonly property of the underlying data object is called */
+    	$this->readonly = $readonly;
+	}
+
     /**
      * Used to get the value of required field
      * 
@@ -135,7 +139,27 @@ abstract class DataObject extends Base
      * 
      * @return string $field_value the value of the given field name 
      */
-    abstract public function Get($field_name);   
+    public function Get($field_name)
+    {        
+        if (!isset($this->data[$field_name]))
+            throw new \Exception("Value for the field: " . $field_name . " does not exist");
+        
+        /** The field value is fetched from $data property */
+        $field_value = $this->data[$field_name];
+        
+        return $field_value;       
+    }
+	
+    /**
+     * Used to load the data from database to the data property of the object
+     * 
+     * It reads data from database and loads it to the $data property of the object
+     * It uses the field name value given as parameter     
+     * 
+     * @since 1.0.0
+	 * @param mixed $parameters the parameters used to read the data
+     */
+    abstract public function Read($parameters);
 	
     /**
      * Used to delete the object data
@@ -159,7 +183,7 @@ abstract class DataObject extends Base
      * 
      * @return boolean $record_exists it is true if the record already exists. it is false otherwise 
      */
-    abstract public function RecordExists();
+    public function RecordExists(){}
 	
     /**
      * Used to save the object data

@@ -1,5 +1,9 @@
 Changelog:
 
+1.0.10 (November 28, 2015)
+	1) Removed error with use of double mysqli_escape_string in DatabaseFunctions.php file 
+	2) Added the function GetFileNameAndExtension to String class
+	
 1.0.9 (November 27, 2015)
 	1) Updated DatabaseFunctions.php file. Corrected error in group by and order by clause positions
 	2) Added charset parameter to DatabaseFunctions class constructor and class initialization functions

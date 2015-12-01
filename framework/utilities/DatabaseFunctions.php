@@ -13,7 +13,7 @@ namespace Framework\Utilities;
  * @package    Utilities
  * @author     Nadir Latif <nadir@pakjiddat.com>
  * @license    https://www.gnu.org/licenses/gpl-2.0.html GNU General Public License, version 2
- * @version    1.2.2
+ * @version    1.2.4
  * @link       N.A
  */
 final class DatabaseFunctions
@@ -672,9 +672,7 @@ final class DatabaseFunctions
      * @param boolean $is_string used to indicate if the value is a string     
      */
     public function df_add_update_field($field, $table, $value, $is_string)
-    {        
-        $value = mysqli_escape_string($this->id, $value);
-        
+    {
         $this->internal_df_build_update_query($field, $value, true, $is_string, $table, '', '');       
     }
 

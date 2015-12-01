@@ -2,6 +2,8 @@
 
 namespace Framework\Application\WordPress;
 
+use \Framework\Object\WordPressDataObject as WordPressDataObject;
+
 /**
  * This class implements the base BrowserApplication class 
  * 
@@ -12,7 +14,7 @@ namespace Framework\Application\WordPress;
  * @package    WordPress
  * @author     Nadir Latif <nadir@pakjiddat.com>
  * @license    https://www.gnu.org/licenses/gpl-2.0.html GNU General Public License, version 2
- * @version    Release: 1.0.0
+ * @version    Release: 1.0.1
  * @link       N.A
  */
 class Application extends \Framework\Application\Application
@@ -24,7 +26,8 @@ class Application extends \Framework\Application\Application
 	 *
 	 * @since 1.0.0
 	 */
-	public static function WP_Activate() {
+	public static function WP_Activate()
+	{
 
 	}
 	
@@ -35,7 +38,8 @@ class Application extends \Framework\Application\Application
 	 *
 	 * @since 1.0.0
 	 */
-	public static function WP_Deactivate() {
+	public static function WP_Deactivate()
+	{
 
 	}
 	
@@ -123,8 +127,8 @@ class Application extends \Framework\Application\Application
 	 *
 	 * @since 1.0.0
 	 */
-	public function WP_LoadPluginTextDomain() {
-		
+	public function WP_LoadPluginTextDomain()
+	{	
 		/** Used to load the plugin's text domain */
         load_plugin_textdomain(
             $this->GetConfig("wordpress","plugin_text_domain"),
@@ -138,7 +142,8 @@ class Application extends \Framework\Application\Application
 	 *
 	 * @since 1.0.0
 	 */
-	public function WP_AdminEnqueueStyles() {
+	public function WP_AdminEnqueueStyles()
+	{
 		$this->WP_Enqueue("admin_styles",false);
 	} 
 	
@@ -147,7 +152,8 @@ class Application extends \Framework\Application\Application
 	 *
 	 * @since 1.0.0
 	 */
-	public function WP_AdminEnqueueScripts() {
+	public function WP_AdminEnqueueScripts()
+	{
 		$this->WP_Enqueue("admin_scripts",true);
 	}
 	
@@ -156,7 +162,8 @@ class Application extends \Framework\Application\Application
 	 *
 	 * @since 1.0.0
 	 */
-	public function WP_EnqueueScripts() {
+	public function WP_EnqueueScripts()
+	{
 		$this->WP_Enqueue("public_scripts",true);
 	}
 	
@@ -165,7 +172,8 @@ class Application extends \Framework\Application\Application
 	 *
 	 * @since 1.0.0
 	 */
-	public function WP_EnqueueStyles() {			
+	public function WP_EnqueueStyles()
+	{			
 		$this->WP_Enqueue("public_styles",false);
 	}
 	
@@ -174,7 +182,8 @@ class Application extends \Framework\Application\Application
 	 *
 	 * @since 1.0.0
 	 */
-	public function WP_DisplaySettings() {
+	public function WP_DisplaySettings()
+	{
 		/** The wordpress configuration is fetched */
 		$wordpress_configuration                                       = $this->GetConfig("wordpress");
 		/** The object used to set the settings page content is fetched */
@@ -198,7 +207,8 @@ class Application extends \Framework\Application\Application
 	 *
 	 * @since 1.0.0
 	 */
-	public function WP_InitAdmin() {		
+	public function WP_InitAdmin()
+	{		
 		/** The wordpress configuration is fetched */
 		$wordpress_configuration                                        = $this->GetConfig("wordpress");
 		/** The object used to set the settings page content is fetched */
@@ -219,7 +229,8 @@ class Application extends \Framework\Application\Application
 	 * @param $configuration_name the name of the application configuration that contains the scripts/styles to enqueue
 	 * @param $is_script used to indicate if the given application configuration is a script or style
 	 */
-	public function WP_Enqueue($configuration_name,$is_script) {		
+	public function WP_Enqueue($configuration_name,$is_script)
+	{		
 		/** The wordpress configuration is fetched */
 		$wordpress_configuration=$this->GetConfig("wordpress");
 		for($count = 0; $count < count($wordpress_configuration[$configuration_name]); $count++) {
@@ -258,7 +269,8 @@ class Application extends \Framework\Application\Application
 	 * 
 	 * @return array $options the plugin options
 	 */
-	public function GetPluginOptions($option_id){		
+	public function GetPluginOptions($option_id)
+	{		
 		/** The current plugin options are fetched from WordPress */
 		$options                  = get_option( $option_id );
 		/** If the options is a json encoded string then it is decoded */
@@ -278,7 +290,8 @@ class Application extends \Framework\Application\Application
 	 * 
 	 * @return array $options the plugin options
 	 */
-	public function AddDashboardWidget($widget_id, $widget_title, $widget_callback){		
+	public function AddDashboardWidget($widget_id, $widget_title, $widget_callback)
+	{		
 		wp_add_dashboard_widget($widget_id, $widget_title,$widget_callback);		    
 	}
 	
@@ -293,7 +306,8 @@ class Application extends \Framework\Application\Application
 	 * 
 	 * @return string $option_id the id of the option
 	 */
-	public function GetOptionsId($option_name){
+	public function GetOptionsId($option_name)
+	{
 		
 		/** The user id of the logged in user */
     	$user_id                    = get_current_user_id();
@@ -320,8 +334,10 @@ class Application extends \Framework\Application\Application
 	 * @param array $labels the labels for the new custom taxonomy
 	 * @param array $args the parameters for the new custom taxonomy
 	 */
-	public function AddNewCustomTaxonomy($name,$singular_name,$labels="",$args="") {
-		
+	public function AddNewCustomTaxonomy($name,$singular_name,$post_type,$labels=array(),$args=array())
+	{		
+		/** The post type is converted to lower case. spaces are replaced with - */
+		$post_type                     = str_replace(" ","-",strtolower($post_type));
 		/** The default labels for new custom taxonomy */		
 	    $default_labels                = array(
 												'name'                       => _x($name,$singular_name),
@@ -356,9 +372,9 @@ class Application extends \Framework\Application\Application
 		/** The default arguments are merged with user given arguments */
 		$default_args                  = array_merge($default_args,$args);
 		/** The labels are added to the arguments */
-		$args['labels'] = $labels;
+		$default_args['labels']        = $default_labels;
 		/** The new custom taxonomy is registered */
-		register_taxonomy(strtolower($singular_name),$post_type, $args );
+		register_taxonomy(strtolower($singular_name),$post_type, $default_args );
 	}
 
 	/**
@@ -375,8 +391,8 @@ class Application extends \Framework\Application\Application
 	 * @param array $labels the labels for the new custom post type
 	 * @param array $args the parameters for the new custom post type
 	 */
-	public function AddNewCustomPostType($name,$singular_name,$labels="",$args="") {
-		
+	public function AddNewCustomPostType($name,$singular_name,$labels=array(),$args=array())
+	{	
 		/** The default labels for new custom post type */		
 	    $default_labels                = array(
 											'name'               => _x($name,$name,$plugin_text_domain),
@@ -413,26 +429,101 @@ class Application extends \Framework\Application\Application
 		/** The default arguments are merged with user given arguments */
 		$default_args                  = array_merge($default_args,$args);
 		/** The labels are added to the arguments */
-		$args['labels'] = $labels;
+		$default_args['labels']        = $default_labels;
 		/** The new custom post type is registered */
-		register_post_type($name,$args);
+		register_post_type($name,$default_args);
 	}
 	
 	/**
-	 * Used to add a cutom post type
+	 * Used to save plugin options
 	 *
-	 * It adds a new custom post type
-	 * It takes the given parameters and creates a new post type
+	 * It saves the given WordPress plugin options
 	 * 
 	 * @since 1.0.0
 	 * @param array $options the plugin options
 	 * @param string $option_id id of the option to save
 	 */
-	public function SavePluginOptions($options,$option_id) {		
+	public function SavePluginOptions($options,$option_id)
+	{		
 		/** The options values are saved */		
 		update_option($option_id, $options);
 	}
 	
+	/**
+	 * Used to import the contents of an array to WordPress
+	 *
+	 * It creates a new custom post for each element in the array
+	 * 
+	 * @since 1.0.1
+	 * @param string $post_type the name of the post type
+	 * @param array $file_details the details of the file to be imported. it is an array with following keys:
+	 * data => the array contents
+	 * key_field => the name of the key field used to uniquely identify the post
+	 * title_field => the field name that will be used for the post title
+	 * content_field => the field name that will be used for the post content
+	 * fields => the list of field names. all field names except for title and content field names are considered as custom fields
+	 * fields_to_ignore => the list of fields to exlude from the import	 	
+	 * @param int $start_line the line at which to start the import. it should be greater than or equal to 1
+	 * @param int $line_count the line at which to end the import. it should be less than or equal to the size of the data to be imported
+	 */
+	public function ImportFile($post_type,$file_details,$start_line,$line_count)
+	{
+	    /** The data to be imported */
+		$data                                               = $file_details['data'];	
+		/** The name of the key field */
+		$key_field                                          = $file_details['key_field'];	
+		/** The title field */
+		$title_field                                        = $file_details['title_field'];
+		/** The content field */
+		$content_field                                      = $file_details['content_field'];
+		/** The name of all the fields of the file */
+		$field_list                                         = $file_details['fields'];
+		/** The list of fields to ignore */
+		$fields_to_ignore                                   = $file_details['fields_to_ignore'];				
+		/** The components of each meta data item is extracted using regular expression */
+		for ($count1 = ($start_line-1); $count1 < $line_count; $count1++) {				
+		    /** The data to be saved */
+			$post_data                                      = array();				
+			/** The post author is set to the user id of the logged in user */
+		    $post_data['post_author']                       = get_current_user_id();
+			/** The concatenation of all the field values */
+			$combined_values                                = "";
+			/** The data to be saved is generated */
+			for ($count2 = 0; $count2 < count($data[$count1]); $count2++) {
+			    /** The field name */
+				$field_name                                 = $field_list[$count2];
+				/** The field value */
+				$field_value                                = $data[$count1][$count2];
+				/** All the field values are combined */
+				$combined_values                            = $combined_values.$field_value;
+				/** If the field name is not in list of fields to ignore */
+				if (!in_array($field_name, $fields_to_ignore)) {
+				    /** If the field name does not match the title field then the field is added to custom field list */
+					if ($field_name == $title_field) {
+				        /** The title for custom post */
+					    $post_data['post_title']            = $field_value;
+                    }
+				    /** The field name and value are added as custom field */
+				    $post_data["custom_".$field_name]       = $field_value;					    
+				}
+			}
+            /** The md5 checksum of all the field values. It is used to ensure data has not been updated */
+            $post_data['custom_checksum']                   = md5($combined_values);				
+			/** The parameters for the WordPress object. It indicates the type of object to be created */
+			$parameters                                     = array("type"=>"post","type_name"=>$post_type);
+			/** WordPress data object is created */
+			$wordpress_data_object                          = new WordPressDataObject($configuration_object,$parameters);
+			/** The WordPress data object is set to read/write */
+			$wordpress_data_object->SetReadOnly(false);
+			/** The data is set to the WordPress data object */
+			$wordpress_data_object->SetData($post_data);
+			/** The key field for the object is set */
+			$wordpress_data_object->SetKeyField($key_field);
+			/** The WordPress data is saved */
+			$wordpress_data_object->Save();
+		}
+	}
+
     /**
      * Register the filters and actions with WordPress.
      *

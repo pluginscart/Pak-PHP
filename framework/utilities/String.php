@@ -11,7 +11,7 @@ namespace Framework\Utilities;
  * @package    Utilities
  * @author     Nadir Latif <nadir@pakjiddat.com>
  * @license    https://www.gnu.org/licenses/gpl-2.0.html GNU General Public License, version 2
- * @version    1.0.2
+ * @version    1.0.3
  * @link       N.A
  * @author 	   Nadir Latif <nadir@pakiddat.com>
  */
@@ -97,6 +97,7 @@ final class String
     	
 		return $camelcase_text;	
     }
+	
 	/**
      * Used to concatenate the given strings
 	 * 
@@ -118,4 +119,30 @@ final class String
     	}
     	return $concatenated_text;
     }
+	
+    /**
+	 * Used to get the file name and extension from the given url
+	 *
+	 * It parses the given url
+	 * It extracts the file and file extension
+	 * 
+	 * @since 1.0.3
+	 * @param string $url the file url
+	 * 
+	 * @return array $file_data the file data. it is an array with 2 keys:
+	 * file_name => the file name
+	 * file_extension => the file extension	 
+	 */
+	public function GetFileNameAndExtension($url)
+	{
+		/** The file extension */
+		$temp_arr                                      = explode(".",$url);
+		$file_data['file_extension']                   = $temp_arr[count($temp_arr)-1];
+		
+		/** The file name */
+		$temp_arr                                      = explode("/",$url);
+		$file_data['file_name']                        = $temp_arr[count($temp_arr)-1];
+		
+		return $file_data;				
+	}
 }

@@ -5,21 +5,30 @@ ini_set("display_errors", "1");
 use Framework\Utilities\DatabaseFunctions as DatabaseFunctions;
 
 include('../DatabaseFunctions.php');
+/* Enter your database connection information. You should first import the sql file given in data folder */
+$connection_information            = array("host"=>"localhost","user"=>"nadir","password"=>"kcbW5eFSCbPXbJGLHvUGG8T8","database"=>"dev_pakphp","debug"=>"2","charset"=>"utf8");
 
-SelectQuery();
-//UpdateQuery();
-//InsertQuery();
-//DeleteQuery();
+SelectQuery($connection_information);
+//UpdateQuery($connection_information);
+//InsertQuery($connection_information);
+//DeleteQuery($connection_information);
 
 /**
  * Used to select data from database
  * 
  * @since 1.2.2
+ * @param array $connection_information an array with following keys:
+ * host => the database host name
+ * user => the database user
+ * password => the database password
+ * database => the database name
+ * debug => the debug level it can be 0,1 or 2
+ * charset => utf8
  */
-function SelectQuery()
+function SelectQuery($connection_information)
 {
     /** The database connection details */
-    $parameters                   = array("host"=>"localhost","user"=>"nadir","password"=>"kcbW5eFSCbPXbJGLHvUGG8T8","database"=>"dev_pakphp","debug"=>"2","charset"=>"utf8");  		
+    $parameters                   = $connection_information;  		
     /** The DatabaseFunctions object is created */
 	$database                     = new DatabaseFunctions($parameters);
 	/** The database table name */
@@ -44,7 +53,7 @@ function SelectQuery()
 	/** The field name in where clause */		
 	$where_clause[0]['field']     = "function_name";
 	/** The field value */
-	$where_clause[0]['value']     = "TestFunction";
+	$where_clause[0]['value']     = "InsertQuery";
 	/** The option table name of the above field. Useful for multiple tables */
 	$where_clause[0]['table']     = "example_cached_data";
 	/** The operation. e.g =,<,>,!= */
@@ -59,7 +68,7 @@ function SelectQuery()
 	/** The optional table name */
 	$where_clause[1]['table']     = "example_cached_data";
 	/** The operation. e.g =,<,>,!= */
-	$where_clause[1]['operation'] = "=";
+	$where_clause[1]['operation'] = ">=";
 	/** The operator. e.g AND, OR, NOT */
 	$where_clause[1]['operator']  = "";
 	/** The order by clause is set */
@@ -99,11 +108,18 @@ function SelectQuery()
  * Used to update data in database
  * 
  * @since 1.2.2
+ * @param array $connection_information an array with following keys:
+ * host => the database host name
+ * user => the database user
+ * password => the database password
+ * database => the database name
+ * debug => the debug level it can be 0,1 or 2
+ * charset => utf8
  */
-function UpdateQuery()
+function UpdateQuery($connection_information)
 {
     /** The database connection details */
-    $parameters                   = array("host"=>"localhost","user"=>"nadir","password"=>"kcbW5eFSCbPXbJGLHvUGG8T8","database"=>"dev_pakphp","debug"=>"2","charset"=>"utf8");  		
+    $parameters                   = $connection_information;  		
     /** The DatabaseFunctions object is created */
 	$database                     = new DatabaseFunctions($parameters);
 	/** The database table name */
@@ -162,13 +178,22 @@ function UpdateQuery()
  * Used to add data to database
  * 
  * @since 1.2.2
+ * @param array $connection_information an array with following keys:
+ * host => the database host name
+ * user => the database user
+ * password => the database password
+ * database => the database name
+ * debug => the debug level it can be 0,1 or 2
+ * charset => utf8
  */
-function InsertQuery()
-{
+function InsertQuery($connection_information)
+{	
     /** The database connection details */
-    $parameters                   = array("host"=>"localhost","user"=>"nadir","password"=>"kcbW5eFSCbPXbJGLHvUGG8T8","database"=>"dev_pakphp","debug"=>"2","charset"=>"utf8");  		
+    $parameters                   = $connection_information;  		
     /** The DatabaseFunctions object is created */
 	$database                     = new DatabaseFunctions($parameters);
+	/** Auto commit is disabled. So the data will only be saved to database when the commit function is called */
+	$database->df_toggle_autocommit(false);
 	/** The database table name */
 	$table_name                   = "example_cached_data";
 	/** The table name is set */
@@ -198,7 +223,7 @@ function InsertQuery()
 	echo "<h3>Database query: </h3>";
 	/** The query is displayed */		
 	echo $query;
-				
+	
 	/** The database query is run */
 	$database->df_execute($query);
 	
@@ -211,6 +236,16 @@ function InsertQuery()
 	$last_inserted_row_id          = $database->df_last_insert_id();
 	echo "<h3>Last inserted row id: </h3>";
 	print_r($last_inserted_row_id);
+							
+	/**
+	 * The data is commited to database
+	 * If you comment out the following line, and uncomment the rollback line
+	 * Then the data will not be added to database
+	 * But in both cases the mysql affected rows shows 1 record added
+	 */
+	$database->df_commit();	
+	/** The changes are rolled back */
+	//$database->df_rollback();	
 	
 	/** The query log is displayed */
 	echo "<h3>Query Log: </h3>";
@@ -227,11 +262,18 @@ function InsertQuery()
  * Used to delete data from database
  * 
  * @since 1.2.2
+ * @param array $connection_information an array with following keys:
+ * host => the database host name
+ * user => the database user
+ * password => the database password
+ * database => the database name
+ * debug => the debug level it can be 0,1 or 2
+ * charset => utf8
  */
-function DeleteQuery()
+function DeleteQuery($connection_information)
 {
     /** The database connection details */
-    $parameters                   = array("host"=>"localhost","user"=>"nadir","password"=>"kcbW5eFSCbPXbJGLHvUGG8T8","database"=>"dev_pakphp","debug"=>"2","charset"=>"utf8");  		
+    $parameters                   = $connection_information;  		
     /** The DatabaseFunctions object is created */
 	$database                     = new DatabaseFunctions($parameters);
 	/** The database table name */

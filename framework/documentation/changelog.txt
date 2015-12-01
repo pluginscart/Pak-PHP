@@ -1,7 +1,16 @@
 Changelog:
 
+1.0.12 (December 1, 2015)    
+    1) In utilities package, removed error with use of double mysqli_escape_string in DatabaseFunctions.php file
+    2) Added default implementation for the functions GetKeyField,SetKeyField,GetData,SetData,Edit,SetReadonly,Get to object/DataObject.php file
+    3) Added new sub class of DataObject called WordPressDataObject
+    4) Removed Load function from DataObject class
+    5) Added the function GetFileNameAndExtension to String class in utilities package. It allows parsing the url of a file and extracing the file name and extension
+    6) Added the function DownloadAndParseFile to FileSystem class in utilities package. It allows downloading and parsing files
+    7) Added the function ImportFile to WordPress Application.php class. It allows importing array data to WordPress posts 
+    
 1.0.11 (November 28, 2015)    
-    1) Added option for disabling error handling from application parameters	
+    1) Added option for disabling error handling from application parameters
 	
 1.0.10 (November 27, 2015)
     1) Updated DatabaseFunctions.php file in utilities package. Corrected error in group by and order by clause positions

@@ -1,5 +1,10 @@
 Changelog:
 
+1.2.4 (November 28, 2015)
+	1) Removed error with use of double mysqli_escape_string in DatabaseFunctions.php file
+	2) Added mysql commit and rollback to Insert function in df_examples.php file
+	3) Added option for adding database connection details in one place to df_example.php file
+	
 1.2.3 (November 27, 2015)
 	1) Corrected error in group by and order by clause positions
 	2) Added charset parameter to class constructor and class initialization functions

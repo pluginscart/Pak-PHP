@@ -10,7 +10,7 @@
  * @package           Example
  * 
  * Description:       Example project
- * Version:           1.0.10
+ * Version:           1.0.12
  * Author:            Nadir Latif
  * Author URI:        http://pakjiddat.com
  * License:           GPL-2.0+
