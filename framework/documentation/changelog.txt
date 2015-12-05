@@ -1,5 +1,14 @@
 Changelog:
 
+1.0.14 (December 7, 2015)    
+    1) Corrected bug in Wordpress Application file
+    2) Added user_id configuration option to WordPress DefaultConfiguration.php
+    
+1.0.13 (December 3, 2015)    
+    1) Removed default errorhandling from WordPress configuration 
+    2) Corrected minor php error in WordPress Application file
+    3) Added wordpressexample project    
+    
 1.0.12 (December 1, 2015)    
     1) In utilities package, removed error with use of double mysqli_escape_string in DatabaseFunctions.php file
     2) Added default implementation for the functions GetKeyField,SetKeyField,GetData,SetData,Edit,SetReadonly,Get to object/DataObject.php file

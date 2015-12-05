@@ -37,9 +37,7 @@ abstract class Configuration extends \Framework\Configuration\Configuration
         /** User configuration settings are merged with default configuration settings */
         $default_configuration          = new DefaultConfiguration();
 		/** The default configuration is merged with user configuration and the result is returned */
-        $this->configuration            = $default_configuration->GetUpdatedConfiguration($this->user_configuration);		
-        /** The error handler object is created */
-        $this->InitializeObject("errorhandler");		
+        $this->configuration            = $default_configuration->GetUpdatedConfiguration($this->user_configuration);
         /** All required classes are included */
         $this->IncludeRequiredClasses();
         /** Php Sessions are enabled if user requested sessions */

@@ -15,7 +15,7 @@ namespace WordPressExample;
  * @version    1.0.0
  * @since      1.0.0
  */
-final class Testing extends \Framework\Application\WordPress\Application
+final class Testing extends \Framework\Testing\Testing
 {
 	/**
 	 * Used to register functions that extend the WordPress XML-RPC interface
@@ -32,61 +32,24 @@ final class Testing extends \Framework\Application\WordPress\Application
 		$plugin_prefix                                                    = $this->GetConfig("wordpress","plugin_prefix");
 	
 		/** The custom xml rpc functions are added */		
-		$methods[$plugin_prefix.'.AddData']                               = array($this,"AddData");
-		$methods[$plugin_prefix.'.AddMetaData']                           = array($this,"AddMetaData");
+		$methods[$plugin_prefix.'.TestFunction']                          = array($this,"TestFunction");		
 		
 		return $methods;
 	}
-	
+		
 	/**
-	 * Used to add ayas data to WordPress custom posts
+	 * Used to add a test function to the WordPress XML-RPC interface
 	 *
-	 * It adds ayas to following ayas custom post type
+	 * It adds a test function to the WordPress XML-RPC interface
+	 * It can be used to unit test WordPress plugins
 	 * 
-	 * @since 2.0.0
+	 * @since 1.0.0
 	 * @param array $args the user login information. it is an array with following keys:
 	 * blog id: the blog id
 	 * username: the user name
 	 * password: the password
 	 */
-	public function AddData($args){
-		global $wp_xmlrpc_server;
-		/** The rpc arguments are escaped */
-        $wp_xmlrpc_server->escape($args);
-        /** The blog id, user name and password */
-        $blog_id           = $args[0];
-        $username          = $args[1];
-        $password          = $args[2];
-		$start_ayat        = $args[3];
-		$total_ayat_count  = $args[4];
-		$translator        = stripslashes($args[5]);
-		$language          = $args[6];
-        /** If the login info is not correct then an error is returned */
-        if (! $user = $wp_xmlrpc_server->login($username,$password))
-            return $wp_xmlrpc_server->error;
-
-		try {
-		    /** The suras and authors data is added to WordPress */
-		    $this->GetComponent("holyqurandataimport")->AddData($start_ayat,$total_ayat_count,$translator,$language);
-		}
-		catch(\Exception $e) {
-			die($e->getMessage());
-		}
-        return array("result"=>"success");
-	}
-	
-	/**
-	 * Used to add Holy Quran meta data to WordPress
-	 *
-	 * It adds Holy Quran meta data to the sura and author custom post types
-	 * 
-	 * @since 2.0.0
-	 * @param array $args the user login information. it is an array with following keys:
-	 * blog id: the blog id
-	 * username: the user name
-	 * password: the password
-	 */
-	public function AddMetaData($args){
+	public function TestFunction($args){
 		global $wp_xmlrpc_server;
 		/** The rpc arguments are escaped */
         $wp_xmlrpc_server->escape($args);
@@ -99,12 +62,34 @@ final class Testing extends \Framework\Application\WordPress\Application
             return $wp_xmlrpc_server->error;
 
 		try {
-		    /** The suras and authors data is added to WordPress */
-		    $this->GetComponent("holyqurandataimport")->AddMetaData();
+		    /** Success response is returned */
+			return array("result"=>"success");
 		}
 		catch(\Exception $e) {
 			die($e->getMessage());
-		}
-        return array("result"=>"success");
+		}        
+	}
+	
+	/**
+	 * Used to register custom post types and custom taxonomies with WordPress
+	 *
+	 * It adds following custom post types: websites
+	 * 
+	 * @since 1.0.0
+	 */
+	public function AddCustomPostTypes()
+	{
+		/** The default arguments for the new custom post types */
+		$default_args                  = array(
+											'public'             => true,
+											'publicly_queryable' => true,
+											'show_ui'            => true,
+											'show_in_menu'       => true,
+											'query_var'          => true,
+											'menu_position'      => 5,											
+											'supports'           => array( 'title', 'custom-fields')
+        );			
+        /** The ayat custom post type is added */
+        $this->GetComponent("application")->AddNewCustomPostType("Websites","Website",array(),$default_args);		
 	}
 }

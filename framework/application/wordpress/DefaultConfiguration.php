@@ -63,6 +63,8 @@ class DefaultConfiguration extends \Framework\Configuration\DefaultConfiguration
         $configuration['wordpress']['custom_actions']                                           = array();
 		/** The custom filters */		
         $configuration['wordpress']['custom_filters']                                           = array();
+		/** The user id of the logged in user */		
+        $configuration['wordpress']['user_id']                                                  = get_current_user_id();
 		
 		/** The name of the WordPress plugin folder is determined */
 		$temp_arr                                                                               = explode(DIRECTORY_SEPARATOR,$configuration['path']['base_path']);

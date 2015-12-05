@@ -22,8 +22,8 @@ abstract class Settings extends Base
     /**
      * Used to display the settings fields
      *
-     * This output of this function should be shown inside a form
-     * It shows the registered fields along with a submit button	 
+     * The output of this function should be shown inside a form
+     * It shows the registered fields
      * 
      * @since    1.0.0
      * 
@@ -62,6 +62,11 @@ abstract class Settings extends Base
      */
     final public function RegisterPluginOptions($plugin_settings)
     {
+    	/** 
+		 * Used to indicate if the plugin option should be saved
+		 * It allows the plugin options to be used even if the user has not saved the plugin settings from the settings page
+		 */
+    	$save_plugin_option                   = false;
         /** The wordpress configuration is fetched */
         $wordpress_configuration              = $this->GetConfig("wordpress");
         /** The options id is fetched */

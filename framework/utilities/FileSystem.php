@@ -321,13 +321,14 @@ final class FileSystem
 		$file_extension                                = $file_details['file_extension'];
 		/** The absolute path to the downloaded file */
 		$file_path                                     = $local_file_path . DIRECTORY_SEPARATOR . $file_name;
+		
 	    /** If the file exists locally then it is read */
 	    if (is_file($file_path)) {
-	    	$file_contents                             = $this->ReadLocalFile($file_path);
+	    	$file_contents                             = $this->ReadLocalFile($file_path);			
 	    }
 		/** Otherwise the file contents are fetched and saved to local file */
 		else {					
-		    $file_contents                             = $this->GetFileContent($file_url);
+		    $file_contents                             = $this->GetFileContent($file_url);			
 			/** The file contents are saved locally */
 			$this->WriteLocalFile($file_contents, $file_path);
 		}

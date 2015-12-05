@@ -41,9 +41,7 @@ final class Configuration extends \Framework\Application\WordPress\Configuration
         /** Test type indicates the type of application testing. i.e script, functional or unit */
         $this->user_configuration['testing']['test_type']                                                      = 'unit';
         /** The list of classes to unit test */
-        $this->user_configuration['testing']['test_classes']                                                   = array(
-																										            "testing"
-																										        );		
+        $this->user_configuration['testing']['test_classes']                                                   = array("testing");		
 		/** Used to indicate if application is being developed */
         $this->user_configuration['development_mode']                                                          = true;
 		
@@ -56,9 +54,16 @@ final class Configuration extends \Framework\Application\WordPress\Configuration
 		$this->user_configuration['required_frameworks']['filesystem']['class_name']                           = '\Framework\Utilities\FileSystem';
 		$this->user_configuration['required_frameworks']['encryption']['class_name']                           = '\Framework\Utilities\Encryption';
 		$this->user_configuration['required_frameworks']['string']['class_name']                               = '\Framework\Utilities\String';
-		$this->user_configuration['required_frameworks']['template']['class_name']                             = '\Framework\Utilities\Template';		
+		$this->user_configuration['required_frameworks']['template']['class_name']                             = '\Framework\Utilities\Template';
+		$this->user_configuration['required_frameworks']['dashboardwidget']['class_name']                      = '\WordPressExample\DashboardWidget';
 		/** Used to indicate if application should use sessions */
 	    $this->user_configuration['general']['enable_sessions']                                                = true;
+			
+		/** The custom wordpress actions are defined. for example ajax callbacks */
+		$this->user_configuration['wordpress']['custom_actions']                                               = array(		     
+ 		        /** Used to add custom post types to WordPress */   
+			    array("name"=>"init","callback"=>array("testing","AddCustomPostTypes"))			    			
+	    );		
 			
 		/** If the application is not in test mode, then the custom filters and action are registered */
 		if (!$this->user_configuration['testing']['test_mode']) {					
@@ -79,16 +84,18 @@ final class Configuration extends \Framework\Application\WordPress\Configuration
 		    $this->user_configuration['wordpress']['admin_init_callback']                                      = array("application","InitAdminPage");
 		    /** The localization information for wpe-admin.js */		    
 		    $admin_script_localization                                                                         = array(
-			    "name"=>"wordpress-example-dashboard-widget",
+			    "name"=>"wpe-dashboard-widget",
 			    "variable_name"=>"WPE_L10n",
 			    "data"=>array(
-					'title_alert' => __( "Please enter the dashboard title", "wordpress-example" ),
-					'text_alert' => __( "Please enter the dashboard text", "wordpress-example" )					
+					'title_alert' => __("Please enter the dashboard title","wordpress-example"),
+					'text_alert' => __("Please enter the dashboard text","wordpress-example"),
+					'ajax_success' => __("Successfully made ajax call","wordpress-example"),
+					'ajax_error' => __("Ajax call could not be made","wordpress-example")				
 				)		
 		    );		   			
 		    /** The WordPress admin javascript files are defined */
 		    $this->user_configuration['wordpress']['admin_scripts']                                           = array(
-		        array("name"=>"wpe-admin","file"=>"js/wpe-admin.js","dependencies"=>array("jquery"), "localization"=>""),
+		        array("name"=>"wpe-admin","file"=>"js/wpe-admin.js","dependencies"=>array("jquery")),
 		        array("name"=>"wpe-dashboard-widget","file"=>"js/wpe-dashboard-widget.js","dependencies"=>array("jquery"), "localization"=>$admin_script_localization)
 		    );
 		    /** The WordPress admin css files are defined */
@@ -96,15 +103,15 @@ final class Configuration extends \Framework\Application\WordPress\Configuration
 		        array("name"=>"wpe-admin","file"=>"css/wpe-admin.css","dependencies"=>"","media"=>"all")		        
 		    );
 		    /** The WordPress public javascript files are defined */
-		    $this->user_configuration['wordpress']['public_scripts']                                          = array(array());
+		    $this->user_configuration['wordpress']['public_scripts']                                          = false;
 		    /** The WordPress public css files are defined */
-		    $this->user_configuration['wordpress']['public_styles']                                           = array(array());
+		    $this->user_configuration['wordpress']['public_styles']                                           = false;
 		    /** The custom wordpress actions are defined. for example ajax callbacks */
 		    $this->user_configuration['wordpress']['custom_actions']                                          = array(		     
  		        /** Used to setup the WordPress example dashboard widget */   
-			    array("name"=>"wpe_dashboard_setup","callback"=>array("application","SetupDashboardWidget")),
+			    array("name"=>"wp_dashboard_setup","callback"=>array("application","SetupDashboardWidget")),
 			    /** Ajax call for the Dashboard widget */
-			    array("name"=>"wpe_ajax_dashboardwidget","callback"=>array("dashboardwidget","DashboardWidgetAjax"))			    			
+			    array("name"=>"wp_ajax_dashboardwidget","callback"=>array("dashboardwidget","DashboardWidgetAjax"))			    			
 		    );			       
 	    }
         else {
@@ -112,12 +119,7 @@ final class Configuration extends \Framework\Application\WordPress\Configuration
 		    $this->user_configuration['wordpress']['custom_filters']                                          = array(		     
 		        /** Used to create custom posts and taxonomies */
 			    array("name"=>"xmlrpc_methods","callback"=>array("testing","RegisterXmlRpcMethods"))			
-		    );
-			/** The custom wordpress actions are defined. for example ajax callbacks */
-		    $this->user_configuration['wordpress']['custom_actions']                                          = array(		     
- 		        /** Used to add custom post types to WordPress */   
-			    array("name"=>"init","callback"=>array("application","AddCustomPostTypes"))			    			
-		    );		
+		    );			
         }
     }
 }

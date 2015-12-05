@@ -5,10 +5,10 @@ namespace Framework\Application\WordPress;
 use \Framework\Object\WordPressDataObject as WordPressDataObject;
 
 /**
- * This class implements the base BrowserApplication class 
+ * This class implements the base WordPress Application class 
  * 
- * It contains functions that help in constructing the user interface of browser based applications
- * The class should be inherited by the application user interface class
+ * It contains functions that help in constructing wordpress plugins
+ * The class should be inherited by the users application class
  * 
  * @category   Framework
  * @package    WordPress
@@ -234,7 +234,7 @@ class Application extends \Framework\Application\Application
 		/** The wordpress configuration is fetched */
 		$wordpress_configuration=$this->GetConfig("wordpress");
 		for($count = 0; $count < count($wordpress_configuration[$configuration_name]); $count++) {
-            	 
+
             if(!$is_script)wp_enqueue_style( 
             $wordpress_configuration[$configuration_name][$count]['name'], 
             $this->GetConfig("wordpress","plugin_url") . "/". $wordpress_configuration[$configuration_name][$count]['file'],
@@ -392,7 +392,9 @@ class Application extends \Framework\Application\Application
 	 * @param array $args the parameters for the new custom post type
 	 */
 	public function AddNewCustomPostType($name,$singular_name,$labels=array(),$args=array())
-	{	
+	{
+		/** The plugin text domain */
+		$plugin_text_domain   = $this->GetConfig("wordpress", "plugin_text_domain");	
 		/** The default labels for new custom post type */		
 	    $default_labels                = array(
 											'name'               => _x($name,$name,$plugin_text_domain),
@@ -468,6 +470,8 @@ class Application extends \Framework\Application\Application
 	 */
 	public function ImportFile($post_type,$file_details,$start_line,$line_count)
 	{
+		/** The configuration object is fetched */
+		$configuration_object                               = $this->GetConfigurationObject();
 	    /** The data to be imported */
 		$data                                               = $file_details['data'];	
 		/** The name of the key field */
@@ -479,13 +483,13 @@ class Application extends \Framework\Application\Application
 		/** The name of all the fields of the file */
 		$field_list                                         = $file_details['fields'];
 		/** The list of fields to ignore */
-		$fields_to_ignore                                   = $file_details['fields_to_ignore'];				
+		$fields_to_ignore                                   = $file_details['fields_to_ignore'];		
 		/** The components of each meta data item is extracted using regular expression */
 		for ($count1 = ($start_line-1); $count1 < $line_count; $count1++) {				
 		    /** The data to be saved */
 			$post_data                                      = array();				
 			/** The post author is set to the user id of the logged in user */
-		    $post_data['post_author']                       = get_current_user_id();
+		    $post_data['post_author']                       = $this->GetConfig("wordpress","user_id");
 			/** The concatenation of all the field values */
 			$combined_values                                = "";
 			/** The data to be saved is generated */
@@ -535,11 +539,11 @@ class Application extends \Framework\Application\Application
     public function Main()
     {
     	/** The wordpress configuration is fetched */
-		$wordpress_configuration    = $this->GetConfig("wordpress");		
+		$wordpress_configuration    = $this->GetConfig("wordpress");	
     	/** Used to register the function that will be called when the plugin is activated */
-		\register_activation_hook( $this->GetConfig("wordpress","plugin_file_path"), array( 'Application', 'WP_Activate' ) );
+		\register_activation_hook( $this->GetConfig("wordpress","plugin_file_path"), array( $this->GetComponent("application"), 'WP_Activate' ) );
 		/** Used to register the function that will be called when the plugin is deactivated */
-		\register_activation_hook( $this->GetConfig("wordpress","plugin_file_path"), array( 'Application', 'WP_Deactivate' ) );
+		\register_activation_hook( $this->GetConfig("wordpress","plugin_file_path"), array( $this->GetComponent("application"), 'WP_Deactivate' ) );
 				
 		$filters                    = $wordpress_configuration['filters'];         
 		$actions                    = $wordpress_configuration['actions'];
