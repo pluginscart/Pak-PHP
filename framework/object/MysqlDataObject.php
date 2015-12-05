@@ -44,10 +44,12 @@ class MysqlDataObject extends DataObject
      * @since 1.0.0
 	 * @param string $table_name name of the MySQL database table
      * @param string $field_name sort field of the MySQL database table
+	 * @param string $order_by_direction sort direction. e.g ASC or DESC
      */
-    final public function SetOrderBy($table_name,$field_name)
-    {        
-        $this->order_by = $table_name . "." . $field_name; 
+    final public function SetOrderBy($table_name,$field_name,$order_by_direction)
+    {
+    	$this->order_by_direction  = $order_by_direction;        
+        $this->order_by            = $table_name . "." . $field_name; 
     }
 	
 	/**

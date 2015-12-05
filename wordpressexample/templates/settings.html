@@ -1,0 +1,28 @@
+<div class="wrap">
+    <div id="ic_settings_left">	
+	    <h2>{heading}</h2>
+	    <form method="post" action="options.php" id="ic_form" class="ic-hidden">			           		
+	        <input type="hidden" name="ic_ajax_nonce" id="ic_ajax_nonce" value="{ajax_nonce}"/>
+	        {form_fields}	    
+	        <input type="submit" name="ic_submit" id="ic_submit" class="button button-primary" value="Save Changes" />
+	        &nbsp;&nbsp;&nbsp;
+	        <input type="button" name="ic_import" id="ic_import" class="button button-primary" value="Import Data" />
+	    </form>   
+	    <br/>
+	    <br/>
+	    <hr/>
+	    <br/>
+	    <div>{powered_by_text}: <a href='http://tanzil.net/trans/' target='_new'>http://tanzil.net/trans/</a></div>
+	    <div>{report_bug_text}: <a href='https://wordpress.org/support/plugin/islam-companion' target='_new'>https://wordpress.org/support/plugin/islam-companion</a></div>
+	    <div>{suggest_feature_text}: <a href='https://wordpress.org/support/plugin/islam-companion' target='_new'>https://wordpress.org/support/plugin/islam-companion</a></div>
+    </div>
+    <div id="ic_settings_right">	
+    	<h4 id="data_import_heading">{data_import_heading}</h4>
+    	<div id="szlider">
+            <div id="szliderbar">
+            </div>
+            <div id="szazalek">
+            </div>
+        </div>
+    </div>
+</div>

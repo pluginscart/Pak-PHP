@@ -1,21 +1,21 @@
 <?php
 
-namespace Example;
+namespace WebExample;
 
 use Framework\Configuration\Base as Base;
 
 /**
- * This class implements the presentation class for the Example application
+ * This class implements the presentation class for the WebExample application
  * It implements functions that provide template parameters to the controller classes
  * 
  * It is used to provide template parameters
  * 
- * @category   Example
- * @package    Example
+ * @category   WebExample
+ * @package    Presentation
  * @author     Nadir Latif <nadir@pakjiddat.com>
  * @license    https://www.gnu.org/licenses/gpl-2.0.html GNU General Public License, version 2
  * @version    1.0.0
- * @link       N.A
+ * @since      1.0.0
  */
 class Presentation extends Base
 {

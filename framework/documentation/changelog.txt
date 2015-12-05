@@ -5,7 +5,7 @@ Changelog:
     2) Added default implementation for the functions GetKeyField,SetKeyField,GetData,SetData,Edit,SetReadonly,Get to object/DataObject.php file
     3) Added new sub class of DataObject called WordPressDataObject
     4) Removed Load function from DataObject class
-    5) Added the function GetFileNameAndExtension to String class in utilities package. It allows parsing the url of a file and extracing the file name and extension
+    5) Added the function GetFileNameAndExtension to String class in utilities package. It allows parsing the url of a file and extracting the file name and extension
     6) Added the function DownloadAndParseFile to FileSystem class in utilities package. It allows downloading and parsing files
     7) Added the function ImportFile to WordPress Application.php class. It allows importing array data to WordPress posts 
     

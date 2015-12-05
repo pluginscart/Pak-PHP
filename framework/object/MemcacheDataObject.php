@@ -41,7 +41,7 @@ class MemcacheDataObject extends DataObject
      * Used to load the data from memcache to the data property of the object
      * 
      * It reads data from memcache and loads it to the $data property of the object
-     * It uses the object's field_name property as the memcache key
+     * It uses the object's key_field property as the memcache key
      * The current object corresponds to a memcache value that corresponds to a single memcache key 
      * 
      * @since 1.0.0
@@ -52,7 +52,7 @@ class MemcacheDataObject extends DataObject
     final public function Read($parameters)
     {
     	/** The value is fetched from memcache */
-    	$value                =  $this->GetComponent("memcache")->get($this->field_name);
+    	$value                =  $this->GetComponent("memcache")->get($this->key_field);
 		/** If the value exists then it is unserialized */
 		if($value) {
 			$this->data       = unserialize($value);
@@ -81,9 +81,9 @@ class MemcacheDataObject extends DataObject
     	/** If the current object is set to read only then an exception is thrown */
     	if ($this->readonly) throw new \Exception("Cannot delete readonly object.");        
         /** The value is deleted from memcache */
-    	$is_deleted                =  $this->GetComponent("memcache")->delete($this->field_name);
+    	$is_deleted                =  $this->GetComponent("memcache")->delete($this->key_field);
 		/** An exception is thrown if the value could not be deleted */
-		if (!$is_deleted) throw new \Exception("Memcache value for the key: ".$this->field_name." could not be deleted");
+		if (!$is_deleted) throw new \Exception("Memcache value for the key: ".$this->key_field." could not be deleted");
     }
 
     /**
@@ -100,7 +100,7 @@ class MemcacheDataObject extends DataObject
     final public function RecordExists()
     {        
         /** The value is fetched from memcache */
-    	$value                   =  $this->GetComponent("memcache")->get($this->field_name);
+    	$value                   =  $this->GetComponent("memcache")->get($this->key_field);
 		/** If the value exists then $record_exists is set to true. Otherwise it is set to false */
 		$record_exists           = ($value !==false)?true:false;		
 		
@@ -123,8 +123,8 @@ class MemcacheDataObject extends DataObject
 		/** The data stored in memache. It is serialized before storing */
 		$value                     = serialize($this->data); 
         /** The value is saved to memcache */
-    	$is_saved                  =  $this->GetComponent("memcache")->set($this->field_name,$value,0,0);
+    	$is_saved                  =  $this->GetComponent("memcache")->set($this->key_field,$value,0,0);
 		/** An exception is thrown if the value could not be saved */
-		if (!$is_saved) throw new \Exception("Memcache value for the key: ".$this->field_name." could not be saved");
+		if (!$is_saved) throw new \Exception("Memcache value for the key: ".$this->key_field." could not be saved");
     }
 }

@@ -1,0 +1,842 @@
+# Loco Gettext template
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: Islam Companion\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: Mon Mar 23 2015 17:04:25 GMT+0500 (Pakistan Standard "
+"Time)\n"
+"POT-Revision-Date: Sat Mar 28 2015 21:34:52 GMT+0500 (Pakistan Standard "
+"Time)\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: \n"
+"Language-Team: \n"
+"Language: \n"
+"Plural-Forms: nplurals=INTEGER; plural=EXPRESSION\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-SourceCharset: UTF-8\n"
+"X-Poedit-Basepath: .\n"
+"X-Poedit-SearchPath-0: ..\n"
+"X-Poedit-KeywordsList: _:1;gettext:1;dgettext:2;ngettext:1,2;dngettext:2,3;"
+"__:1;_e:1;_c:1;_n:1,2;_n_noop:1,2;_nc:1,2;__ngettext:1,2;__ngettext_noop:1,2;"
+"_x:1,2c;_ex:1,2c;_nx:1,2,4c;_nx_noop:1,2,3c;_n_js:1,2;_nx_js:1,2,3c;"
+"esc_attr__:1;esc_html__:1;esc_attr_e:1;esc_html_e:1;esc_attr_x:1,2c;"
+"esc_html_x:1,2c;comments_number_link:2,3;t:1;st:1;trans:1;transChoice:1,2\n"
+"X-Generator: Loco - https://localise.biz/"
+
+msgid "Islam Companion Settings"
+msgstr ""
+
+msgid "Islam Companion"
+msgstr ""
+
+msgid "Save Changes"
+msgstr ""
+
+msgid "Powered By"
+msgstr ""
+
+msgid "Report a bug"
+msgstr ""
+
+msgid "Suggest a feature"
+msgstr ""
+
+msgid "Language"
+msgstr ""
+
+msgid "Narrator"
+msgstr ""
+
+msgid "Surah"
+msgstr ""
+
+msgid "Ruku"
+msgstr ""
+
+msgid "Please Select"
+msgstr ""
+
+msgid "Please select a language first"
+msgstr ""
+
+msgid "Please select"
+msgstr ""
+
+msgid "prev"
+msgstr ""
+
+msgid "next"
+msgstr ""
+
+msgid ""
+"<span class='float-left'><b>%1$s: %2$s, %3$s <span>%4$d</span> of <span "
+"id='ic-total-rakaat-count'>%5$d</span>"
+msgstr ""
+
+msgid "Aya"
+msgstr ""
+
+msgid "Holy Quran"
+msgstr ""
+
+msgid "An error occurred in the Islam Companion Plugin. Please try again."
+msgstr ""
+
+msgid "Please select a language"
+msgstr ""
+
+msgid "Please select a narrator"
+msgstr ""
+
+msgid "Please select a sura"
+msgstr ""
+
+msgid "Please select a ruku"
+msgstr ""
+
+msgid "An error occurred while trying to get data from server. Please try again"
+msgstr ""
+
+msgid "Please select a sura first"
+msgstr ""
+
+msgid "Al-Faatiha\n"
+msgstr ""
+
+msgid "Al-Baqara"
+msgstr ""
+
+msgid "Aal-i-Imraan"
+msgstr ""
+
+msgid "An-Nisaa"
+msgstr ""
+
+msgid "Al-Maaida"
+msgstr ""
+
+msgid "Al-An'aam"
+msgstr ""
+
+msgid "Al-A'raaf"
+msgstr ""
+
+msgid "Al-Anfaal"
+msgstr ""
+
+msgid "At-Tawba"
+msgstr ""
+
+msgid "Yunus"
+msgstr ""
+
+msgid "Yusuf\n"
+msgstr ""
+
+msgid "Ar-Ra'd"
+msgstr ""
+
+msgid "Ibrahim"
+msgstr ""
+
+msgid "Al-Hijr"
+msgstr ""
+
+msgid "An-Nahl"
+msgstr ""
+
+msgid "Al-Israa"
+msgstr ""
+
+msgid "Al-Kahf"
+msgstr ""
+
+msgid "Maryam"
+msgstr ""
+
+msgid "Taa-Haa"
+msgstr ""
+
+msgid "Al-Anbiyaa"
+msgstr ""
+
+msgid "Al-Hajj"
+msgstr ""
+
+msgid "Al-Muminoon"
+msgstr ""
+
+msgid "An-Noor"
+msgstr ""
+
+msgid "Al-Furqaan"
+msgstr ""
+
+msgid "Ash-Shu'araa"
+msgstr ""
+
+msgid "An-Naml"
+msgstr ""
+
+msgid "Al-Qasas"
+msgstr ""
+
+msgid "Al-Ankaboot"
+msgstr ""
+
+msgid "Ar-Room"
+msgstr ""
+
+msgid "Luqman"
+msgstr ""
+
+msgid "As-Sajda"
+msgstr ""
+
+msgid "Al-Ahzaab"
+msgstr ""
+
+msgid "Saba"
+msgstr ""
+
+msgid "Faatir"
+msgstr ""
+
+msgid "Yaseen"
+msgstr ""
+
+msgid "As-Saaffaat"
+msgstr ""
+
+msgid "Saad"
+msgstr ""
+
+msgid "Az-Zumar"
+msgstr ""
+
+msgid "Al-Ghaafir"
+msgstr ""
+
+msgid "Fussilat"
+msgstr ""
+
+msgid "Ash-Shura"
+msgstr ""
+
+msgid "Az-Zukhruf"
+msgstr ""
+
+msgid "Ad-Dukhaan"
+msgstr ""
+
+msgid "Al-Jaathiya"
+msgstr ""
+
+msgid "Al-Ahqaf"
+msgstr ""
+
+msgid "Muhammad"
+msgstr ""
+
+msgid "Al-Fath"
+msgstr ""
+
+msgid "Al-Hujuraat"
+msgstr ""
+
+msgid "Qaaf"
+msgstr ""
+
+msgid "Adh-Dhaariyat"
+msgstr ""
+
+msgid "At-Tur"
+msgstr ""
+
+msgid "An-Najm"
+msgstr ""
+
+msgid "Al-Qamar"
+msgstr ""
+
+msgid "Ar-Rahmaan"
+msgstr ""
+
+msgid "Al-Waaqia"
+msgstr ""
+
+msgid "Al-Hadid"
+msgstr ""
+
+msgid "Al-Mujaadila"
+msgstr ""
+
+msgid "Al-Hashr"
+msgstr ""
+
+msgid "Al-Mumtahana"
+msgstr ""
+
+msgid "As-Saff"
+msgstr ""
+
+msgid "Al-Jumu'a"
+msgstr ""
+
+msgid "Al-Munaafiqoon"
+msgstr ""
+
+msgid "At-Taghaabun"
+msgstr ""
+
+msgid "At-Talaaq"
+msgstr ""
+
+msgid "At-Tahrim"
+msgstr ""
+
+msgid "Al-Mulk"
+msgstr ""
+
+msgid "Al-Qalam"
+msgstr ""
+
+msgid "Al-Haaqqa"
+msgstr ""
+
+msgid "Al-Ma'aarij"
+msgstr ""
+
+msgid "Nooh"
+msgstr ""
+
+msgid "Al-Jinn"
+msgstr ""
+
+msgid "Al-Muzzammil"
+msgstr ""
+
+msgid "Al-Muddaththir"
+msgstr ""
+
+msgid "Al-Qiyaama"
+msgstr ""
+
+msgid "Al-Insaan"
+msgstr ""
+
+msgid "Al-Mursalaat"
+msgstr ""
+
+msgid "An-Naba"
+msgstr ""
+
+msgid "An-Naazi'aat"
+msgstr ""
+
+msgid "Abasa"
+msgstr ""
+
+msgid "At-Takwir"
+msgstr ""
+
+msgid "Al-Infitaar"
+msgstr ""
+
+msgid "Al-Mutaffifin"
+msgstr ""
+
+msgid "Al-Inshiqaaq"
+msgstr ""
+
+msgid "Al-Burooj"
+msgstr ""
+
+msgid "At-Taariq"
+msgstr ""
+
+msgid "Al-A'laa"
+msgstr ""
+
+msgid "Al-Ghaashiya"
+msgstr ""
+
+msgid "Al-Fajr"
+msgstr ""
+
+msgid "Al-Balad"
+msgstr ""
+
+msgid "Ash-Shams"
+msgstr ""
+
+msgid "Al-Lail"
+msgstr ""
+
+msgid "Ad-Dhuhaa"
+msgstr ""
+
+msgid "Ash-Sharh"
+msgstr ""
+
+msgid "At-Tin"
+msgstr ""
+
+msgid "Al-Alaq"
+msgstr ""
+
+msgid "Al-Qadr"
+msgstr ""
+
+msgid "Al-Bayyina"
+msgstr ""
+
+msgid "Az-Zalzala"
+msgstr ""
+
+msgid "Al-Aadiyaat"
+msgstr ""
+
+msgid "Al-Qaari'a"
+msgstr ""
+
+msgid "At-Takaathur"
+msgstr ""
+
+msgid "Al-Asr"
+msgstr ""
+
+msgid "Al-Humaza"
+msgstr ""
+
+msgid "Al-Fil"
+msgstr ""
+
+msgid "Quraish"
+msgstr ""
+
+msgid "Al-Maa'un"
+msgstr ""
+
+msgid "Al-Kawthar"
+msgstr ""
+
+msgid "Al-Kaafiroon"
+msgstr ""
+
+msgid "An-Nasr"
+msgstr ""
+
+msgid "Al-Masad"
+msgstr ""
+
+msgid "Al-Ikhlaas"
+msgstr ""
+
+msgid "Al-Falaq"
+msgstr ""
+
+msgid "An-Naas"
+msgstr ""
+
+msgid "Albanian"
+msgstr ""
+
+msgid "Amazigh"
+msgstr ""
+
+msgid "Amharic"
+msgstr ""
+
+msgid "Arabic"
+msgstr ""
+
+msgid "Azerbaijani"
+msgstr ""
+
+msgid "Bengali"
+msgstr ""
+
+msgid "Bosnian"
+msgstr ""
+
+msgid "Bulgarian"
+msgstr ""
+
+msgid "Chinese"
+msgstr ""
+
+msgid "Czech"
+msgstr ""
+
+msgid "Divehi"
+msgstr ""
+
+msgid "Dutch"
+msgstr ""
+
+msgid "English"
+msgstr ""
+
+msgid "French"
+msgstr ""
+
+msgid "German"
+msgstr ""
+
+msgid "Hausa"
+msgstr ""
+
+msgid "Hindi"
+msgstr ""
+
+msgid "Indonesian"
+msgstr ""
+
+msgid "Italian"
+msgstr ""
+
+msgid "Japanese"
+msgstr ""
+
+msgid "Korean"
+msgstr ""
+
+msgid "Kurdish"
+msgstr ""
+
+msgid "Malay"
+msgstr ""
+
+msgid "Malayalam"
+msgstr ""
+
+msgid "Norwegian"
+msgstr ""
+
+msgid "Vasim Mammadaliyev and Ziya Bunyadov"
+msgstr ""
+
+msgid "Muhammed Sadiq and Muhammed Sani Habib"
+msgstr ""
+
+msgid "King Fahad Quran Complex"
+msgstr ""
+
+msgid "Jalal ad-Din al-Mahalli and Jalal ad-Din as-Suyuti"
+msgstr ""
+
+msgid "Alikhan Musayev"
+msgstr ""
+
+msgid "Mustafa Mlivo"
+msgstr ""
+
+msgid "Besim Korkut"
+msgstr ""
+
+msgid "Muhiuddin Khan"
+msgstr ""
+
+msgid "Zohurul Hoque"
+msgstr ""
+
+msgid "Tzvetan Theophanov"
+msgstr ""
+
+msgid "Ramdane At Mansour"
+msgstr ""
+
+msgid "A. R. Nykl"
+msgstr ""
+
+msgid "Preklad I. Hrbek"
+msgstr ""
+
+msgid "Amir Zaidan"
+msgstr ""
+
+msgid "Adel Theodor Khoury"
+msgstr ""
+
+msgid "A. S. F. Bubenheim and N. Elyas"
+msgstr ""
+
+msgid "Abu Rida Muhammad ibn Ahmad ibn Rassoul"
+msgstr ""
+
+msgid "Office of the President of Maldives"
+msgstr ""
+
+msgid "Muhammad Isa García"
+msgstr ""
+
+msgid "Mohammed Marmaduke William Pickthall"
+msgstr ""
+
+msgid "Ali Quli Qarai"
+msgstr ""
+
+msgid "Hasan al-Fatih Qaribullah and Ahmad Darwish"
+msgstr ""
+
+msgid "Saheeh International"
+msgstr ""
+
+msgid "Muhammad Sarwar"
+msgstr ""
+
+msgid "Mohammad Habib Shakir"
+msgstr ""
+
+msgid "English Transliteration"
+msgstr ""
+
+msgid "Abdullah Yusuf Ali"
+msgstr ""
+
+msgid "A. J. Arberry"
+msgstr ""
+
+msgid "Julio Cortes "
+msgstr ""
+
+msgid "Raúl González Bórnez"
+msgstr ""
+
+msgid "Ahmed Ali"
+msgstr ""
+
+msgid "Ahmed Raza Khan"
+msgstr ""
+
+msgid "Abdul Majid Daryabadi"
+msgstr ""
+
+msgid "Muhammad Taqi-ud-Din al-Hilali and Muhammad Muhsin Khan"
+msgstr ""
+
+msgid "Talal Itani"
+msgstr ""
+
+msgid "Abul Ala Maududi"
+msgstr ""
+
+msgid "Wahiduddin Khan"
+msgstr ""
+
+msgid "Hussain Ansarian"
+msgstr ""
+
+msgid "Naser Makarem Shirazi"
+msgstr ""
+
+msgid "Muhammad Hamidullah"
+msgstr ""
+
+msgid "AbdolMohammad Ayati"
+msgstr ""
+
+msgid "Abolfazl Bahrampour"
+msgstr ""
+
+msgid "Mostafa Khorramdel"
+msgstr ""
+
+msgid "Baha'oddin Khorramshahi"
+msgstr ""
+
+msgid "Mohammad Sadeqi Tehrani"
+msgstr ""
+
+msgid "Mohammad Mahdi Fooladvand"
+msgstr ""
+
+msgid "Sayyed Jalaloddin Mojtabavi"
+msgstr ""
+
+msgid "Mohammad Kazem Moezzi"
+msgstr ""
+
+msgid "Mahdi Elahi Ghomshei"
+msgstr ""
+
+msgid "Muhammad Farooq Khan and Muhammad Ahmed  "
+msgstr ""
+
+msgid "Abubakar Mahmoud Gumi"
+msgstr ""
+
+msgid "Suhel Farooq Khan and Saifur Rahman Nadwi"
+msgstr ""
+
+msgid "Error, duplicate 1: Jalal ad-Din al-Mahalli and Jalal ad-Din as-Suyuti"
+msgstr ""
+
+msgid "Muhammad Quraish Shihab et al."
+msgstr ""
+
+msgid "Indonesian Ministry of Religious Affairs"
+msgstr ""
+
+msgid "Hamza Roberto Piccardo"
+msgstr ""
+
+msgid "Unknown"
+msgstr ""
+
+msgid "Burhan Muhammad-Amin"
+msgstr ""
+
+msgid "Cheriyamundam Abdul Hameed and Kunhi Mohammed Parappoor"
+msgstr ""
+
+msgid "Abdullah Muhammad Basmeih"
+msgstr ""
+
+msgid "Muhammad Karakunnu and Vanidas Elayavoor"
+msgstr ""
+
+msgid "Fred Leemhuis"
+msgstr ""
+
+msgid "Sofian S. Siregar"
+msgstr ""
+
+msgid "Einar Berg"
+msgstr ""
+
+msgid "Salomo Keyzer "
+msgstr ""
+
+msgid "Samir El-Hayek "
+msgstr ""
+
+msgid "Józefa Bielawskiego"
+msgstr ""
+
+msgid "Elmir Kuliev"
+msgstr ""
+
+msgid "Gordy Semyonovich Sablukov"
+msgstr ""
+
+msgid "V. Porokhova"
+msgstr ""
+
+msgid "Magomed-Nuri Osmanovich Osmanov"
+msgstr ""
+
+msgid "George Grigore"
+msgstr ""
+
+msgid "Abu Adel"
+msgstr ""
+
+msgid "Elmir Kuliev (with Abd ar-Rahman as-Saadi's commentaries)"
+msgstr ""
+
+msgid "Ministry of Awqaf, Egypt"
+msgstr ""
+
+msgid "Ignaty Yulianovich Krachkovsky"
+msgstr ""
+
+msgid "Knut Bernström"
+msgstr ""
+
+msgid "Mahmud Muhammad Abduh"
+msgstr ""
+
+msgid "Taj Mehmood Amroti"
+msgstr ""
+
+msgid "Sherif Ahmeti"
+msgstr ""
+
+msgid "Feti Mehdiu"
+msgstr ""
+
+msgid "Hasan Efendi Nahi"
+msgstr ""
+
+msgid "Ali Muhsin Al-Barwani"
+msgstr ""
+
+msgid "Suat Yildirim"
+msgstr ""
+
+msgid "Abdulbaki Golpinarli"
+msgstr ""
+
+msgid "Diyanet Isleri"
+msgstr ""
+
+msgid "Muhammet Abay"
+msgstr ""
+
+msgid "Alİ Bulaç"
+msgstr ""
+
+msgid "Abdol Mohammad Ayati"
+msgstr ""
+
+msgid "Yasar Nuri Ozturk"
+msgstr ""
+
+msgid "Jan Turst Foundation"
+msgstr ""
+
+msgid "Elmalili Hamdi Yazir"
+msgstr ""
+
+msgid "Yakub Ibn Nugman"
+msgstr ""
+
+msgid "Edip Yüksel"
+msgstr ""
+
+msgid "Error, duplicate 1: King Fahad Quran Complex"
+msgstr ""
+
+msgid "Diyanet Vakfi"
+msgstr ""
+
+msgid "Suleyman Ates"
+msgstr ""
+
+msgid "Muhammad Sodik Muhammad Yusuf"
+msgstr ""
+
+msgid "Error, duplicate 1: Ahmed Ali"
+msgstr ""
+
+msgid "Fateh Muhammad Jalandhry"
+msgstr ""
+
+msgid "Tahir ul Qadri"
+msgstr ""
+
+msgid "Syed Zeeshan Haider Jawadi"
+msgstr ""
+
+msgid "Muhammad Junagarhi"
+msgstr ""
+
+msgid "Ayatollah Muhammad Hussain Najafi "
+msgstr ""
+
+msgid "Muhammad Saleh"
+msgstr ""
+
+msgid "Error, duplicate 1: Ahmed Raza Khan"
+msgstr ""
+
+msgid "Abul A'ala Maududi"
+msgstr ""
+
+msgid "Ma Jian"
+msgstr ""

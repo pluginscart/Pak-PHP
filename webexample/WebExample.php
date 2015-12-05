@@ -1,22 +1,21 @@
 <?php
 
-namespace Example;
+namespace WebExample;
 
 /**
- * This class implements the unit tests for the Example application
+ * This class implements the unit tests for the WebExample application
  * It extends the Application class
  * 
- * It is used to test the Example application
- * It tests the framework utility libraries
+ * It is used to test the WebExample application
  * 
- * @category   Example
- * @package    Example
+ * @category   WebExample
+ * @package    Application
  * @author     Nadir Latif <nadir@pakjiddat.com>
  * @license    https://www.gnu.org/licenses/gpl-2.0.html GNU General Public License, version 2
  * @version    1.0.0
- * @link       N.A
+ * @since      1.0.0
  */
-class Example extends \Framework\Application\Application
+class WebExample extends \Framework\Application\Application
 {
     /** 
      * Handler function for index url option

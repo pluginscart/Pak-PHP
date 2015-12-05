@@ -1,0 +1,34 @@
+/**
+ * All of the CSS for your dashboard-specific functionality should be
+ * included in this file.
+ */
+.ic-float-left{float:left;font-size: 10pt;}
+.ic-float-right{float:right;font-size: 10pt;}
+.ic-navigator-class-rtl{font-size: 10pt;cursor: pointer;float:right;}
+.ic-navigator-class-ltr{font-size: 10pt;cursor: pointer;float:left;}
+.ic-rtl-dashboard-text{line-height:30px;font-size: 13pt;direction:rtl;text-align:right;word-wrap: break-word;font-weight: bold;}
+.ic-ltr-dashboard-text{direction:ltr;text-align:left;word-wrap: break-word;font-weight: bold; }
+.persian{list-style-type: persian;margin-right: 8%;}
+.amharic{list-style-type: amharic}
+.arabic-indic{list-style-type: arabic-indic;margin-right: 8%;}
+.bengali{list-style-type: bengali}
+.disc{list-style-type: disc;margin-right: 8%;}
+.lower-norwegian{list-style-type: lower-norwegian}
+.malayalam{list-style-type: malayalam;margin-right: 8%;}
+.somali{list-style-type: somali;margin-right: 8%;}
+.thai{list-style-type: thai}
+.decimal{list-style-type: decimal}
+.urdu{list-style-type: urdu;margin-right: 8%;margin-left: 1em;}
+.ic-small-text {font-size: 12px;}
+.ic-online-dictionary-link-rtl{cursor:pointer;float:left;}
+.ic-online-dictionary-link-ltr{cursor:pointer;float:right;}
+.ic-hidden{display:none;}
+.section-padding{padding-bottom:10px;height:20px;}
+.ic-audio-control{padding-right:20px;width:50%;max-height:35px;float:left;}
+.ic-heading{font-size: 10pt;font-weight: bold;}
+.ic_ajax_loader {background: url("/wp-content/plugins/islam-companion-v2/islam-companion/css/vendors/jquery-ajax-loader-spinner/spinner_squares_circle.gif") no-repeat center center transparent;width:100%;height: 100%;}
+
+#ic_settings_left{float:left;}
+#ic_settings_right{width: 50%;float:right;height: 400px;margin-top: 5%;visibility: hidden;}
+#data_import_heading{text-align: center;}
+#ic_import{visibility: hidden;}

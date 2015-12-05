@@ -24,7 +24,7 @@
 
 namespace Framework;
 /** The autoload.php file is included */
-require_once("autoload.php");
+require("autoload.php");
 /** The application context is determined */
 $context = (isset($argc))?"command line":"browser";
 /** The application parameters */
