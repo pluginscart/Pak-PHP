@@ -1,6 +1,6 @@
 <?php
 
-namespace Framework\Application\WordPress;
+namespace Framework\Frameworks\WordPress;
 
 /**
  * Base configuration class for wordpress applications
@@ -16,7 +16,6 @@ namespace Framework\Application\WordPress;
  * @author     Nadir Latif <nadir@pakjiddat.com>
  * @license    https://www.gnu.org/licenses/gpl-2.0.html GNU General Public License, version 2
  * @version    1.0.0
- * @link       N.A
  */
 abstract class Configuration extends \Framework\Configuration\Configuration
 {   
@@ -38,6 +37,8 @@ abstract class Configuration extends \Framework\Configuration\Configuration
         $default_configuration          = new DefaultConfiguration();
 		/** The default configuration is merged with user configuration and the result is returned */
         $this->configuration            = $default_configuration->GetUpdatedConfiguration($this->user_configuration);
+		/** The application authentication and error handling is enabled */		
+        $this->EnableAuthenticationAndErrorHandling();
         /** All required classes are included */
         $this->IncludeRequiredClasses();
         /** Php Sessions are enabled if user requested sessions */
@@ -64,7 +65,7 @@ abstract class Configuration extends \Framework\Configuration\Configuration
 	    $custom_filters                                                                                          = $this->GetConfig('wordpress','custom_filters');
 		/** The custom actions and filters */
 	    $custom_actions_filters                                                                                  = array("actions"=>$custom_actions,"filters"=>$custom_filters);		
-		/** All the custom actions and filters are registered */
+		/** All the custom actions and filters are registered */		
 		foreach ($custom_actions_filters as $hook_name => $hooks) {
 		    for($count=0; $count<count($hooks); $count++) {		    
 			    /** A custom action or filter */

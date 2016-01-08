@@ -10,17 +10,18 @@ final class ExampleClass
      */
     public function AuthenticationTest()
     {
+    	echo "<h2>Testing function: AuthenticationTest </h2>";
         /** List of valid user credentials. used to test the http digest authentication */
         $credentials              = array(
-            array(
-                "user_name" => "admin",
-                "password" => "admin"
-            ),
-            array(
-                "user_name" => "manager",
-                "password" => "manager"
-            )
-        );
+							            array(
+							                "user_name" => "admin",
+							                "password" => "admin"
+							            ),
+							            array(
+							                "user_name" => "manager",
+							                "password" => "manager"
+							            )
+							        );
         /** The custom text to use in the authentication box that shows in the browser */
         $authentication_box_title = "Protected Area!";
         /** The authentication object is fetched */
@@ -42,6 +43,8 @@ final class ExampleClass
      */
     public function CachingTest()
     {
+    	echo "<h2>Testing function: CachingTest </h2>";
+		
         /** The database object is fetched */
         $database_parameters = array(
             "host" => "localhost",
@@ -53,12 +56,12 @@ final class ExampleClass
         );
         $database_obj        = UtilitiesFramework::Factory("database", $database_parameters);
         $db_link             = $database_obj->df_get_id();
-        /** The prefix of the table. e.g if prefix name is example_ then table name is example_cached_data */
-        $table_prefix        = "example_";
+        /** The name of the table where the cached data will be stored */
+        $table_name          = "cached_data";
         /** The caching object is fetched with given parameters */
         $caching_parameters  = array(
             "db_link" => $database_obj->df_get_id(),
-            "table_prefix" => $table_prefix
+            "table_name" => $table_name
         );
         $caching_obj         = UtilitiesFramework::Factory("caching", $caching_parameters);
         /** The data is saved to cache */
@@ -67,11 +70,11 @@ final class ExampleClass
             "parameter 2"
         ), "test data");
         /** The data is fetched from cache */
-        $cached_data = $caching_obj->GetCachedData("TestFunction", array(
-            "parameter 1",
-            "parameter 2"
-		), true);
-        print_R($cached_data);
+        $cached_data         = $caching_obj->GetCachedData("TestFunction", array(
+						            "parameter 1",
+						            "parameter 2"
+								), true);
+        var_export($cached_data);
     }
     
     /**
@@ -80,6 +83,8 @@ final class ExampleClass
      */
     public function EncryptionTest()
     {
+    	echo "<h2>Testing function: EncryptionTest </h2>";
+		
         /** The encryption object is fetched */
         $encryption_obj = UtilitiesFramework::Factory("encryption");
         /** The text to be encrypted */
@@ -101,16 +106,19 @@ final class ExampleClass
      */
     public function DatabaseTest()
     {
+    	echo "<h2>Testing function: DatabaseTest </h2>";
+		echo "<h4>Contents of table: example_cached_data</h4>";
+		
         /** The database object is fetched */
-        $database_parameters = array(
-            "host" => "localhost",
-            "user" => "nadir",
-            "password" => "kcbW5eFSCbPXbJGLHvUGG8T8",
-            "database" => "dev_pakphp",
-            "debug" => "1",
-            "charset" => "utf8"
-        );
-        $database_obj        = UtilitiesFramework::Factory("database", $database_parameters);
+	    $database_parameters      = array(
+							            "host" => "localhost",
+							            "user" => "nadir",
+							            "password" => "kcbW5eFSCbPXbJGLHvUGG8T8",
+							            "database" => "dev_pakphp",
+							            "debug" => "1",
+							            "charset" => "utf8"
+							        );
+        $database_obj             = UtilitiesFramework::Factory("database", $database_parameters);
         /** The $database_obj is initialized and cleared */
         $database_obj->df_initialize();
         /** The select query is built */
@@ -124,7 +132,7 @@ final class ExampleClass
         
         $query   = $database_obj->df_build_query($main_query, $where_clause, 's');
         $db_rows = $database_obj->df_all_rows($query);
-        print_R($db_rows);
+        var_export($db_rows);
     }
     
     /**
@@ -133,6 +141,8 @@ final class ExampleClass
      */
     public function ExcelTest()
     {
+    	echo "<h2>Testing function: ExcelTest </h2>";
+    	
         /** The PhpExcel library is included */
         $excel_file_path = "!Enter the path to the PHPExcel IOFactory.php file!";
 		if(!is_file($excel_file_path)) {
@@ -141,9 +151,9 @@ final class ExampleClass
 		}
         include_once($excel_file_path);
         /** The Excel class object is fetched */
-        $excel_obj = UtilitiesFramework::Factory("excel");
-        $data_arr  = $excel_obj->ReadExcelFile("test.xls", "A2", "C13");
-        print_R($data_arr);
+        $excel_obj      = UtilitiesFramework::Factory("excel");
+        $data_arr       = $excel_obj->ReadExcelFile("test.xls", "A2", "C13");
+        var_export($data_arr);
     }
     
     /**
@@ -153,6 +163,8 @@ final class ExampleClass
      */
     public function EmailTest()
     {
+    	echo "<h2>Testing function: EmailTest </h2>";
+		
         /** 
          * The Email class object is fetched 
          * The Email class requires Mail and Mail_Mime pear package
@@ -164,10 +176,10 @@ final class ExampleClass
         $from_email = "nadir@pakjiddat.com";
         $to_email   = "nadir@pakjiddat.com";
         
-        $email_obj = UtilitiesFramework::Factory("email");
-        $is_sent   = $email_obj->SendEmail(array(
-            "test.xls"
-        ), $from_email, $to_email, "Utilitiesframework Test", "<h3>testing html content</h3>");
+        $email_obj  = UtilitiesFramework::Factory("email");
+        $is_sent    = $email_obj->SendEmail(array(
+			            "test.xls"
+			        ), $from_email, $to_email, "Utilitiesframework Test", "<h3>testing html content</h3>");
         if ($is_sent)
             echo "Email was successfully sent";
         else
@@ -180,26 +192,30 @@ final class ExampleClass
      */
     public function ErrorHandlingTest()
     {
+    	echo "<h2>Testing function: ErrorHandlingTest </h2>";
+    	
         /** The parameters from ErrorHandler object */
         $parameters                           = array();
         /** Custom shutdown function. It is automatically called just before script exits */
         $parameters['shutdown_function']      = array(
-            $this,
-            "CustomShutdown"
-        );
+										            $this,
+										            "CustomShutdown"
+										        );
 		/** Used to indicate that application is being run from browser */
-		$parameters['is_browser_application'] = true;
+		$parameters['context']                = "browser";
         /** Used to indicate if the error message should be displayed */
         $parameters['development_mode']       = true;
-        /** The email address that will get the error message email */
-        $parameters['email']                  = array("email_address"=>"nadir@pakjiddat.com","email_header"=>"From: admin@pakjiddat.com\r\nSubject: Test email");
-        /** The error log file name */
-        $parameters['log_file_name']          = "";
+        /** 
+		 * The name of the application folder
+		 * This name is checked against the file that raised the exception
+		 * If the file name does not include the application folder name then the exception is not handled
+		 */
+        $parameters['application_folder']     = "utilities";
         /** Custom error handling function */
         $parameters['custom_error_handler']   = array(
-            $this,
-            "CustomErrorHandler"
-        );
+										            $this,
+										            "CustomErrorHandler"
+										        );
         
         /** The ErrorHandling class object is fetched */
         $errorhandling_obj                    = UtilitiesFramework::Factory("errorhandler", $parameters);
@@ -215,41 +231,43 @@ final class ExampleClass
      */
     public function FileSystemTest()
     {
-        $is_browser_application = true;
-        $html_content           = '<!DOCTYPE html>
-								<html>
-								<head>
-								<meta charset="UTF-8">
-								<title>Title of the document</title>
-								</head>
-								
-								<body>
-								Content of the document......
-								</body>
-							</html>';
+    	echo "<h2>Testing function: FileSystemTest </h2>";
+		
+        $is_browser_application  = true;
+        $html_content            = '<!DOCTYPE html>
+									<html>
+									<head>
+									<meta charset="UTF-8">
+									<title>Title of the document</title>
+									</head>
+									
+									<body>
+									Content of the document......
+									</body>
+								</html>';
         
-        $html_content = str_replace("\r", "", $html_content);
-        $html_content = str_replace("\n", "", $html_content);
+        $html_content           = str_replace("\r", "", $html_content);
+        $html_content           = str_replace("\n", "", $html_content);
         
-        $validator_url = "https://html5.validator.nu/";
-        $output_format = ($is_browser_application) ? "html" : "text";
-        $show_source   = ($is_browser_application) ? "yes" : "no";
+        $validator_url          = "https://html5.validator.nu/";
+        $output_format          = ($is_browser_application) ? "html" : "text";
+        $show_source            = ($is_browser_application) ? "yes" : "no";
         
-        $content = array(
-            "parser" => "html5",
-            "out" => $output_format,
-            "showsource" => $show_source,
-            "asciiquotes" => "yes",
-            "content" => $html_content
-        );
+        $content                = array(
+						            "parser" => "html5",
+						            "out" => $output_format,
+						            "showsource" => $show_source,
+						            "asciiquotes" => "yes",
+						            "content" => $html_content
+						        );
         
-        $headers = array(
-            "Content-type: multipart/form-data; boundary=---------------------------" . strlen($html_content)
-        );
+        $headers                = array(
+						            "Content-type: multipart/form-data; boundary=---------------------------" . strlen($html_content)
+						          );
         
-        $errorhandling_obj = UtilitiesFramework::Factory("filesystem");
+        $errorhandling_obj      = UtilitiesFramework::Factory("filesystem");
         
-        $validation_results = $errorhandling_obj->GetFileContent($validator_url, "POST", $content, $headers);
+        $validation_results     = $errorhandling_obj->GetFileContent($validator_url, "POST", $content, $headers);
         if ($is_browser_application)
             $validation_results = str_replace("style.css", $validator_url . "style.css", $validation_results);
         
@@ -257,17 +275,19 @@ final class ExampleClass
     }
     
     /**
-     * String function testing
+     * String function test
      * Used to test relative to absolute conversion function
      */
     public function StringTest()
     {
+    	echo "<h2>Testing function: StringTest </h2>";
+		
         /** The String class object is fetched */
         $string_obj = UtilitiesFramework::Factory("string");
         $main_url   = "https://pear.php.net/manual/en/";
         $rel_url    = "package.mail.mail.send.php";
         $abs_url    = $string_obj->ConvertRelUrlToAbsUrl($main_url, $rel_url);
-        print_R($abs_url);
+        var_export($abs_url);
     }
     
     /**
@@ -281,7 +301,7 @@ final class ExampleClass
      */
     public function CustomErrorHandler($log_message, $error_parameters)
     {
-        echo "Custom error log message: <br/><br/>" . $log_message;
+        echo "Custom error message: <br/><br/>" . $log_message;
         echo "<br/><br/>Error parameters: <br/><br/>" . var_export($error_parameters, true);
     }
     
@@ -295,18 +315,154 @@ final class ExampleClass
     }
     
 	/**
-     * Template function testing
-     * Used to test template class
+     * Template function test
+     * Used to test Template class
      */
     public function TemplateTest()
     {
+    	echo "<h2>Testing function: TemplateTest </h2>";
+		
         /** The Template class object is fetched */
-        $template_obj = UtilitiesFramework::Factory("template");
-		$template_path = "templates".DIRECTORY_SEPARATOR."example.html";  
-		$tag_replacement_arr = array(array("title"=>"Page title","body"=>"Body title"));
+        $template_obj              = UtilitiesFramework::Factory("template");
+		$template_path             = ".." . DIRECTORY_SEPARATOR . "templates".DIRECTORY_SEPARATOR."example.html";  
+		$tag_replacement_arr       = array(array("title"=>"Page title","body"=>"Body title"));
 		/** The example template file is rendered */
         $template_file_contents    = $template_obj->RenderTemplateFile($template_path, $tag_replacement_arr);
-        print_R($template_file_contents);
+        var_export($template_file_contents);
+    }
+	
+	/**
+     * Reflection function test
+     * Used to test Reflection class
+     */
+    public function ReflectionTest()
+    {
+    	echo "<h2>Testing function: ReflectionTest </h2>";
+		
+        /** 
+		 * The reflection example class object is created
+		 * It provides the test function
+		 * This will be the users class
+		 */
+		include_once 'ReflectionExampleClass.php';
+        $reflection_example         = new ReflectionExampleClass();
+        /**
+		 * The function that provides custom validation for the test function parameters
+		 * It signals an error if the length of the random string is larger than 80 characters
+		 */
+        $custom_validation_callback = array($reflection_example, "CustomValidation");
+        /** The safe_function_caller closure is fetched from the Reflection class */
+        $safe_function_caller       = Reflection::GetClosure();
+        /** The parameters for the test function */
+        $parameters                 = array("number1"=>30,
+									    	"number2"=>10,
+											"number3"=>10,
+		 									"data"=>array(
+		 										  "type"=>"integer",
+		                                          "random_string"=>"<b style='text-align:center'>The result of adding the three integers is: </b>"
+										    )
+							  		);
+        /** The current application context */
+        $context                    = "browser";							 
+        /** The test function is called through the safe function caller */
+        $result                     = $safe_function_caller($reflection_example, "AddNumbers", $parameters, $context, $custom_validation_callback);			
+        /** The result of adding the numbers is displayed */
+        echo $result['random_string'].$result['sum'];
+    }
+
+	/**
+     * Used to get the test data
+     * It returns test error data
+	 * 
+	 * @return array $log_data it contains database object and test data which will be saved to database
+	 *     error_data => array the test error data to be logged
+	 *     database_obj => object the database object that will be used to store the data to database. it is an object of called DatabaseFunctions
+     */
+    private function GetTestErrorData()
+    {
+        /** The database object is fetched */
+	    $database_parameters            = array(
+									            "host" => "localhost",
+									            "user" => "nadir",
+									            "password" => "kcbW5eFSCbPXbJGLHvUGG8T8",
+									            "database" => "dev_pakphp",
+									            "debug" => "1",
+									            "charset" => "utf8"
+									        );
+        $database_obj                    = UtilitiesFramework::Factory("database", $database_parameters);
+        /** The $database_obj is initialized and cleared */
+        $database_obj->df_initialize();
+		/** An exception object is created */
+		$exception_obj                   = new \Exception("Test Exception"); 
+		/** The error data */
+		$error_data['error_level']       = $exception_obj->getCode();
+		$error_data['error_type']        = "Exception";
+        $error_data['error_message']     = $exception_obj->getMessage();
+        $error_data['error_file']        = $exception_obj->getFile();
+        $error_data['error_line']        = $exception_obj->getLine();
+        $error_data['error_context']     = json_encode($exception_obj->getTrace());
+		$error_data['server_data']       = json_encode($_SERVER);
+		$error_data['mysql_query_log']   = $database_obj->df_display_query_log(true);
+		$error_data['created_on']        = time();
+		
+		/** The log data to be returned */
+		$log_data                        = array("error_data" => $error_data, "database_obj" => $database_obj);
+		
+		return $log_data;
+    }
+	
+	/**
+     * Logging function test
+     * Used to test Logging class
+	 * It shows how to log error data
+     */
+    public function LoggingTest()
+    {    		
+    	echo "<h2>Testing function: LoggingTest </h2>";
+		/** The test error data is fetched */
+		$log_data                        = $this->GetTestErrorData();
+		
+		/** The logging object is fetched */
+        $logging                         = UtilitiesFramework::Factory("logging");
+		/** The logging information */
+		$logging_information             = array("database_object" => $log_data['database_obj'],"table_name" => "error_data");
+        /** The parameters used to save the log data */
+        $parameters                      = array("logging_information" => $logging_information,
+			                                   "logging_data" => $log_data['error_data'],
+			                                   "logging_destination" => "database"               
+										   );
+        /** The error data is saved to database */
+        $logging->SaveLogData($parameters);
+		/** The log data should have been saved to database */
+		echo "<h4>Error data was sucessfully logged to database</h4>";
+		/** The parameters used to fetch the log data. All errors of type Exception are fetched */
+        $parameters                      = array(array("field_name" => "error_type", "field_value" => "Exception"));
+		/** The log data is fetched from database */
+		$log_data                        = $logging->FetchLogDataFromDatabase($logging_information, $parameters);
+		/** The log data is displayed */
+		echo "<h4>Error data was successfully fetched from database. Following data was fetched: </h4>";
+		print_r($log_data);
+    }
+
+	/**
+     * Profiling function test
+     * Used to test Profiling class
+	 * It shows how to get execution time of GetTestErrorData function
+     */
+    public function ProfilingTest()
+    {    		
+    	echo "<h2>Testing function: ProfilingTest </h2>";
+		
+		/** The profiling object is fetched */
+        $profiling                       = UtilitiesFramework::Factory("profiling");
+		/** The timer is started */
+		$profiling->StartProfiling("execution_time");
+		/** The GetTestErrorData function is called */
+		$this->GetTestErrorData();
+		/** The execution time for the function is returned in microseconds */
+		$execution_time                  = $profiling->GetExecutionTime();
+		/** The execution time is displayed */
+		echo "<h4>The function GetTestErrorData took: ".$execution_time." microseconds</h4>";
     }
 }
 ?>

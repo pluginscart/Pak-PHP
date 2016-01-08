@@ -23,12 +23,6 @@ use \Framework\Configuration\Base as Base;
 class DataObjectAbstraction extends Base
 {
 	/** 
-	 * The mapping between the data source name and the data source class
-	 * 
-     * @since 1.0.0		
-	 */    
-    protected $data_source_class_mapping = array("wordpress"=>"WordpressDataObject","mysql"=>"MysqlDataObject");
-	/** 
 	 * The name of the underlying data source
 	 * 
      * @since 1.0.0		
@@ -43,25 +37,47 @@ class DataObjectAbstraction extends Base
     protected $data_source_object;
 	    
 	/**
-	 * Class constructor
-	 * Used to initialize the object
+	 * Sets the object meta information
+	 * Used to set the name of the data source
 	 * 
 	 * It sets the data source name
-	 * It creates an instance of the relavant data source class	 
+	 * It creates an instance of the relavant data source class
+	 * 	 
+	 * @since 1.0.0
+	 * @param array $meta_information an array with 2 keys:
+	 * configuration => the configuration object
+	 * parameters => parameters used to construct the object
 	 */
-	public function __construct()
+	public function __construct($meta_information)
 	{
-		/** The application configuration is fetched */
-		$configuration                = $this->GetConfigurationObject();		
+		/** The configuration object */
+		$configuration                = $meta_information['configuration'];
+		/** The configuration object is set */
+		$this->SetConfigurationObject($configuration);		
+		/** The database to class name mapping */
+		$data_source_class_mapping    = $this->GetConfig("general","data_source_class_mapping");
 		/** The data source name is set */
 		$this->data_source_name       = $this->GetConfig("general","database_type");
 		/** The data source class name */
-		$this->data_source_class_name = '\Framework\Object\\'.$this->data_source_class_mapping[$this->data_source_name];
+		$this->data_source_class_name = '\Framework\Object\\'.$data_source_class_mapping[$this->data_source_name];
 		/** The data source class object is created */		
-		$this->data_source_object     = new $this->data_source_class_name();
-		/** The application configuration object is set */
-		$this->data_source_object->SetConfigurationObject($configuration);
+		$this->data_source_object     = new $this->data_source_class_name($meta_information);
 	}
+	
+	/**
+     * Used to set the range from which the data should be fetched
+     * 
+     * It sets the start and end values for the data range	 
+	 * 
+     * @since 1.0.0	 
+     * @param string $start the index of the first record
+	 * @param string $end the number of records to fetch
+     */
+    public function SetLimit($start, $end)
+    {
+    	/** The limits of the underlying data source object are set */
+    	$this->data_source_object->SetLimit($start, $end);
+    }
 	
 	/**
      * Used to get the table name
@@ -208,14 +224,31 @@ class DataObjectAbstraction extends Base
      * It uses the key field value given as parameter     
      * 
      * @since 1.0.0
-	 * @param array $fields list of field names to fetch	  
-     * @param mixed $condition the condition used to fetch the data from database
-	 * @param boolean $read_all used to indicate if all data should be returned
+	 * @param mixed $parameters the parameters used to fetched the data. for relational data, it should have following keys:
+	 * fields => list of field names to fetch
+     * condition => the condition used to fetch the data from database
+	 * it can be a single string or integer value. in this case the previously set field name and table name are used 
+	 * or an array with following fields: field,value,table,operation and operator
+	 * read_all => used to indicate if all data should be returned
+	 * in case of non relational data, it can be empty
+	 * order => array the sort information
+	 *     field => string the sort field
+	 *     direction => string [ASC~DESC] the sort direction
      */
-    final public function Read($fields,$condition,$read_all)
+    final public function Read($parameters)
     {
+    	/** The original query parameters */
+    	$original_query_parameters = $parameters;
+    	/** The given parameters are transformed */
+    	$parameters                = $this->data_source_object->TransformParameters($parameters);		
     	/** The data is read from the underlying data source object */
-    	$this->data_source_object->Read($fields,$condition,$read_all);
+    	$this->data_source_object->Read($parameters);
+		/** The data that was returned by the data source */
+		$data                      = $this->data_source_object->GetData();
+		/** The resulting data is filtered */
+    	$data                      = $this->data_source_object->FilterData($original_query_parameters, $data);		
+		/** The filtered data is set to the object */
+		$this->data_source_object->SetData($data);		
     }
 	    
     /**
@@ -302,10 +335,7 @@ class DataObjectAbstraction extends Base
      */
     public function SetMetaInformation($meta_information)
 	{
-		/** If MySQL is to be used then the MySQL table name and field name are set */
-		if ($this->GetConfig("general","database_type") == "mysql") {
-			/** The SetMetaInformation function of the underlying data source class object is called */
-			$this->data_source_object->SetMetaInformation($meta_information);		    		   
-		}
+		/** The SetMetaInformation function of the underlying data source class object is called */
+	    $this->data_source_object->SetMetaInformation($meta_information);		    
 	}
 }

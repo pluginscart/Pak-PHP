@@ -12,7 +12,7 @@ use \Framework\Configuration\Base as Base;
  * It contains functions that help in constructing etl scripts
  * 
  * @category   Framework
- * @package    Tools
+ * @package    Object
  * @author     Nadir Latif <nadir@pakjiddat.com>
  * @license    https://www.gnu.org/licenses/gpl-2.0.html GNU General Public License, version 2
  * @version    Release: 1.0.0

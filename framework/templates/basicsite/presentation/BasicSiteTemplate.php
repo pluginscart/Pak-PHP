@@ -38,6 +38,8 @@ final class BasicSiteTemplate extends TemplateEngine
             $user_interface_html = $this->RenderTextBox($parameters);
         else if ($option == "html_table")
             $user_interface_html = $this->RenderHtmlTable($parameters);
+	    else if ($option == "simple_html_table")
+            $user_interface_html = $this->RenderSimpleHtmlTable($parameters);
         else if ($option == "css_js_tags")
             $user_interface_html = $this->RenderCssJsFileTags($parameters);
         else if ($option == "datalist_options")
@@ -358,6 +360,74 @@ final class BasicSiteTemplate extends TemplateEngine
         
     }
     
+	/**
+     * Used to get html string for basicsite table_data template
+	 * It uses simpler parameters as compared to RenderHtmlTable function	 
+     * 
+     * It builds the html of the table_data template from the given parameters
+     * It uses simple_table_row and simple_table_column templates
+     * 
+     * @since 1.0.0
+     * @param array $parameters an array of table parameters. it contains 5 key value pairs     
+     * table_rows => an array whoose each element is an array of column values     
+     * table_css_class => the css class for the table
+     * @throws Exception an object of type Exception is thrown if the number of elements in header_width array is not equal to number of elements in header_text array
+     * 
+     * @return string $table_string the html table string containing all the table data		 
+     */
+    private function RenderSimpleHtmlTable($parameters)
+    {
+    	/** The CSS class for the table */
+    	$table_css_class                        = $parameters['table_css_class'];    	
+        /** The table row html string is generated */
+        $table_rows_params                      = array();
+        for ($count1 = 0; $count1 < count($parameters['table_rows']); $count1++) {
+            /** The table_row_column.html template parameters are initialized */
+            $table_col_params                   = array();            
+            /** The simple_table_column.html template parameters are generated */
+            $table_row_col_text_arr             = $parameters['table_rows'][$count1];
+            for ($count2 = 0; $count2 < count($table_row_col_text_arr); $count2++) {
+            	/** The column text */            	
+                $column_text                    = $table_row_col_text_arr[$count2];
+				/** The column css class */				
+                $table_col_params[] = array(
+                    "column_data" => $column_text                    
+                );
+            }
+			
+			/** The full path to the template file */
+            $template_file_path                = $this->GetConfig("path","template_path").DIRECTORY_SEPARATOR."simple_table_column.html";
+		    /** The table_column.html template string is generated */
+            $table_col_text                    = \Framework\Utilities\UtilitiesFramework::Factory("template")->RenderTemplateFile($template_file_path, $table_col_params);        
+                   
+            /** The generated table column html string is added to table_row.html template parameters */
+            $table_rows_params[] = array(                
+                "table_column" => $table_col_text
+            );
+        }
+
+		/** The full path to the template file */
+        $template_file_path                   = $this->GetConfig("path","template_path").DIRECTORY_SEPARATOR."simple_table_row.html";
+		/** The table_row_column.html template string is generated */
+        $table_rows_text                      = \Framework\Utilities\UtilitiesFramework::Factory("template")->RenderTemplateFile($template_file_path, $table_rows_params);        
+ 
+        /** The table_data.html template parameters are generated */
+	    $table_data_params                    = array(
+											            array(                
+											                "table_rows" => $table_rows_text,
+											                "table_css_class" => $table_css_class,           
+											            )
+											        );
+        
+		/** The full path to the template file */
+        $template_file_path                  = $this->GetConfig("path","template_path").DIRECTORY_SEPARATOR."simple_table_data.html";
+		/** The table_row_column.html template string is generated */
+        $table_rows_str                      = \Framework\Utilities\UtilitiesFramework::Factory("template")->RenderTemplateFile($template_file_path, $table_data_params);        
+
+        return $table_rows_str;
+        
+    }
+
     /**
      * Used to get html string for basicsite table_data template
      * 
@@ -366,36 +436,39 @@ final class BasicSiteTemplate extends TemplateEngine
      * 
      * @since 1.0.0
      * @param array $parameters an array of table parameters. it contains 5 key value pairs
-     * table_headers=>an array whoose each element is a text string. each text string is a header element		 
-     * header_widths=>header width of each column header
-     * table_rows=>an array whoose each each element is an array of column values
-     * table_row_css=>an array with 2 elements. each element is a css class for a table row	
-     * css_class=>an array whoose each element is a css class that should be applied to each row column	
-	 * cell_attributes_callback=>a callback function that gives the cell attributes for given table row and column
-	 * table_css_class=>the css class for the table
+     * table_headers => an array whoose each element is a text string. each text string is a header element		 
+     * header_widths => header width of each column header
+     * table_rows => an array whoose each element is an array of column values
+     * table_row_css => an array with 2 elements. each element is a css class for a table row	
+     * css_class => an array whoose each element is a css class that should be applied to each row column	
+	 * cell_attributes_callback => a callback function that gives the cell attributes for given table row and column
+	 * table_css_class => the css class for the table
      * @throws Exception an object of type Exception is thrown if the number of elements in header_width array is not equal to number of elements in header_text array
      * 
      * @return string $table_string the html table string containing all the table data		 
      */
     private function RenderHtmlTable($parameters)
-    {       
-        if (count($parameters['table_headers']) != count($parameters['header_widths']))
-            throw new \Exception("Header width array count must match header text array count");
-        
-        /** The table header parameters are generated. each parameter contains a header_width and header_text */
-        for ($count = 0; $count < count($parameters['table_headers']); $count++) {
-            /** The header text */
-            $header_text                        = $parameters['table_headers'][$count];
-            /** The width of a table header column */
-            $header_width                       = ($parameters['header_widths'][$count]);
-            /** The header column css class */
-            $header_column_class                = $parameters['header_column_class'][$count];
-            /** The table header params are updated */
-            $table_header_params[]              = array(
-                "header_extra_css" => $header_width,
-                "header_text" => $header_text,
-                "header_column_class" => $header_column_class
-            );
+    {
+    	/** The table header */
+		$table_header_params                        = "";
+    	if (is_array($parameters['table_headers']) && is_array($parameters['header_widths'])) {       
+            if (count($parameters['table_headers']) != count($parameters['header_widths']))
+                throw new \Exception("Header width array count must match header text array count");        		    
+            /** The table header parameters are generated. each parameter contains a header_width and header_text */
+            for ($count = 0; $count < count($parameters['table_headers']); $count++) {
+                /** The header text */
+                $header_text                        = $parameters['table_headers'][$count];
+                /** The width of a table header column */
+                $header_width                       = ($parameters['header_widths'][$count]);
+                /** The header column css class */
+                $header_column_class                = $parameters['header_column_class'][$count];
+                /** The table header params are updated */
+                $table_header_params[]              = array(
+                    "header_extra_css" => $header_width,
+                    "header_text" => $header_text,
+                    "header_column_class" => $header_column_class
+                );
+            }
         }
 		/** The table css class */
 		$table_css_class                        = $parameters['table_css_class'];
@@ -409,7 +482,7 @@ final class BasicSiteTemplate extends TemplateEngine
             /** The table_row_column.html template parameters are initialized */
             $table_col_params                   = array();
             /** The row css class is set. The css class repeats after each row */
-            $row_css_class                      = $parameters['table_row_css'][$count1 % 2];
+            $row_css_class                      = (is_array($parameters['table_row_css']))?$parameters['table_row_css'][$count1 % 2]:"";
             /** The table_column.html template parameters are generated */
             $table_row_col_text_arr             = $parameters['table_rows'][$count1];
             for ($count2 = 0; $count2 < count($table_row_col_text_arr); $count2++) {            	

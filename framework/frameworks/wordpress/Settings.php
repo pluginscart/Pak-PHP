@@ -1,6 +1,6 @@
 <?php
 
-namespace Framework\Application\WordPress;
+namespace Framework\Frameworks\WordPress;
 
 use \Framework\Configuration\Base as Base;
 

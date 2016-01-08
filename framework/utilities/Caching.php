@@ -31,10 +31,9 @@ final class Caching
      */
     private $db_link;    
     /**
-     * The table prefix for the mysql tables containing cached data
-     * For example "example_"
+     * The table name for the mysql table containing cached data     
      */
-    private $table_prefix;
+    private $table_name;
 	
     /**
      * Used to return a single instance of the class
@@ -46,7 +45,7 @@ final class Caching
      * @since 1.0.0
      * @param array $parameters an array containing class parameters. it has following keys:
      * db_link=> the link to the database
-     * table_prefix=> the table prefix of the database table where the cached data will be stored		 		
+     * table_name=> the table name of the database table where the cached data will be stored		 		
      *  
      * @return Caching static::$instance name the instance of the correct child class is returned 
      */
@@ -61,20 +60,20 @@ final class Caching
     /**
      * Class constructor
      *
-     * Used to set the database table name prefix for the table that stores cached data
+     * Used to set the database table name for the table that stores cached data
      * Also sets the database link resource
      * 
      * @since 1.0.0
      * @param array $parameters an array containing class parameters. it has following keys:
-     * db_link=> the link to the database
-     * table_prefix=> the table prefix of the database table where the cached data will be stored		 		 							 		
+     * db_link => the link to the database
+     * table_name => the table of the database table where the cached data will be stored		 		 							 		
      */
     protected function __construct($parameters)
     {
         /** The database connection link */
         $this->db_link                 = $parameters['db_link'];
-        /** The database table prefix */
-        $this->table_prefix            = $parameters['table_prefix'];
+        /** The database table name */
+        $this->table_name              = $parameters['table_name'];
         /** The duration in seconds for which each functon should be cached */
         self::$function_cache_duration = array(
             "TestFunction" => (3600 * 24)
@@ -141,9 +140,9 @@ final class Caching
         $parameters     = $this->EncodeFunctionData($parameters);
         /** The cached data is fetched from database */
         if ($cache_duration != -1 && $check_cache_duration)
-            $select_str = "SELECT * FROM " . $this->table_prefix . "cached_data WHERE function_name='" . mysqli_escape_string($this->db_link, $function_name) . "' AND function_parameters='" . mysqli_escape_string($this->db_link, $parameters) . "' AND (created_on+" . mysqli_escape_string($this->db_link, $cache_duration) . ")>=" . time();
+            $select_str = "SELECT * FROM " . $this->table_name . " WHERE function_name='" . mysqli_escape_string($this->db_link, $function_name) . "' AND function_parameters='" . mysqli_escape_string($this->db_link, $parameters) . "' AND (created_on+" . mysqli_escape_string($this->db_link, $cache_duration) . ")>=" . time();
         else
-            $select_str = "SELECT * FROM " . $this->table_prefix . "cached_data WHERE function_name='" . mysqli_escape_string($this->db_link, $function_name) . "' AND function_parameters='" . mysqli_escape_string($this->db_link, $parameters) . "'";
+            $select_str = "SELECT * FROM " . $this->table_name . " WHERE function_name='" . mysqli_escape_string($this->db_link, $function_name) . "' AND function_parameters='" . mysqli_escape_string($this->db_link, $parameters) . "'";
 		
         $result = mysqli_query($this->db_link, $select_str);
         /** If the data is found then it is returned */
@@ -179,12 +178,12 @@ final class Caching
         $encoded_data       = $this->EncodeFunctionData($data);
         /**	The data is fetched from cache. If it exists in cache then it is updated */
         if ($this->GetCachedData($function_name, $parameters, false)) {
-            $update_str = "UPDATE " . $this->table_prefix . "cached_data SET created_on='" . time() . "',data='" . mysqli_escape_string($this->db_link, $encoded_data) . "' WHERE function_name='" . mysqli_escape_string($this->db_link, $function_name) . "' AND function_parameters='" . mysqli_escape_string($this->db_link, $encoded_parameters) . "'";
+            $update_str = "UPDATE " . $this->table_name . " SET created_on='" . time() . "',data='" . mysqli_escape_string($this->db_link, $encoded_data) . "' WHERE function_name='" . mysqli_escape_string($this->db_link, $function_name) . "' AND function_parameters='" . mysqli_escape_string($this->db_link, $encoded_parameters) . "'";
             mysqli_query($this->db_link, $update_str);
         }
         /** Otherwise it is added to database */
         else {
-            $insert_str = "INSERT INTO " . $this->table_prefix . "cached_data(function_name,function_parameters,data,created_on) VALUES('" . mysqli_escape_string($this->db_link, $function_name) . "','" . mysqli_escape_string($this->db_link, $encoded_parameters) . "','" . mysqli_escape_string($this->db_link, $encoded_data) . "','" . time() . "')";
+            $insert_str = "INSERT INTO " . $this->table_name . "(function_name,function_parameters,data,created_on) VALUES('" . mysqli_escape_string($this->db_link, $function_name) . "','" . mysqli_escape_string($this->db_link, $encoded_parameters) . "','" . mysqli_escape_string($this->db_link, $encoded_data) . "','" . time() . "')";
             mysqli_query($this->db_link, $insert_str);
         }
     }

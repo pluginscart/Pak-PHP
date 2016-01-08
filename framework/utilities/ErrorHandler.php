@@ -13,8 +13,7 @@ namespace Framework\Utilities;
  * @package    Utilities
  * @author     Nadir Latif <nadir@pakjiddat.com>
  * @license    https://www.gnu.org/licenses/gpl-2.0.html GNU General Public License, version 2
- * @version    Release: 1.0.2
- * @link       N.A
+ * @version    Release: 1.0.4 
  */
 final class ErrorHandler
 {
@@ -30,26 +29,15 @@ final class ErrorHandler
      * Contains detailed error information
      * Includes error message, error file name, error line number and error context		 
      */
-    private $error_message, $error_file, $error_line, $error_context;
-    /**
-     * The email information used for emailing the error message
-	 * It is an array with 2 keys:
-	 * email_address => the email address string
-	 * email_header => the email header string
-     */
-    private $email;
-	/**
-	 * The web hook at which the error message should be posted
-	*/
-	private $web_hook;	 
-    /**
-     * The name of the file where error messages should be logged
-     */
-    private $log_file_name;
+    private $error_message, $error_file, $error_line, $error_context;	
     /**
      * The type of the error. i.e error or exception
      */
-    private $type;   
+    private $type;
+	/**
+     * The name of the application folder
+     */
+    private $application_folder;
     /**
      * The original exception object that raised the first exception
      */
@@ -59,9 +47,9 @@ final class ErrorHandler
      */
     private $exception_obj;
     /**
-     * Used to indicate if the current application is run from the browser or from the command line		 
+     * Used to indicate the application context. e.g if the current application is run from the browser or from the command line		 
      */
-    private $is_browser_application;
+    private $context;
     /**
      * Used to call a custom error handling function. It is an array with 2 keys:
      * object=> object containing the error handling function
@@ -94,7 +82,7 @@ final class ErrorHandler
      * email=> the email information used for emailing the error message. It is an array with 2 keys: address => the email address string. headers => the email headers string
      * log_file_name=> the name of the log file to which the error will be logged     		
      * development_mode=> used to indicate if the application is in development mode or production mode
-     * is_browser_application=> used to indicate if class is being used by a browser application
+     * context=> used to indicate if class is being used by a browser application
      * custom_error_handler=> used to specify a custom error handling function. it will be called when there is an error or exception. it is an array with 2 keys
      *  					  first is the object the second is the name of the function that will handle the error
      * 						  this function should exist within the object
@@ -120,11 +108,12 @@ final class ErrorHandler
      * Used to initialize the object variables from the constructor parameters
      * 
      * @since 1.0.0		 
-     * @param array $parameters it contains the configuration information for the logging class object. it should have following keys:		 
+     * @param array $parameters it contains the configuration information for the logging class object. it should have following keys:
+	 * application_folder => the name of the application folder. if the error file path does not include the application folder then the error/exception is not logged		 
      * email=> the email information used for emailing the error message. It is an array with 2 keys: email_address => the email address string. email_header => the email headers string
      * log_file_name=> the name of the log file to which the error will be logged     		
      * development_mode=> used to indicate if the application is in development mode or production mode
-     * is_browser_application=> used to indicate if class is being used by a browser application
+     * context=> used to indicate if class is being used by a browser application
      * custom_error_handler=> used to specify a custom error handling function. it will be called when there is an error or exception. it is an array with 2 keys
      *  					  first is the object the second is the name of the function that will handle the error
      * 						  this function should exist within the object
@@ -134,14 +123,12 @@ final class ErrorHandler
      */
     protected function __construct($parameters)
     {
-    	/** Object properties are set to the constructor parameters */
-        $this->email                  = isset($parameters['email'])?$parameters['email']:"";
-		$this->web_hook               = isset($parameters['web_hook'])?$parameters['web_hook']:"";
-        $this->log_file_name          = isset($parameters['log_file_name'])?$parameters['log_file_name']:"";        
+    	/** Object properties are set to the constructor parameters */                
         $this->custom_error_handler   = isset($parameters['custom_error_handler'])?$parameters['custom_error_handler']:"";
         $this->type                   = "";
+		$this->application_folder     = isset($parameters['application_folder'])?$parameters['application_folder']:'';
 		$this->development_mode       = isset($parameters['development_mode'])?$parameters['development_mode']:true;
-        $this->is_browser_application = isset($parameters['is_browser_application'])?$parameters['is_browser_application']:true;
+        $this->context                = isset($parameters['context'])?$parameters['context']:'browser';
 		/** The path to the templates folder */
 		$this->template_folder_path   = realpath(__DIR__.DIRECTORY_SEPARATOR."templates");		
         /** The error handler, exception handler and shutdown handler functions are registered */
@@ -182,7 +169,7 @@ final class ErrorHandler
      * @param array $error_context the error context
      */
     public function ErrorHandler($error_level, $error_message, $error_file, $error_line, $error_context)
-    {        
+    {
         /** The object error properties are set to the error information */
         $this->error_level   = $error_level;
         $this->error_message = $error_message;
@@ -258,9 +245,9 @@ final class ErrorHandler
     private function GetFunctionParameters($trace, $class_name, $function_name)
     {
     	/** The line break. If the application is being accessed from web browser then line break is set to <br/> */
-		$line_break                               = ($this->is_browser_application) ? "<br/>" : "\n";
+		$line_break                               = ($this->context == 'browser') ? "<br/>" : "\n";
 		/** The error message template file name suffix. If the application is being accessed from web browser then the suffix is set to html. otherwise it is set to plain */
-		$error_template_suffix                    = ($this->is_browser_application) ? "html" : "plain";
+		$error_template_suffix                    = ($this->context == 'browser') ? "html" : "plain";
     	/** The stack trace information. Used to render the function_parameters.html template file */
 		$template_parameters                    = array();
         /** Each function parameter is rendered using function_parameters.html template file */               
@@ -270,8 +257,8 @@ final class ErrorHandler
             /** Gets function parameter value from stack trace */
             $parameter_value                    = $trace['args'][$count];
             /** If parameter value is an array then it is converted to string */
-            if (is_array($parameter_value))
-                $parameter_value                = var_export($parameter_value,true);		
+            if (is_array($parameter_value) || is_object($parameter_value))
+                $parameter_value                = json_encode($parameter_value);	
 			/** If the parameter value is numeric then it is converted to a string */
 			else if(is_numeric($parameter_value))
 			    $parameter_value                = strval($parameter_value);			
@@ -300,8 +287,10 @@ final class ErrorHandler
         }
 		
 		/** If the trace contained parameters then the stack trace is rendered using error_message.html template file */
-		if (count($template_parameters)>0)$function_parameter_html = UtilitiesFramework::Factory("template")->RenderTemplateFile($this->template_folder_path.DIRECTORY_SEPARATOR."function_parameters_".$error_template_suffix.".html", $template_parameters);
-		else $function_parameter_html = "";
+		if (count($template_parameters)>0)
+		    $function_parameter_html            = UtilitiesFramework::Factory("template")->RenderTemplateFile($this->template_folder_path.DIRECTORY_SEPARATOR."function_parameters_".$error_template_suffix.".html", $template_parameters);
+		else
+		    $function_parameter_html            = "";
 		
         return $function_parameter_html;        
     }
@@ -316,9 +305,9 @@ final class ErrorHandler
     private function GetStackTrace()
     {
     	/** The line break. If the application is being accessed from web browser then line break is set to <br/> */
-		$line_break                               = ($this->is_browser_application) ? "<br/>" : "\n";
+		$line_break                               = ($this->context == 'browser') ? "<br/>" : "\n";
 		/** The error message template file name suffix. If the application is being accessed from web browser then the suffix is set to html. otherwise it is set to plain */
-		$error_template_suffix                    = ($this->is_browser_application) ? "html" : "plain";
+		$error_template_suffix                    = ($this->context == 'browser') ? "html" : "plain";
     	/** The stack trace is fetched */
         $stack_trace                              = debug_backtrace();
 		/** The start index of the stack trace */
@@ -344,8 +333,7 @@ final class ErrorHandler
 		 * Information of each stack trace is added to an array
 		 * The first three entries of the stack trace are skipped
 		 * Since they include the ErrorHandler class functions
-		 */
-	
+		 */	
         for ($count = $start_index; $count < count($stack_trace); $count++) {
             $trace                                = $stack_trace[$count];
             /** The parameters for a single function */
@@ -385,20 +373,26 @@ final class ErrorHandler
      */
     public function LogError()
     {
-    	try {    				
+    	try {
+				/** If the exception occured in a file that is not part of the application, then the function returns */    
+		    	if (strpos($this->error_file, $this->application_folder) === false && 
+		    	    strpos($this->error_file, "framework") === false) {
+		    		return;
+				}
+			
 		        /** The line break. If the application is being accessed from web browser then line break is set to <br/> */
-		        $line_break                           = ($this->is_browser_application) ? "<br/>" : "\n";
+		        $line_break                           = ($this->context == 'browser') ? "<br/>" : "\n";
 		        /** The error message template file name suffix. If the application is being accessed from web browser then the suffix is set to html. otherwise it is set to plain */
-		        $error_template_suffix                = ($this->is_browser_application) ? "html" : "plain"; 
+		        $error_template_suffix                = ($this->context == 'browser') ? "html" : "plain";				
 		        /** The error log template parameters */		
-		        $template_parameters = array();
+		        $template_parameters                  = array();
 				$template_parameters['date']          = date("d-m-Y H:i:s");
 				$template_parameters['line_break']    = $line_break;
 				$template_parameters['error_level']   = strval($this->error_level);
 				$template_parameters['error_file']    = $this->error_file;
 				$template_parameters['error_line']    = $this->error_line;
 				$template_parameters['error_message'] = $this->error_message;
-		        $template_parameters['stack_trace']   = $this->GetStackTrace();	
+		        $template_parameters['stack_trace']   = $this->GetStackTrace();
 		        /** The log message. The error message is rendered using error_message.html template file */
 		        $log_message                          = UtilitiesFramework::Factory("template")->RenderTemplateFile($this->template_folder_path.DIRECTORY_SEPARATOR."error_message_".$error_template_suffix.".html", $template_parameters);							
 				/** If the application is in development mode */
@@ -420,20 +414,11 @@ final class ErrorHandler
 				    /** The error message that is displayed to the user is rendered */
 		            $error_message = UtilitiesFramework::Factory("template")->RenderTemplateFile($template_file_name, $template_parameters);									   
 		        }
-						
-				/** The log message is written to log file if log file name is given */
-		        if ($this->log_file_name != "")
-		            error_log($log_message, 3, $this->log_file_name);
-		        /** The log message is sent as email if the email address is given */
-		        if ($this->email && $this->email['email_address'] != "")
-		            error_log($log_message, 1, $this->email['email_address'], $this->email['email_header']);
-				/** TO DO ! */
-				if($this->web_hook != ""){}
-			
+								
 		        /** 
 		         * If a custom error handling function is defined then it is called
 		         * The log message and error details are given as arguments
-		        */  
+		        */  		        
 		        if (is_callable($this->custom_error_handler)) {
 		            $error_parameters = array(
 		                "error_level" => $this->error_level,
@@ -447,7 +432,6 @@ final class ErrorHandler
 		            /** calls the user defined error handler if one is defined */
 		            call_user_func_array($this->custom_error_handler, array(
     		            $log_message,
-		                $error_message,
 		                $error_parameters
 		            ));		               
 		         }

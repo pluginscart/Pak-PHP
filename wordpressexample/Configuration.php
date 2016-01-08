@@ -15,7 +15,7 @@ namespace WordPressExample;
  * @version    1.0.0
  * @since      1.0.0
  */
-final class Configuration extends \Framework\Application\WordPress\Configuration
+final class Configuration extends \Framework\Frameworks\WordPress\Configuration
 {
    /**
      * Used to set the user configuration

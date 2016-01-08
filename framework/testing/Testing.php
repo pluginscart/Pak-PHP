@@ -38,7 +38,7 @@ class Testing extends Base
      * @return $array $validation_results the results of validation. the array contains 2 keys. result=> success or error
      * and message=> response returned by validation function
      */
-    final function ValidateOutput($output_type, $output)
+    final public function ValidateOutput($output_type, $output)
     {
         if ($output_type == "html")
             $validation_results = $this->ValidateHTML($output);
@@ -124,19 +124,19 @@ class Testing extends Base
     {
     	/** If the html does not have the html5 <!DOCTYPE html> text then the html is inserted into a base page template */
     	if (strpos($html_content,"<!DOCTYPE html>") === false) {
-    		$html_content       = $this->InsertHtmlToTemplate($html_content, "template");			
+    		$html_content       = $this->InsertHtmlToTemplate($html_content, "basicsite");			
     	}
 		
         $filesystem_obj         = \Framework\Utilities\UtilitiesFramework::Factory("filesystem");
-        $is_browser_application = $this->GetConfig("general", "is_browser_application");
+        $context                = $this->GetConfig("general", "parameters", "context");
         $test_parameters        = $this->GetConfig("testing");
         
         $html_content = str_replace("\r", "", $html_content);
         $html_content = str_replace("\n", "", $html_content);
         
         $validator_url = $test_parameters['validator_url'];
-        $output_format = ($is_browser_application) ? "html" : "text";
-        $show_source   = ($is_browser_application) ? "yes" : "no";
+        $output_format = ($context == "browser") ? "html" : "text";
+        $show_source   = ($context == "browser") ? "yes" : "no";
         
         $content = array(
             "parser" => "html5",
@@ -151,7 +151,7 @@ class Testing extends Base
         );
         
         $validation_results = $filesystem_obj->GetFileContent($validator_url, "POST", $content, $headers);
-        if ($is_browser_application)
+        if ($context == "browser")
             $validation_results = str_replace("style.css", $validator_url . "style.css", $validation_results);
         
         if (strpos($validation_results, "There were errors.") !== false)
@@ -192,74 +192,79 @@ class Testing extends Base
     }
     
     /**
-     * Used to save the test data to test folder
+     * Used to save the test data to database
      * 
      * It fetches the application parameters from application configuration
-     * It saves the application parameters to the test data folder defined
-     * In application configuration
+     * It saves the application parameters to the framework database
      * 
      * @since 1.0.0
+	 * @param string $object_name The name of the object that has the function
+	 * @param string $function_name The name of the function used to handle the url request 
      */
-    final public function SaveTestData()
+    final public function SaveTestData($object_name, $function_name)
     {        
-        /** If the test data folder path is not defined then an exception is thrown */
-        if (!is_dir($this->GetConfig("testing", "test_data_folder")))
-            throw new \Exception("Invalid test data folder path");
-		
-		/** The test data file path */
-        $test_data_file_path        = $this->GetConfig("testing", "test_data_folder") . DIRECTORY_SEPARATOR . $this->GetConfig('general', 'option') . "_test_data.json";
         /** The application parameters are fetched */
-        $test_data                  = $this->GetConfig('general', 'parameters');
+        $test_data                                     = $this->GetConfig('general', 'parameters');
+		/** The test data is encoded */
+		$test_data                                     = $this->GetComponent("encryption")->EncodeData($test_data);
+		/** The data that needs to be saved to database */
+		$test_data                                     = array("object_name" => $object_name, "function_name" => $function_name, "function_parameters" => $test_data, "created_on" => time());
+		/** The mysql table name where the data will be logged */
+		$test_table_name                               = $this->GetConfig("general", "mysql_table_names", "test");
+		/** The logging information */
+		$logging_information                           = array("database_object"=>$this->GetComponent("frameworkdatabase"), "table_name"=>$test_table_name);				
 		/** This configuration determines if the test data should be appended or not */
-        $append_test_data           = $this->GetConfig('testing', 'append_test_data');
-		/** If the test data should be appended to the test data file */
-		if ($append_test_data) {
-            $test_data                  = array($test_data);
-            /** The test data is read from local file if it exists */
-            if (is_file($test_data_file_path))
-                $current_test_data      = $this->GetComponent("filesystem")->ReadLocalFile($test_data_file_path);
-		    else
-			    $current_test_data      = array();				
-            /** Used to indicate if the test data exists in the test data file */
-            $test_data_exists           = false;
-            /**         
-		     * If the current test data file has contents then it is json decoded
-             * If the current test data file does not have the application parameters
-             * Then it is appended to current application parameters
-             */
-            if ($current_test_data != "") {
-        	    /** The current test data is json decoded */
-                $current_test_data      = json_decode($current_test_data, true);		
-                /** Each of the test data elements are checked */
-                for ($count = 0; $count < count($current_test_data); $count++) {
-                    /** Used to indicate that test data exists */
-                    $test_data_exists   = true;
-                    /** Test data element */
-                    $test_data_element  = $current_test_data[$count];
-                    /** Each item in the test data element is checked */
-                    foreach ($test_data_element as $key => $value) {
-                        /** If the test data item key does not exist or it exists but the value is not equal to the value of the current test data */
-                        if ((!isset($test_data[0][$key])) || (isset($test_data[0][$key]) && $test_data[0][$key] != $value)) {
-                            $test_data_exists = false;
-                            break;
-                        }
-                    }
-                    if ($test_data_exists)
-                        break;
-                 }
-                if (!$test_data_exists) {
-                    $test_data          = array_merge($current_test_data, $test_data);
-                }
-            }
-        }
-        /** The application parameters are json encoded */
-        $test_data                      = json_encode($test_data);
-        /** If the test data is not empty then the application parameters are written to test data file */
-        if ($test_data != "") {
-            $this->GetComponent("filesystem")->WriteLocalFile($test_data, $test_data_file_path);
-        }
+        $append_test_data                              = $this->GetConfig('testing', 'append_test_data');
+		/** If the data should not be appended then the current data is cleared */
+		if (!$append_test_data) {
+			/** The where clause condition used to fetch the data that is to be deleted */
+			$condition                                 = array(
+														    array('field_name'=>"object_name",'field_value'=>$object_name,'operation'=>"=",'operator'=>"AND"),
+														    array('field_name'=>'function_name','field_value'=>$function_name,'operation'=>"=",'operator'=>""),														    								     
+														);
+		    $this->GetComponent("logging")->ClearLogDataFromDatabase($logging_information, $condition);
+		}
+		
+		/** The parameters for saving log data */
+		$parameters                                    = array("logging_information"=>$logging_information,
+																"logging_data"=>$test_data,
+																"logging_destination"=>"database",
+														);
+		/** The test data is saved to database */
+		$this->GetComponent("logging")->SaveLogData($parameters);
     }
     
+		
+	/**
+     * Used to log variable values to database
+     * 
+     * It saves the value of the given variable to the framework database
+     * 	 
+     * @since 1.0.0
+	 * @internal
+	 * @param string $variable_name the name of the variable
+	 * @param string $variable_value the value of the variable	
+     */
+    public function LogVariableValueToDatabase($variable_name, $variable_value)
+	{
+		/** The database object is initialized */
+		$this->GetComponent("frameworkdatabase")->df_initialize();
+		/** The mysql table name where the variable value will be logged */
+		$variable_table_name                           = $this->GetConfig("general", "mysql_table_names", "variable");
+		/** If the variable value is an array then it is json encoded */
+		if (is_array($variable_value))
+		    $variable_value                            = json_encode($variable_value);
+		/** The logging information */
+		$logging_information                           = array("database_object"=>$this->GetComponent("frameworkdatabase"), "logging_table_name"=>$variable_table_name);
+		/** The parameters for saving log data */
+		$parameters                                    = array("logging_information"=>$logging_information,
+																"logging_data"=>array("variable_name"=>$variable_name,"variable_value"=>$variable_value,"created_on"=>time()),
+																"logging_destination"=>"database",
+														);
+		/** The test data is saved to database */
+		$this->GetComponent("logging")->SaveLogData($parameters);		
+	}
+	
     /**
      * Used to check if given expression is true
      * 
@@ -268,13 +273,14 @@ class Testing extends Base
      * 
      * @since 1.0.0
      * @param boolean $expression an expression that is either true or false
+	 * @param string $description the description of the assert
      */
-    final public function AssertTrue($expression)
+    final public function AssertTrue($expression, $description)
     {
         if ($expression)
             $this->valid_assert_count++;
         else
-            throw new \Exception("Failed to assert that false is true");
+            throw new \Exception("Failed to assert that false is true. Details: ".$description);
         
         return $expression;
     }
@@ -286,14 +292,15 @@ class Testing extends Base
      * 
      * @since 1.0.0
      * @param boolean $is_valid indicates if the parameters are equal
+	 * @param string $description the description of the assert
      */
-    final public function AssertEqual($parameter1, $parameter2)
+    final public function AssertEqual($parameter1, $parameter2, $description)
     {
         $is_valid = ($parameter1 == $parameter2);
         if ($is_valid)
             $this->valid_assert_count++;
         else
-            throw new \Exception("Failed to assert that " . $parameter1 . " is equal to " . $parameter2);
+            throw new \Exception("Failed to assert that " . $parameter1 . " is equal to " . $parameter2. " Details: ".$description);
         
         return $is_valid;
     }
@@ -335,7 +342,7 @@ class Testing extends Base
             if (is_callable($script_callback))
                 call_user_func($script_callback);
             else
-                throw new \Exception("Script function: " . $class_function . " does not exist in class: " . $script_object);
+                throw new \Exception("Script function: " . $class_function . " does not exist in class: " . get_class($script_object));
         }
         catch (Exception $e) {
             $errorhandler_obj = $this->GetComponent("errorhandler");
@@ -412,13 +419,14 @@ class Testing extends Base
                         /** If the callback function is callable then it is called with parameters in test data file */
                         if (is_callable($testing_callback)) {
                             /** The test data */
-                            $test_data           = $this->LoadTestData($class_function);
+                            $test_data           = $this->LoadTestData($object_name, $class_function);
                             /** The number of test cases of the test function */
                             $test_cases          = 0;						
                             /** The test function is called for each parameter in test data file */
                             for ($count2 = 0; $count2 < count($test_data); $count2++) {
                                 call_user_func_array($testing_callback, $test_data);
                                 $test_cases++;
+								//sleep(2);
                             }
                         } else
                             throw new \Exception("Test function: " . $class_function . " does not exist in class: " . $class_name);
@@ -565,52 +573,48 @@ class Testing extends Base
     /**     
      * This function provides test data for testing the given function
 	 * It may be overriden by child classes
-	 * It reads test data from the function's test data file
 	 * 
-     * It reads the test data file. contents of file should be in json format
-     * It decodes the json text
-     * The decoded text is returned
+     * It reads the test data from database
      * 
-     * @since    1.0.0
-     * @param string $function_name the name of the function to be tested
-     * @throws object \Exception an exception is thrown if the given test data file does not exist
+     * @since 1.0.0
+	 * @param string $object_name the name of the object that contains the function to be tested
+     * @param string $function_name the name of the function to be tested     
 	 *  
      * @return $test_data the test data contents
      */
-    protected function LoadTestData($function_name)
+    protected function LoadTestData($object_name, $function_name)
     {
-    	/** The test data */
-    	$test_data                          = array(0);
-    	/** The test data folder */
-    	$test_data_folder                   = $this->GetConfig("testing", "test_data_folder");
-		/** If the test data folder is not defined then empty test data is returned */
-		if (!is_dir($test_data_folder))
-		    return $test_data;
-		
-    	/** The list of all test data files */
-		$test_file_list                     = scandir($test_data_folder);
-		/** Current test file name */
-		$current_test_file_name             = str_replace("Test", "", $function_name);
-		/** For each test data file the function name is compared with test file name */
-		for ($count = 0; $count < count($test_file_list); $count++) {
-			$test_file_name                 = $test_file_list[$count];
-			$temp_test_file_name            = str_replace("_test_data.json","",$test_file_name);
-			if ($temp_test_file_name == $current_test_file_name) break;
-		}		
-        /** The test file is read */
-        $test_file_name                     = $this->GetConfig("testing", "test_data_folder") . DIRECTORY_SEPARATOR . $test_file_name;
-		/** If the test data file does not exist then an exception is thrown */
-		if (!is_file($test_file_name))
-		    throw new \Exception("The test data file: ".$test_file_name." does not exist");
-		
-        $test_data                          = $this->GetComponent("filesystem")->ReadLocalFile($test_file_name);
-        /** The test data is json decoded */
-        $test_data                          = json_decode($test_data, true);
-		/** If there is no test data, then a sample value is added to the test data so the test function runs at least once */
-		$test_data                          = (count($test_data)==0)?array(0):$test_data;
-		
-        /** The test data is returned */
-        return $test_data;
+    	/** The required test data */
+		$test_data                                     = array(0);
+    	/** The mysql table name where the data will be logged */
+		$test_table_name                               = $this->GetConfig("general", "mysql_table_names", "test");
+		/** The logging information */
+		$logging_information                           = array("database_object"=>$this->GetComponent("frameworkdatabase"), "table_name"=>$test_table_name);
+		/** The parameters for saving log data */
+		$parameters                                    = array(
+																array(
+																    "field_name"=>"object_name",
+																    "field_value"=>$object_name
+																),
+																array(
+																    "field_name"=>"function_name",
+																    "field_value"=>$function_name
+																)
+														);
+														
+		/** The log data is fetched from database */													
+    	$log_data                                      = $this->GetComponent("logging")->FetchLogDataFromDatabase($logging_information, $parameters);		
+		/** Each log data item is converted to test data item */
+		for ($count = 0; $count < count($log_data); $count++) {
+			/** Log data item */
+			$log_data_item                             = $log_data[$count];
+			/** The function parameters field which is the test data is decoded */
+			$function_parameters                       = $this->GetComponent("encryption")->DecodeData($log_data_item['function_parameters']);
+			/** The function parameters are added to the test data */
+			$test_data                                 = array_merge($test_data, array($function_parameters));
+		}
+
+		return $test_data;
     }
     
     /**

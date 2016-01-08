@@ -39,16 +39,11 @@ class DefaultConfiguration extends Base
         
         /** The configuration array is initialized */
         $configuration = $user_configuration;
-        
-        /** Used to indicate if application is a browser application */
-        if (isset($user_configuration['general']['is_browser_application']))
-            $configuration['general']['is_browser_application'] = $user_configuration['general']['is_browser_application'];
-        else
-            $configuration['general']['is_browser_application'] = (isset($_SERVER['HTTP_HOST']) || isset($_SERVER['HTTPS_HOST'])) ? true : false;
-        
+		/** The application context */
+	  	$configuration["general"]["parameters"]["context"]         = (isset($user_configuration['general']['parameters']['context'])) ? $user_configuration['general']['parameters']['context'] : 'browser';        
         /** The module name is saved to application configuration */
         if (!isset($user_configuration['general']['module']))
-            $user_configuration['general']['module'] = str_replace(" ", "", $user_configuration['general']['application_name']);
+            $user_configuration['general']['module']               = str_replace(" ", "", $user_configuration['general']['application_name']);
         
 		/** The application option and the option parameters are saved to application configuration */
         if (!isset($user_configuration['general']['default_option']))
@@ -58,36 +53,51 @@ class DefaultConfiguration extends Base
         $configuration['general']['development_mode']              = true;
         $configuration['general']['parameters']                    = (isset($user_configuration['general']['parameters'])) ? $user_configuration['general']['parameters'] : array();
         $configuration['general']['parameters']['uploads']         = (isset($_FILES)) ? $_FILES : array();
-        /** If the application is a browser application then the current url is saved */
-        if ($configuration['general']['is_browser_application'])
-            $configuration['general']['current_url'] = (isset($_SERVER['HTTPS_HOST']) ? 'https://' : 'http://') . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
+        /** If the application context is not command line then the current url is saved */
+        if ($configuration["general"]["parameters"]["context"] != "command line")
+            $configuration['general']['current_url']               = (isset($_SERVER['HTTPS_HOST']) ? 'https://' : 'http://') . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'];
         else
-            $configuration['general']['current_url'] = "N.A";
+            $configuration['general']['current_url']               = "N.A";
       
-        /** The application url mappings are set */
-        $configuration['general']['application_url_mappings'] = array();
+	    /** The application url mappings are set */
+        $configuration['general']['application_url_mappings']      = array();
         
 		/** Used to indicate that the application will implement a presentation class that will provide template parameters */
-		$configuration['general']['use_presentation']         = false;
+		$configuration['general']['use_presentation']              = false;
         /** Used to indicate if application should use sessions */
-        $configuration['general']['enable_sessions'] = false;
+        $configuration['general']['enable_sessions']               = false;
         
         /** The folder name of the application */
-        $configuration['general']['application_name'] = "";
+        $configuration['general']['application_name']              = "";
+
+		/** The ip address of the memcached server */
+		if (!isset($user_configuration['general']['memcache_server']))
+            $configuration['general']['memcache_server']           = "127.0.0.1";
+		
+		/** The mappings from database type to database object */
+		if (!isset($user_configuration['general']['data_source_class_mapping']))
+            $configuration['general']['data_source_class_mapping'] = array("wordpress"=>"WordPressDataObject","mysql"=>"MysqlDataObject");;
 		
 		/** The type of database used by the application */
 		if (!isset($user_configuration['general']['database_type']))
-            $configuration['general']['database_type'] = "mysql";
+            $configuration['general']['database_type']             = "mysql";
         
 		/** The DataObject class name is set */
-		if ($configuration['general']['database_type'] = "mysql")
-		    $configuration['general']['database_object_class'] = "\Framework\Object\MysqlDataObject";
-		else if ($configuration['general']['database_type'] = "wordpress")
-		    $configuration['general']['database_object_class'] = "\Framework\Object\WordpressDataObject";
+		if ($configuration['general']['database_type'] == "mysql")
+		    $configuration['general']['database_object_class']     = "\Framework\Object\MysqlDataObject";
+		else if ($configuration['general']['database_type'] == "wordpress")
+		    $configuration['general']['database_object_class']     = "\Framework\Object\WordpressDataObject";
 		
-		
+		/** The names of the MySQL database tables to be used by the application */		
+		if (!isset($user_configuration['general']['mysql_table_names']))            
+		    $configuration['general']['mysql_table_names']         = array(																											 
+																		"test"=>"pakphp_test_data",
+																		"variable"=>"pakphp_variable_data",
+																		"error"=>"pakphp_error_data",
+																		"api"=>"pakphp_api_access_data"
+																	);	
         /** The line break character for the application is set */
-        $configuration['general']['line_break'] = ($configuration['general']['is_browser_application']) ? "<br/>" : "\n";
+        $configuration['general']['line_break']                    = ($configuration["general"]["parameters"]["context"] != "command line") ? "<br/>" : "\n";
         
         /** If no option is set in url and no default option is given by user an exception is thrown */
         if ($configuration['general']['option'] == "" && isset($user_configuration['general']) && !is_string($user_configuration['general']['default_option']))
@@ -95,12 +105,19 @@ class DefaultConfiguration extends Base
         
         /** If no option is set in url then the default option is used */
         if ($configuration['general']['option'] == "" && isset($user_configuration['general']['default_option']))
-            $configuration['general']['option'] = $user_configuration['general']['default_option'];
+            $configuration['general']['option']                    = $user_configuration['general']['default_option'];
 
+		/** The access log information. It is saved to the api access log */
+		$configuration['general']['access_log_information']        = array("request_type" => "",
+																	    "option" => "",
+																	    "parameters" => "",
+																	    "response_format" => "",
+																	    "response" => array("result"=>"error"));
+		
         /** User configuration is merged */
         if (isset($user_configuration['general']))
-            $configuration['general'] = array_replace_recursive($configuration['general'], $user_configuration['general']);
-        
+            $configuration['general']                              = array_replace_recursive($configuration['general'], $user_configuration['general']);
+    
         return $configuration;
     }
     
@@ -169,7 +186,7 @@ class DefaultConfiguration extends Base
         /** The url of html validator to use during testing */
         $configuration['testing']['validator_url']     = "https://html5.validator.nu/";
         /** The path to the application test_data folder */
-        $configuration['testing']['test_data_folder']  = "";
+        $configuration['testing']['test_data_folder']  = "";		
         /** Used to indicate if the application should save page parameters to test_data folder */
         $configuration['testing']['save_test_data']    = false;
 		/** Used to indicate if the application should append the parameters to test data file */
@@ -186,7 +203,7 @@ class DefaultConfiguration extends Base
         /** The path to the application test data folder is set in user configuration */
         if (isset($user_configuration['testing']['test_data_folder']))
             $user_configuration['testing']['test_data_folder'] = $configuration['path']['application_path'] . DIRECTORY_SEPARATOR . $user_configuration['testing']['test_data_folder'];
-        
+
         /** The path to the application documentation folder is set in user configuration */
         if (isset($user_configuration['testing']['documentation_folder']))
             $user_configuration['testing']['documentation_folder'] = $configuration['path']['application_path'] . DIRECTORY_SEPARATOR . $user_configuration['testing']['documentation_folder'];
@@ -253,7 +270,7 @@ class DefaultConfiguration extends Base
         if (!isset($user_configuration['path']['application_template_folder']))
             $user_configuration['path']['application_template_folder'] = "templates";
         $user_configuration['path']['application_template_url'] = $user_configuration['path']['web_domain'] . "/" . $user_configuration['path']['relative_web_domain'] . "/" . $user_configuration['path']['application_folder'] . "/" . $user_configuration['path']['application_template_folder'];
-        
+
         /** The web path to the application's vendors folder */
         if (!isset($user_configuration['path']['web_vendor_path']))
             $user_configuration['path']['web_vendor_path']    = $user_configuration['path']['application_folder_url'] . "/vendors";
@@ -276,7 +293,11 @@ class DefaultConfiguration extends Base
         $configuration['path']['pear_folder_path']          = DIRECTORY_SEPARATOR . "usr" . DIRECTORY_SEPARATOR . "share" . DIRECTORY_SEPARATOR . "pear";		
 		/** Indicates the files that need to be included for all application requests */
         $configuration['path']['include_files']             = array();
-		
+				      
+	    /** The path to the application data folder is set in user configuration */
+        if (isset($user_configuration['path']['data_folder']))
+            $user_configuration['path']['data_folder']          = $configuration['path']['application_path'] . DIRECTORY_SEPARATOR . $user_configuration['path']['data_folder'];
+	
 		/** The folder path to the application's vendors folder */
         if (!isset($user_configuration['path']['vendor_folder_path']))
             $user_configuration['path']['vendor_folder_path'] = $configuration['path']['application_path'] . DIRECTORY_SEPARATOR . 'vendors';
@@ -314,21 +335,8 @@ class DefaultConfiguration extends Base
         $error_handler_parameters['development_mode']              = (isset($user_configuration['general']['development_mode'])) ? $user_configuration['general']['development_mode'] : true;
         /** Custom error handler callback */
         $error_handler_parameters['custom_error_handler']          = "";
-        /** Used to indicate if the error message should be emailed to user */
-        $error_handler_parameters['email']['enable']               = (isset($user_configuration['required_frameworks']['errorhandler']['parameters']['enable'])) ? $user_configuration['required_frameworks']['errorhandler']['parameters']['enable'] : false;
         /** Used to indicate if application is being run from browser */
-        $error_handler_parameters['is_browser_application']        = $configuration['general']['is_browser_application'];
-        /** The email at which log message is sent */
-        $error_handler_parameters['email']['email_address']        = '';
-        /** Subject of the notification email */
-        $error_handler_parameters['email']['email_subject']        = '';
-        /** Addition log email smtp headers such as From: */
-        $error_handler_parameters['email']['email_header']         = "";
-        /** Full path of error log file */
-        $error_handler_parameters['log_file_name']                 = "";
-        /** Used to indicate if error should be logged using web hook */
-        $error_handler_parameters['web_hook']['enable']            = "";
-        $error_handler_parameters['web_hook']['url']               = "";
+        $error_handler_parameters['context']                       = $user_configuration["general"]["parameters"]["context"];        
         /** The database class parameters are set */
         $db_parameters                                             = array(
 																            "host" => "",
@@ -337,8 +345,7 @@ class DefaultConfiguration extends Base
 																            "database" => "",
 																            "debug" => "",
 																            "charset" => "utf8"
-																        );
-        
+																        );        
         /** The utilities class parameters are set */
         $filesystem_parameters['table_prefix']                     = "";
         $filesystem_parameters['function_cache_duration']          = array();
@@ -357,6 +364,10 @@ class DefaultConfiguration extends Base
                 "parameters" => array()
             ),
             "database" => array(
+                "class_name" => "Framework\Utilities\DatabaseFunctions",
+                "parameters" => $db_parameters
+            ),
+            "frameworkdatabase" => array(
                 "class_name" => "Framework\Utilities\DatabaseFunctions",
                 "parameters" => $db_parameters
             ),

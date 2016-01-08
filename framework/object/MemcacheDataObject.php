@@ -17,26 +17,25 @@ namespace Framework\Object;
  */
 class MemcacheDataObject extends DataObject
 {
-	/** 
-	 * Class constructor
+	/**
+	 * Sets the object parameters
 	 * Used to add all the memcache servers to the memcache object
 	 * 
 	 * It adds each memcache server given in application configuration
 	 * It also sets the configuration object
 	 * 
 	 * @since 1.0.0
-	 * @param object $configuration_object the configuration object for the module	  
+	 * 
+	 * @param array $parameter the object parameters
 	 */
-	public function __construct($configuration_object)
+	public function SetParameters($parameters)
 	{
-		/** The configuration object is set */
-		$this->SetConfigurationObject($configuration_object);
 		/** Ip address of memcache server */
 		$memcache_server        = $this->GetConfig("general","memcache_server");	
 	    /** The memcache object connects to the memcache server */
 	    $this->GetComponent("memcache")->pconnect($memcache_server);
 	}
-	   	
+	
     /**
      * Used to load the data from memcache to the data property of the object
      * 

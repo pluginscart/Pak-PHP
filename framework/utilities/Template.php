@@ -149,7 +149,9 @@ final class Template
                 /** If the tag value is an array then the array values are resolved to a string */
                 if (is_array($tag_value))
                     $tag_value = $this->ReplaceTagWithArray($tag_name, $tag_value);
-				else if ($tag_value==="!NOT SET!") throw new \Exception("Tag replacement value was not given for the tag: ".$tag_name." in the file: ".$template_path);
+				else if ($tag_value==="!NOT SET!") {					
+					throw new \Exception("Tag replacement value was not given for the tag: ".$tag_name." in the file: ".$template_path);
+				}
                 /** The tag name is replaced with the tag value */
                 $temp_template_contents = str_replace("{" . $tag_name . "}", $tag_value, $temp_template_contents);
             }

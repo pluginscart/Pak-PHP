@@ -21,23 +21,32 @@ use \Framework\Configuration\Base as Base;
 abstract class DataObject extends Base
 {
 	/**
-     * The field name. used to lookup the data
+     * The meta information about the object
      * 
      * @since 1.0.0		
      */
-    protected $key_field;
+    protected $meta_information;	
     /**
      * Object data
      * 
      * @since 1.0.0		
      */
-    protected $data;
+    protected $data;	
+	
 	/**
-     * Used to indicate that object is read only
+     * Used to set the range from which the data should be fetched
      * 
-     * @since 1.0.0		
+     * It sets the start and end values for the data range	 
+	 * 
+     * @since 1.0.0	 
+     * @param string $start the index of the first record
+	 * @param string $end the number of records to fetch
      */
-    protected $readonly=true;
+    public function SetLimit($start, $end)
+    {
+    	$this->meta_information['limit']['start']  = $start;     
+        $this->meta_information['limit']['end']    = $end;
+    }
 	
 	/**
      * Used to get the key field
@@ -50,10 +59,29 @@ abstract class DataObject extends Base
 	 * @return string $field_name the field name for the object
      */
     public function GetKeyField()
-    {        
-        $key_field = $this->key_field;
+    {
+        $key_field = (isset($this->meta_information['key_field']))?$this->meta_information['key_field']:"";
 		
 		return $key_field; 
+    }
+	
+	/**
+     * Used to set the object meta information
+     * 
+     * It sets the meta information property of the object
+	 * 
+     * @since 1.0.0
+     * @param array $meta_information the object's meta information. it is an array with atleast one key:
+	 * configuration => the configuration object
+     */
+    public function __construct($meta_information)
+    {
+    	/** The configuration object */
+		$configuration                = $meta_information['configuration'];
+		/** The configuration object is set */
+		$this->SetConfigurationObject($configuration);
+		/** The object meta information is set */		
+        $this->SetMetaInformation($meta_information); 
     }
 	
 	/**
@@ -66,7 +94,7 @@ abstract class DataObject extends Base
      */
     public function SetKeyField($key_field)
     {        
-        $this->key_field = $key_field; 
+        $this->meta_information['key_field'] = $key_field; 
     }
 	
     /**
@@ -126,9 +154,25 @@ abstract class DataObject extends Base
     public function SetReadonly($readonly)
 	{
 		/** The readonly property of the underlying data object is called */
-    	$this->readonly = $readonly;
+    	$this->meta_information['readonly'] = $readonly;
 	}
 
+	/**
+     * Used to indicate if the object is readonly
+     * 
+     * It returns the readonly meta information property
+     * 
+     * @since 1.0.0
+     * @return boolean $readonly used to indicate if object data is read only 
+     */
+    public function IsReadonly()
+	{
+		/** The readonly property of the object */
+    	$readonly = $this->meta_information['readonly'];
+		
+		return $readonly;
+	}
+	
     /**
      * Used to get the value of required field
      * 
@@ -148,6 +192,54 @@ abstract class DataObject extends Base
         $field_value = $this->data[$field_name];
         
         return $field_value;       
+    }
+	
+	/**
+     * Used to transform the given parameters
+     * 
+     * It transforms the given parameters into a suitable form
+	 * For example from a general relational data format to a format
+	 * That is suitable for WordPress queries		 
+     * 
+     * @since 1.0.0
+	 * @param mixed $parameters the parameters used to fetch the data
+     * 
+     * @return array $transformed_parameters the transformed parameters 
+     */
+    public function TransformParameters($parameters)
+    {        
+        /** The given parameters are transformed */
+        $transformed_parameters    = $parameters;
+		
+		return $transformed_parameters;
+    }
+	
+	/**
+     * Used to filter the fetched data
+     * 
+     * It checks the given parameters and updates the returned data
+	 * So it only includes the fields given in the parameters
+	 * If the parameters specify distinct field name
+	 * Then the function only returns records that have distinct values for that field	 
+     * 
+     * @since 1.0.0
+	 * @param mixed $parameters the parameters used to fetched the data. for relational data, it should have following keys:
+	 * fields => list of field names to fetch
+     * condition => the condition used to fetch the data from database
+	 * It can be a single string or integer value. in this case the previously set field name and table name are used 
+	 * Or an array with following fields: field,value,table,operation and operator
+	 * read_all => used to indicate if all data should be returned
+	 * In case of non relational data, it can be empty
+	 * @param array $data the data read from the data source
+     * 
+	 * @return array $filtered_data the filtered data
+     */
+    public function FilterData($parameters, $data)
+    {        
+        /** The filtered data */
+        $filtered_data    = $data;
+		
+		return $filtered_data;
     }
 	
     /**

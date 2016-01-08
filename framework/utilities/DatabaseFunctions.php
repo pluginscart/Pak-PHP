@@ -13,8 +13,7 @@ namespace Framework\Utilities;
  * @package    Utilities
  * @author     Nadir Latif <nadir@pakjiddat.com>
  * @license    https://www.gnu.org/licenses/gpl-2.0.html GNU General Public License, version 2
- * @version    1.2.4
- * @link       N.A
+ * @version    1.3.0
  */
 final class DatabaseFunctions
 {
@@ -174,6 +173,80 @@ final class DatabaseFunctions
         }       
     }
 
+	/**
+     * Creates a database table
+     * 
+     * It creates a table using the given parameters
+     * 
+     * @since 1.3.0   
+     * @param string $table_name the name of the table to creat
+     * @param array $field_list the list of table fields
+	 * name => string the field name
+	 * type => the type of the field. e.g int(11) NOT NULL or varchar(20) NOT NULL or text NOT NULL
+     * @param string $primary_key the name of the primary key for the table
+	 * @param array $indexes optional the list of indexes that are unique
+	 * name => string the index name
+	 * field_list => array the list of field names that are unique
+	 * @param array $auto_increment optional the list of fields to auto increment. e.g `id` int (11)
+	 * @param string $comment optional the table comment
+     * @param string $engine optional the mysql engine. default value is MyISAM
+     * @param string $default_charset optional the default charset for the table. default value is utf8	 	
+     * @throws Exception object if table could not be created
+	 * 
+	 * @return boolean $is_valid returns true if table was successfully created. throws exeption otherwise 
+     */
+    public function df_create_table($table_name, $field_list, $primary_key, $auto_increment=array(), $indexes=array(), $comment='', $engine='MyISAM', $default_charset='utf8')
+    {
+    	/** The list of table fields */
+    	$table_field_list                      = array();
+		/** Each field is added to the table field list */
+		for ($count = 0; $count < count($field_list); $count++) {
+			$table_field_list[]                = '`'.$field_list[$count]['name'].'` '.$field_list[$count]['type'];
+		}
+		/** The list of table fields */
+		$field_names                           = implode(",\n", $table_field_list);
+		/** The create table sql */
+		$create_table_sql                      = "CREATE TABLE IF NOT EXISTS `".$table_name."` (";
+		/** The field list is added to the create table sql */
+		$create_table_sql                      = $create_table_sql . $field_names;
+		/** The other table attributes are added */		 
+    	$create_table_sql                      = $create_table_sql . ") ENGINE=".$engine." ". 
+    	                                         "AUTO_INCREMENT=1 ".
+    	                                         "DEFAULT CHARSET=".$default_charset." ".
+    	                                         "COMMENT='".$comment."'";
+		/** The create table sql is run */
+		$this->internal_df_open($create_table_sql);
+		$indexes_sql                           = "ALTER TABLE `".$table_name."` ".
+                                                 "ADD PRIMARY KEY (`".$primary_key."`)";
+		/** The indexes sql is run */
+		$this->internal_df_open($indexes_sql);
+		
+		/** If given, then the indexes are added to the table */
+		if (count($indexes) > 0) {
+			/** The indexes field list */
+			$indexes_field_list         = implode("`,`",$indexes['field_list']);
+			$indexes_field_list         = trim($indexes_field_list,"`");
+			$indexes_field_list         = trim($indexes_field_list,",");
+			$indexes_field_list         = "`".$indexes_field_list."`";
+									 
+		    $indexes_sql                = "ALTER TABLE `".$table_name."` ".                                                 
+                                          "ADD UNIQUE KEY `".$indexes['name']."` (".$indexes_field_list.")";
+			/** The create table sql is run */
+			$this->internal_df_open($indexes_sql);												 
+		}
+		
+		/** If given, then the auto increment columns are added to the table */
+		if (count($auto_increment) > 0) {
+			/** The auto increment sql is built */
+			for ($count = 0; $count < count($auto_increment); $count++) {
+				$auto_increment_sql             = "ALTER TABLE `".$table_name."` ".
+                                                  "MODIFY ".$auto_increment[$count]." NOT NULL AUTO_INCREMENT,AUTO_INCREMENT=1";												  
+			    /** The create table sql is run */
+			    $this->internal_df_open($auto_increment_sql);				
+			}															
+		}             
+    }
+	
     /**
      * Connects to mysql server
      * 
@@ -209,8 +282,8 @@ final class DatabaseFunctions
      * @return void     
      */
     public function df_close()
-    {        
-        if ($this->id !== false)
+    {
+        if (is_resource($this->id))
             $this->internal_df_close();       
     }
 
@@ -225,6 +298,63 @@ final class DatabaseFunctions
     public function df_set_table_name($table_name)
     {        
         $this->table_name = $table_name; 
+    }
+	
+   /**
+    * Used to get the list of all the tables in the database
+    * 
+    * @since 1.3.0    
+    * 
+    * @return array $table_list the list of all table names in the database
+    */
+    public function df_get_table_list()
+    {        
+        /** The sql query for fetching the list of tables */
+        $sql          = "SHOW TABLES";        
+		/** All table rows */
+		$table_list   = $this->df_all_rows($sql);
+		
+		return $table_list;
+    }
+   
+   /**
+    * Used to drop the given table column
+    * 
+    * @since 1.3.0
+    * @param string $table_name the name of the database table
+    * @param string $column_name the name of the column that is to be dropped
+    
+    * @return boolean $column_dropped used to indicate if the given table column was successfully dropped 
+    */
+    public function df_drop_column($table_name, $column_name)
+    {
+    	/** The sql for dropping the column */        
+   	    $sql            = "ALTER TABLE `" . $table_name . "` DROP COLUMN " . $column_name;
+		/** The result of the drop operation. The column is dropped */
+		$column_dropped = $this->df_execute($sql);
+		
+		return $column_dropped;
+    }
+	
+   /**
+    * Used to rename the given table column
+    * 
+    * @since 1.3.0
+    * @param string $table_name the name of the database table
+    * @param string $old_column_name the name of the column that is to be renamed
+    * @param string $new_column_name the new name of the column
+    * @param string $column_type the type of the column
+    * 
+    * @return boolean $column_renamed used to indicate if the given table column was successfully renamed
+    */
+    public function df_rename_column($table_name, $old_column_name, $new_column_name, $column_type)
+    {
+    	/** The sql for renaming the column */        
+   	    $sql            = "ALTER TABLE `" . $table_name . "` CHANGE " . $old_column_name . " " . $new_column_name . " " . $column_type;
+		/** The result of the rename operation. The column is renamed */
+		$column_renamed = $this->df_execute($sql);
+		
+		return $column_renamed;
     }
 	
     /**
@@ -265,9 +395,9 @@ final class DatabaseFunctions
      * @return array all the rows of the select query result     
      */
     public function df_all_rows($sql)
-    {        
-        $rsid = $this->internal_df_open($sql);
-        $x    = array();
+    {
+        $rsid    = $this->internal_df_open($sql);
+        $x       = array();
         while ($r = $this->internal_df_fetch($rsid)) {
             $x[] = $r;
         }
@@ -380,7 +510,8 @@ final class DatabaseFunctions
         $this->df_set_query_type($query_type);
         
         for ($count = 0; $count < count($main_query); $count++) {
-            $table_name = (isset($main_query[$count]['table'])) ? $main_query[$count]['table'] : $this->table_name;			
+            $table_name = (isset($main_query[$count]['table'])) ? $main_query[$count]['table'] : $this->table_name;
+				
             if ($query_type == 's')
                 $this->df_add_select_field($main_query[$count]['field'], $table_name);
             else if ($query_type == 'i')
@@ -394,11 +525,12 @@ final class DatabaseFunctions
                 $operation  = (isset($where_clause[$count]['operation'])) ? $where_clause[$count]['operation'] : "=";
                 $operator   = (isset($where_clause[$count]['operator'])) ? $where_clause[$count]['operator'] : "";
 				$is_string  = (isset($where_clause[$count]['is_string'])) ? $where_clause[$count]['is_string'] : true;
-				$table_name = (isset($where_clause[$count]['table'])) ? $where_clause[$count]['table'] : $this->table_name; 
+				$table_name = (isset($where_clause[$count]['table'])) ? $where_clause[$count]['table'] : $this->table_name;
+				
                 $this->df_build_where_clause($where_clause[$count]['field'], $where_clause[$count]['value'], $is_string, $table_name, $operation, $operator, false);
             }
         }
-        
+     
         return ($this->df_get_query_string());        
     }
 
@@ -479,12 +611,15 @@ final class DatabaseFunctions
     /**
      * Used to display the query log
      * 
-     * @since 1.2.1	     
+     * @since 1.2.1
+	 * @param boolean $is_return used to indicate if the query log should be displayed or returned
      *
-     * @return void 
+     * @return string $query_string the mysql query log
      */
-    public function df_display_query_log()
-    {        
+    public function df_display_query_log($return)
+    {
+    	/** The mysql query string */
+    	$query_string   = "";        
         if ($this->is_browser_application)
             $line_break = "<br/>";
         else
@@ -493,10 +628,14 @@ final class DatabaseFunctions
         for ($count = 0; $count < count($this->query_log); $count++) {
             $query = $this->query_log[$count];
             if ($this->debug > 1)
-                echo ($count + 1) . ") time taken: " . $query['time_taken'] . " sec" . $line_break . "query: " . $query['sql'] . $line_break . $line_break;
+                $query_string .= ($count + 1) . ") time taken: " . $query['time_taken'] . " sec" . $line_break . "query: " . $query['sql'] . $line_break . $line_break;
             else if ($this->debug == 1)
-                echo ($count + 1) . ") query: " . $query['sql'] . $line_break . $line_break;
-        }        
+                $query_string .= ($count + 1) . ") query: " . $query['sql'] . $line_break . $line_break;
+        }
+		
+		if (!$return) echo $query_string;
+		
+		return $query_string;
     }
 
     /**
@@ -512,7 +651,7 @@ final class DatabaseFunctions
         if ($type != '')
             $this->query_type = $type;
         if (strtolower($this->query_type) == 'i') {
-            $this->query = "INSERT INTO " . $this->table_list[0] . "(";
+            $this->query = "INSERT INTO " . $this->table_list[0] . " (";
             
             for ($count = 0; $count < count($this->field_list); $count++)
                 $this->query .= ($this->field_list[$count] . ",");
@@ -530,7 +669,7 @@ final class DatabaseFunctions
         } else if (strtolower($this->query_type) == 's') {
             if ($this->where_clause != "")
                 $this->where_clause = trim($this->where_clause, ',');
-            
+          
             $this->query = "SELECT ";
             
             for ($count = 0; $count < count($this->display_fields); $count++)
@@ -540,9 +679,9 @@ final class DatabaseFunctions
             
             for ($count = 0; $count < count($this->table_list); $count++)
                 $this->query .= ($this->table_list[$count] . ",");
-            
+          
             $this->query = trim($this->query, ',');
-            
+           
             if ($this->where_clause != "")
                 $this->query .= " WHERE " . $this->where_clause;
             
@@ -552,7 +691,7 @@ final class DatabaseFunctions
             if ($this->sort_by != "" && $this->order_by != "")
                 $this->query .= " ORDER BY " . $this->sort_by . " " . $this->order_by;           
 			
-            if ($this->start < $this->end)
+            if (is_numeric($this->start) && is_numeric($this->end) && ($this->end) > 0)
                 $this->query .= " LIMIT " . $this->start . "," . $this->end;
         } else if (strtolower($this->query_type) == 'u') {
             if ($this->where_clause != "")
@@ -630,7 +769,7 @@ final class DatabaseFunctions
         $this->sort_by        = '';
 		$this->group_by       = '';
         $this->order_by       = '';
-		$this->table_name     = '';
+		$this->table_name     = '';		
         $this->table_list     = array();
         $this->field_list     = array();
         $this->value_list     = array();
@@ -807,7 +946,7 @@ final class DatabaseFunctions
             $start_time = microtime(true);
         
         $rsid = @mysqli_query($this->id, $sql);
-        
+       
         if ($this->debug >= 1) {
             /** If debugging mode is set to 1 or greater then the end time is noted and the query is logged along with time taken */
             $end_time        = microtime(true);
@@ -821,11 +960,11 @@ final class DatabaseFunctions
             $this->query_log = array_merge($this->query_log, $sql_log);
             
         }
-        
+      
         if ($rsid)
             return $rsid;
         else
-            throw new \Exception("Error in executing mysql query. Details: " . mysqli_error($this->id) . " sql: " . $sql);        
+            throw new \Exception("Error in executing mysql query. Details: " . mysqli_error($this->id) . " sql: " . $sql);		         
     }
 
     /**
@@ -860,7 +999,7 @@ final class DatabaseFunctions
      * @return void
      */
     private function internal_df_build_select_query($field, $value, $is_display_field, $is_string, $table, $operation, $operator, $options)
-    {        
+    {
         $value = mysqli_escape_string($this->id, $value);
         if ($table != "" && !in_array($table, $this->table_list))
             $this->table_list[] = $table;
@@ -905,7 +1044,7 @@ final class DatabaseFunctions
      * @return void
      */
     private function internal_df_build_update_query($field, $value, $is_update_field, $is_string, $table, $operation, $operator)
-    {
+    {    	
        $value = mysqli_escape_string($this->id, $value);
             
        if ($is_update_field) {

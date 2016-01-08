@@ -15,7 +15,7 @@ namespace WordPressExample;
  * @version    1.0.0
  * @since      1.0.0
  */
-final class Settings extends \Framework\Application\WordPress\Settings
+final class Settings extends \Framework\Frameworks\WordPress\Settings
 {    
     /**
      * Options page callback

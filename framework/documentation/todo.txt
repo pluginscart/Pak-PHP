@@ -20,6 +20,9 @@
 20) Tools class for transforming data so it provides multiple views
 21) Write articles describing following: how to create a wordpress plugin, how to unit test and functional test your application, how to write a sample web application, how to write a script, how to display html tables, how to use etl class, how to use user interface objects, data objects and data object abstraction, how to use session, api and http authentication
 22) Write a script for version control. it should allow linking each item in the changelog to a file and function. it should also generate a git commit statement for each changed file
+23) Create an API class that derives from the base Application class. it should provide methods for validating function input and returning function output in correct format. add xmlrpc function to API class
+24) Add option to testing class for unit testing single function
+25) Look into possibility of hosting all the code in database
 
 Reference:
 
@@ -80,6 +83,8 @@ Reference:
 55) http://ruwix.com/simple-javascript-html-css-slider-progress-bar/
 56) http://php.net/manual/en/reflectionclass.getdoccomment.php
 57) http://www.slideshare.net/rdohms/annotations-in-php-they-exist
+58) http://php.net/manual/en/functions.arguments.php
+59) http://php.net/manual/en/class.closure.php
 
 Concepts used:
 
@@ -94,3 +99,4 @@ Concepts used:
 9) dependency inversion
 10) dependency injection
 11) support for writing etl scripts
+12) preventing session hijacking using session_regenerate_id

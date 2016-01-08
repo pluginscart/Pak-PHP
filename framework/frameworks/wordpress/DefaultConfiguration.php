@@ -1,6 +1,6 @@
 <?php
 
-namespace Framework\Application\WordPress;
+namespace Framework\Frameworks\WordPress;
 
 /**
  * Default application configuration class
@@ -12,8 +12,7 @@ namespace Framework\Application\WordPress;
  * @package    WordPress
  * @author     Nadir Latif <nadir@pakjiddat.com>
  * @license    https://www.gnu.org/licenses/gpl-2.0.html GNU General Public License, version 2
- * @version    1.0.0
- * @link       N.A
+ * @version    1.0.0 
  */
 class DefaultConfiguration extends \Framework\Configuration\DefaultConfiguration
 {    
@@ -63,13 +62,15 @@ class DefaultConfiguration extends \Framework\Configuration\DefaultConfiguration
         $configuration['wordpress']['custom_actions']                                           = array();
 		/** The custom filters */		
         $configuration['wordpress']['custom_filters']                                           = array();
-		/** The user id of the logged in user */		
-        $configuration['wordpress']['user_id']                                                  = get_current_user_id();
+		/** The user id of the logged in user. It should be set inside the init action */		
+        $configuration['wordpress']['user_id']                                                  = 0;
+		/** The mapping between short name of custom post types and the full name of the custom post types */		
+        $configuration['wordpress']['custom_post_types']                                        = array();
 		
 		/** The name of the WordPress plugin folder is determined */
 		$temp_arr                                                                               = explode(DIRECTORY_SEPARATOR,$configuration['path']['base_path']);
 		$plugin_folder_name                                                                     = $temp_arr[count($temp_arr)-1];
-				
+			
 		/** The wordpress actions and filters configuration is initialized */
     	$configuration['wordpress']['actions']                                                  = $configuration['wordpress']['filters']=array();
 				

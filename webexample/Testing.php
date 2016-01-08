@@ -27,7 +27,7 @@ class Testing extends \Framework\Testing\Testing
      */
     public function TestAuthentication($test_data)
     {
-        /** List of valid user credentials. used to test the http digest authentication **/
+        /** List of valid user credentials. used to test the http digest authentication */
         $credentials              = array(
             array(
                 "user_name" => "admin",
@@ -38,16 +38,16 @@ class Testing extends \Framework\Testing\Testing
                 "password" => "manager"
             )
         );
-        /** The custom text to use in the authentication box that shows in the browser **/
+        /** The custom text to use in the authentication box that shows in the browser */
         $authentication_box_title = "Protected Area!";
-        /** The authentication object is fetched **/
+        /** The authentication object is fetched */
         $authentication           = $this->GetComponent("authentication");
         /** 
          * If the user presses the cancel button then the function returns false
          * If the user entered the wrong credentials then he will be asked to login again
          */
         $cancel_pressed=(!$authentication->AuthenticateUser($credentials, $authentication_box_title));            
-        $this->AssertTrue(true);
+        $this->AssertTrue(true, "Authentication test passed successfully");
     }
     
     /** 
@@ -59,31 +59,31 @@ class Testing extends \Framework\Testing\Testing
      */
     public function TestCaching($test_data)
     {
-        $database_obj        = $this->GetComponent("database");
+        $database_obj        = $this->GetComponent("frameworkdatabase");
         $db_link             = $database_obj->df_get_id();
-        /** The prefix of the table. e.g if prefix name is example_ then table name is example_cached_data **/
-        $table_prefix        = "example_";
-        /** The caching object is fetched with given parameters **/
+        /** The name of the table */
+        $table_name          = "cached_data";
+        /** The caching object is fetched with given parameters */
         $caching_parameters  = array(
             "db_link" => $database_obj->df_get_id(),
-            "table_prefix" => $table_prefix
+            "table_name" => $table_name
         );
         $caching_obj         = $this->GetComponent("caching");
-		/** The db link is set so the data can be cached to database **/
+		/** The db link is set so the data can be cached to database */
 		$caching_obj->SetDbLink($db_link);
-        /** The data is saved to cache **/
+        /** The data is saved to cache */
         $caching_obj->SaveDataToCache("TestFunction", array(
             "parameter 1",
             "parameter 2"
         ), "test data");
-        /** The data is fetched from cache **/
+        /** The data is fetched from cache */
         $cached_data = $caching_obj->GetCachedData("TestFunction", array(
             "parameter 1",
             "parameter 2"
         ),
 		true);
 		
-        $this->AssertEqual($cached_data,"test data");
+        $this->AssertEqual($cached_data, "test data", "Checks if data fetched from cache is same as data saved to cache");
     }
     
     /**
@@ -95,16 +95,16 @@ class Testing extends \Framework\Testing\Testing
      */
     public function TestEncryption($test_data)
     {
-        /** The encryption object is fetched **/
+        /** The encryption object is fetched */
         $encryption_obj = $this->GetComponent("encryption");
-        /** The text to be encrypted **/
+        /** The text to be encrypted */
         $original_text  = "test encryption";
-        /** The original text is encrypted **/
+        /** The original text is encrypted */
         $encrypted_text = $encryption_obj->EncryptText($original_text);
-        /** The encrypted text is decrypted **/
+        /** The encrypted text is decrypted */
         $decrypted_text = $encryption_obj->DecryptText($encrypted_text);
-        /** If the original text matches the decrypted text then following message is shown **/
-        $this->AssertEqual($original_text,$decrypted_text);            
+        /** If the original text matches the decrypted text then following message is shown */
+        $this->AssertEqual($original_text, $decrypted_text, "Checks if the original text is equal to decrypted text");            
     }
     
     /**
@@ -116,22 +116,22 @@ class Testing extends \Framework\Testing\Testing
      */
     public function TestDatabase($test_data)
     {
-        $database_obj        = $this->GetComponent("database");
-        /** The $database_obj is initialized and cleared **/
+        $database_obj             = $this->GetComponent("frameworkdatabase");
+        /** The $database_obj is initialized and cleared */
         $database_obj->df_initialize();
-        /** The select query is built **/
+        /** The select query is built */
         $main_query               = array();
         $main_query[0]['field']   = "*";
-        /** The where clause of the query is built **/
+        /** The where clause of the query is built */
         $where_clause             = array();
         $where_clause[0]['field'] = "function_name";
         $where_clause[0]['value'] = "TestFunction";
-        $where_clause[0]['table'] = "example_cached_data";
+        $where_clause[0]['table'] = "cached_data";
         
         $query   = $database_obj->df_build_query($main_query, $where_clause, 's');
         $db_rows = $database_obj->df_all_rows($query);
 		
-        $this->AssertEqual($db_rows[0]['function_name'],"TestFunction");     
+        $this->AssertEqual($db_rows[0]['function_name'], "TestFunction", "Checks if data was correctly fetched from database");     
     }
     
     /**
@@ -160,7 +160,7 @@ class Testing extends \Framework\Testing\Testing
             "test.xls"
         ), $from_email, $to_email, "Utilitiesframework Test", "<h3>testing html content</h3>");
 		
-        $this->AssertTrue($is_sent);
+        $this->AssertTrue($is_sent, "Checks if email was successfully sent");
     }
     
     /**
@@ -178,7 +178,7 @@ class Testing extends \Framework\Testing\Testing
         $rel_url    = "package.mail.mail.send.php";
         /** The relative link is converted to absolute link **/
         $abs_url    = $string_obj->ConvertRelUrlToAbsUrl($main_url, $rel_url);        
-        $this->AssertEqual($abs_url,$main_url.$rel_url);
+        $this->AssertEqual($abs_url, $main_url.$rel_url, "Checks if the absolute url was correctly generated");
     }
 
     /**
@@ -196,6 +196,6 @@ class Testing extends \Framework\Testing\Testing
 		$tag_replacement_arr = array(array("title"=>"Page title","body"=>"Body title"));
 		/** The example template file is rendered */
         $template_file_contents    = $template_obj->RenderTemplateFile($template_path, $tag_replacement_arr);
-        $this->AssertTrue(strpos($template_file_contents,"Page title")!==false);
+        $this->AssertTrue(strpos($template_file_contents, "Page title")!==false, "Checks if the 'Page title' text is present in the example template file");
     }
 }

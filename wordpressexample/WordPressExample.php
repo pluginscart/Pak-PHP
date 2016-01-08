@@ -15,7 +15,7 @@ namespace WordPressExample;
  * @version    1.0.0
  * @since      1.0.0
  */
-final class WordPressExample extends \Framework\Application\WordPress\Application
+final class WordPressExample extends \Framework\Frameworks\WordPress\Application
 {
 	/**
      * The single static instance

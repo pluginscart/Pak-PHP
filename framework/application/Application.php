@@ -40,19 +40,12 @@ abstract class Application extends Base
     {
     	/** The application response. it contains the string that will be returned by the application as output */
     	$response                                                                      = "";
+		/** The application url mappings */
+		$application_url_mappings                                                      = $this->GetConfig("general","application_url_mappings");					
+		/** The application option */
+		$option                                                                        = $this->GetConfig("general","option");	
         /** If the application is not in test mode then the url request is handled */
-        if (!$this->GetConfig('testing','test_mode')) {        	
-            /** If the save_test_data option is set to true then the page parameters are saved to test_data folder */
-            if ($this->GetConfig('testing','save_test_data')) {
-                /** The application test class object is fetched */
-                $application_test_class_obj                                            = $this->GetComponent('testing');
-                /** The application parameters are saved as test parameters */
-                $application_test_class_obj->SaveTestData();
-		    }
-			/** The application url mappings */
-			$application_url_mappings                                                  = $this->GetConfig("general","application_url_mappings");					
-			/** The application option */
-			$option                                                                    = $this->GetConfig("general","option");					
+        if (!$this->GetConfig('testing','test_mode')) {
             /** If a controller is defined for the current url option then it is called */
             if (isset($application_url_mappings[$option]['controller'])) {
                 /** The controller function is run */
@@ -80,6 +73,17 @@ abstract class Application extends Base
 				}
 				else throw new \Exception("Invalid url request sent to application");
 			}
+			/** If the save_test_data option is set to true then the page parameters are saved to test_data folder */
+            if ($this->GetConfig('testing','save_test_data')) {
+                /** The application test class object is fetched */
+                $application_test_class_obj                                            = $this->GetComponent('testing');
+				/** The name of the object that has the function */
+				$object_name                                                           = $application_url_mappings[$option]['controller']['object_name'];
+				/** The name of the function used to handle the url request */
+				$function_name                                                         = $application_url_mappings[$option]['controller']['function_name'];
+                /** The application parameters are saved as test parameters */
+                $application_test_class_obj->SaveTestData($object_name, $function_name);
+		    }
 		}
         /** If the application is in test mode then the testing function is called for the current test parameters */
         else {
@@ -113,6 +117,33 @@ abstract class Application extends Base
     final public function DisplayOutput($text)
     {        
         echo $text;  
+    }	
+		
+	/**
+     * Used to display the error message
+	 * 
+     * This function displays the error message to the user
+	 * It stops script execution
+     * 
+     * @since 1.0.0
+	 * @param array $error_parameters the error parameters. it contains following keys:
+     *    error_level => int the error level
+	 *    error_type => int [Error~Exception] the error type. it is either Error or Exception
+     *    error_message => string the error message
+     *    error_file => string the error file name
+     *    error_line => int the error line number
+     *    error_context => array the error context
+     */
+    final public function DisplayErrorMessage($error_parameters)
+    {
+  	     /** The response format for the application request */
+	    $response_format                         = 'json';		
+	    /** The response is converted to an array. Error message is added to response */
+		$response                                = array("result"=>"error","data"=>$error_parameters);				
+		/** The response is json encoded */
+		$response                                = json_encode($response);
+		/** The error response from api is displayed */
+		die($response);
     }
 	
     /**
@@ -127,13 +158,27 @@ abstract class Application extends Base
      * @return array $response		 
      */
     final public function RunControllerFunction($option)
-    {        
+    {
+    	/** The application parameters */
+		$parameters               = $this->GetConfig("general","parameters");        
         /** The application url mappings are fetched from application configuration */
-        $application_url_mappings = $this->GetConfig('general','application_url_mappings');               
+        $application_url_mappings = $this->GetConfig('general','application_url_mappings');
+        /** The name of the controller object */    
         $controller_object_name   = $application_url_mappings[$option]['controller']['object_name'];
+		/** The controller object is fetched */
         $controller_object        = $this->GetComponent($controller_object_name);
+		/** The controller function name */
         $function_name            = $application_url_mappings[$option]['controller']['function_name'];
-        $response                 = $controller_object->$function_name();
+		/** The application request is pre processed */
+		$this->PreProcessRequest($option, $controller_object, $function_name, $parameters);		
+		/** The controller function is called */
+		$response                 = $controller_object->$function_name($parameters);
+        	    
+		/** The processed response. The application request is post processed */
+		$processed_response       = $this->PostProcessRequest($option, $controller_object, $function_name, $response, $parameters);
+		/** The formatted response */
+		$response                 = $processed_response['formatted_output'];
+		
         return $response;        
     }    
     /**
@@ -144,34 +189,35 @@ abstract class Application extends Base
      * 
      * @since 1.0.0
      * @param string $option the url option
+	 * @param string $module_name the name of the module
      * @param array $parameters the list of url parameters. it is an associative array. if set to false then the parameters are not used
-     * @return string $encoded_url the encoded url
-     * @return boolean $is_link used to indicate if url will be used in link. if it will be used in link then url & will be
+	 * @param boolean $is_link used to indicate if url will be used in link. if it will be used in link then url & will be
      * encoded so it is compatible with html5 validator
-     * @throws Exception an object of type Exception is thrown if the encoded parameters size is larger than 100 characters
+     * @param string optional $url the server url. if omitted then the framework url is used	 
+	 * 
+     * @return string $encoded_url the encoded url
+     
+     * @throws Exception an object of type Exception is thrown if the encoded parameters size is larger than 350 characters
      */
-    final public function GetEncodedUrl($option, $parameters, $is_link)
+    final public function GetEncodedUrl($option, $module_name, $response_format, $parameters, $is_link, $url="")
     {
     	/** If the parameters are set then they are encoded */
     	if($parameters) {
     		 /** The url parameters are first json encoded */
-             $encoded_parameters = json_encode($parameters);
+             $encoded_parameters          = json_encode($parameters);
              /** Then the parameters are base64 encoded */
-             $encoded_parameters = base64_encode($encoded_parameters);
+             $encoded_parameters          = base64_encode($encoded_parameters);
              /** Then the parameters are urlencoded */
-             $encoded_parameters = urlencode(urlencode($encoded_parameters));
-			                
-             /** An exception is thrown if encoded parameter length is larger then 150 characters */
-             if (strlen($encoded_parameters) > 250)
-                 throw new \Exception("The size of the encoded parameters must be less than 250 characters");
+             $encoded_parameters          = urlencode(urlencode($encoded_parameters));			               
+             /** An exception is thrown if encoded parameter length is larger then 350 characters */
+             if (strlen($encoded_parameters) > 350)
+                 throw new \Exception("The size of the encoded parameters must be less than 350 characters");
     	}
         
-        /** The web application base url is fetched from application configuration */
-        $web_application_url = $this->GetConfig("path","framework_url");
-		/** The application name is fetched from the application configuration */   
-        $module_name         = $this->GetConfig("general","module");
+        /** The web application base url. If not given as a parameter then it is fetched from application configuration */
+        $web_application_url              = ($url != "") ? $url : $this->GetConfig("path","framework_url");
 		/** The url parameters */
-		$url_parameters      = array("option"=>$option,"module"=>$module_name);
+		$url_parameters                   = array("option"=>$option, "module"=>$module_name, "response_format"=>$response_format);
 		/** If the parameters were given then they are added to the url */
 		if ($parameters)
 		    $url_parameters['parameters'] = $encoded_parameters;
@@ -179,16 +225,16 @@ abstract class Application extends Base
         /** The encoded url is created and returned */
         /** If the url will be used in an a tag link then the parameters are separate by &amp; */ 
         if ($is_link)
-		    $separator = "&amp;";
+		    $separator                    = "&amp;";
 		else
-            $separator = "&";
+            $separator                    = "&";
 	
-		$encoded_url = $web_application_url . "?";
+		$encoded_url                      = $web_application_url . "?";
 		foreach ($url_parameters as $key=>$value) {
-			$encoded_url .= $key."=".$value.$separator;
+			$encoded_url .= ($key."=".$value.$separator);
 		}
              
-        $encoded_url = trim($encoded_url, $separator);            
+        $encoded_url                      = trim($encoded_url, $separator);            
         
         return $encoded_url;        
     }    
@@ -226,77 +272,7 @@ abstract class Application extends Base
         
         /** The parameters are then returned */
         return $decoded_parameters;        
-    }
-	
-	/**
-	 * It makes an api request to the give local module
-	 *
-	 * It calls the HandleRequest
-	 * 
-	 * @since 1.0.0
-	 * @param array   $parameters list of parameters to send to local module
-	 * @throws object Exception an exception is thrown if the api response contains an error
-	 * 
-	 * @return array $response the api response
-	 */
-	final public function MakeApiRequestToLocalModule($parameters){
-		try {
-		    /** The api response. it is fetched by making call to local module */		
-		    $response                        = self::HandleRequest("local api",$parameters);
-		    /** If the api request asked for the api response to be encrypted then the api response from server is decrypted and decoded */
-		    if ($parameters['encrypt_response']) {		
-  		        /** The api response is decrypted */
-		        $response                    = $this->GetComponent("encryption")->DecryptText($response);
-		    }
-		    /** The api response is json decoded */		
-		    $response                        = json_decode($response,true);				
-		    /** If the server response contains an error then an exception is thrown */
-		    if($response['result']!='success')
-		        throw new \Exception("Invalid api response was returned. API resonse: ".var_export($response,true).". Parameters: ".var_export($parameters,true));
-		}
-		catch(\Exception $e){
-		   $this->GetComponent("errorhandler")->ExceptionHandler($e);
-		}
-		/** If the api response text contains json data, then it is decoded */
-		if ($this->GetComponent("string")->IsJson($response['text'])) {
-			$response                        = json_decode($response['text'],true);
-		}
-		/** The api response is returned */
-		return $response;
-	}
-    
-	/**
-	 * It makes an api request to the give remote module
-	 *
-	 * It builds the api url from the given parameters
-	 * It makes an http request to the api url and fetches the api response
-	 * If the response contains an error then an exception is thrown
-	 * Otherwise the api response is returned	 
-	 * 
-	 * @since 1.0.0
-	 * @param array   $parameters list of parameters to include with url
-	 * @throws object Exception an exception is thrown if the api response contains an error
-	 * 
-	 * @return array $response the api response
-	 */
-	final public function MakeApiRequestToRemoteModule($parameters){		
-		/** The api url with parameters is generated */
-		$api_url              = $this->GenerateApiUrl($parameters);
-		/** The api response is fetched */
-		$response             = $this->GetComponent("filesystem")->GetFileContent($api_url);
-		/** If the api request asked for the api response to be encrypted then the api response from server is decrypted and decoded */
-		if ($parameters['encrypt_response']) {		
-		    /** The decrypted response */
-		    $response                    = $this->GetComponent("encryption")->DecryptText($response);		
-			/** The decrypted and decoded response */		
-			$response                    = json_decode($response,true);
-		}
-		/** If the server response contains an error then an exception is thrown */
-		if($response['result']!='success')throw new \Exception("Invalid api response was returned. API resonse: ".var_export($response,true).". Parameters: ".var_export($parameters,true));
-		
-		/** The api response is returned */
-		return $response;
-	}
+    }	
 	
 	/**
      * Used to handle application request
@@ -318,23 +294,26 @@ abstract class Application extends Base
     {
     	/** The application module to be called */
 		$module                                           = $default_module;
-				
         /** If the application is being run from browser */
 		if ($context == "browser" || $context == "local api" || $context == "remote api") {
     	    /** The current module name is determined */
     	    $module                                       = isset($parameters['module'])?$parameters['module']:$default_module;
+			/** The application context is added to the application parameters */
+		    $parameters['context']                        = $context;			
 		}
 		/** If the application is being run from command line then the module name is determined */
 		else if ($context == "command line") {
 			/** The updated application parameters in standard key => value format */
 			$updated_parameters                           = array();
+			/** The application context is added to the application parameters */
+		    $updated_parameters['context']                = $context;
 			/** The application parameters are determined */
 			for ($count=1; $count<count($parameters); $count++ ) {
 				/** Single command line argument */
 				$command                                  = $parameters[$count];
 				/** If the command does not contain equal sign then an exception is thrown. only commands of the form --key=value are accepted */
 				if (strpos($command, "--")!==0 || strpos($command, "=")===false)
-				    throw new \Exception("Invalid command line argument was given");
+				    throw new \Exception("Invalid command line argument was given. Command line arguments: ".var_export($parameters,true));
 				else {
 					 $command                             = str_replace("--", "", $command);
 					 list($key,$value)                    = explode("=", $command);
@@ -348,59 +327,21 @@ abstract class Application extends Base
 		}
 		/** If an invalid application context is given then an exception is thrown */
 	    else throw new \Exception("Invalid application context: ".$context);
-				
+			
 		/** An exception is thrown if the module name cannot be determined */
 		if (!$module) throw new \Exception("Module name was not given in url request");
-		
+	
 		/** The application configuration class name */ 
 		$class_name                                       = \Framework\Utilities\UtilitiesFramework::Factory("string")->Concatenate('\\',$module,'\\',"Configuration");
 		/** An instance of the required module is created */
-		$configuration                                    = new $class_name($parameters);
+		$configuration                                    = new $class_name($parameters);	
 		/** The application output */
 		$response                                         = $configuration->RunApplication();		
-		/** If the application type is api then success string is added to response */
-		if (isset($parameters['request_type']) && $parameters['request_type'] == "api") {			
-		    /** Success string is added to response */
-		    $response                                     = array("result"=>"success","message"=>$response);			
-		    /** The response is json encoded */			
-		    $response                                     = json_encode($response);
-		}
-		/** If the application response is an array, then it is json encoded */
-        else if (is_array($response)) {
-	   	    /** The response is json encoded */			
-		    $response                                     = json_encode($response);
-        }
-		/** If the parameters requested encrpytion of response then the response is encrypted */
-		if (isset($parameters['encrypt_response']) && $parameters['encrypt_response']) 
-		    $response                                     = \Framework\Utilities\UtilitiesFramework::Factory("encryption")->EncryptText($response);		       
-		
+
 		/** The output is returned */
 		return $response;
     }
 
-    /**
-     * Used to authentication the client using api authentication
-	 * 
-     * This function checks the api key given in application parameters
-     * The api key is checked against the valid api key given in application configuration
-     * 
-     * @since 1.0.0		 	
-     */
-    public function ApiAuthentication()
-    {        
-        /** The application parameters containing api data are fetched **/
-        $api_auth                          = $this->GetConfig("general","api_auth");		        
-		/** The application parameters are fetched */
-		$application_parameters            = $this->GetConfig("general","parameters");
-		/** If the api key is not set in the application parameters then an exception is thrown */
-		if (!isset($application_parameters['parameters']['api_key']))
-		    throw new \Exception("API Key was not given in application parameters");
-		
-        if (!isset($api_auth['credentials']) || (isset($api_auth['credentials']) && $api_auth['credentials'] != $application_parameters['parameters']['api_key'])) {
-            die("Invalid API Key");
-        }       
-    }
-	
     /**
      * Used to redirect the user to the wulfmansworld.com backend login page
      * 
@@ -460,12 +401,15 @@ abstract class Application extends Base
     public function CustomErrorHandler($log_message, $error_parameters)
     {
         /** The line break is fetched from application configuration **/
-        $line_break = $this->GetConfig("general","line_break");
-        /** The error message is displayed to the browser **/
-        echo $log_message . $line_break . $line_break;
-        echo "MySQL query log: " . $line_break . $line_break;
-        /** The database query log is displayed **/
-        $this->GetComponent("database")->df_display_query_log();       
+        $line_break                   = $this->GetConfig("general","line_break");
+		/** Lines breaks are added to the log message */
+		$log_message                  = $log_message . $line_break . $line_break;
+		/** The mysql query log */		
+        $mysql_query_log              = $this->GetComponent("database")->df_display_query_log(true);
+		/** The mysql query log is appended to the log message */
+		$log_message                  = $log_message . "MySQL query log: " . $line_break . $line_break;       
+        /** The error message is displayed to the browser */
+       $this->DisplayOutput($log_message);       
     }
     
     /**
@@ -480,5 +424,165 @@ abstract class Application extends Base
     {        
         /** The database connection is closed **/
         $this->GetComponent("database")->df_close();       
+    }
+	
+	/**
+     * Used to pre process the application request
+     * 
+     * This function is called before an application request is processed
+	 * It can be used to validate the request parameters
+	 * This method should be overridden by child classes
+     * By default the function does nothing
+	 * 
+     * @since 1.0.0
+	 * @param string $option the application option
+	 * @param object $controller_object the object that contains the api function
+	 * @param string $function_name the api function name
+	 * @param array $parameters the parameters for the callback function	 
+     */
+    protected function PreProcessRequest($option, $controller_object, $function_name, $parameters)
+    {
+    	/** The current context of the application */
+    	$context                             = $this->GetConfig("general","parameters","context");
+    	/** The custom validation callback */
+    	$custom_validation_callback          = array($this, "ValidateFunctionParameter");
+    	/** The reflection object is fetched */
+    	$reflection                          = $this->GetComponent("reflection");
+		/**
+		 * The result of validating the parameters
+		 * Method parameters are validated against the information in the Doc Block comments
+		 */		
+		$validation_result                   = $reflection->ValidateMethodParametersAndContext($controller_object, $function_name, $context, $parameters, $custom_validation_callback);
+		
+		return $validation_result;
+    }
+	
+	/**
+     * Used to post process the application request
+     * 
+     * This function is called after an application request has been handled
+	 * It formats the output of the request handling function according to the information given in the Doc Block comments
+	 * It also validates the output of the function against the return type given in the Doc Block comments
+	 * It also saves the details of function execution to database
+	 * For example execution time, ip address and function parameters	     
+	 * 
+     * @since 1.0.0
+	 * @param string $option the application option
+	 * @param object $controller_object the object that contains the api function
+	 * @param string $function_name the api function name
+	 * @param mixed $response the api function response
+	 * @param array $parameters the value of all the method parameters
+	 * @param array $all_parsed_parameters details of all the method parameters
+	 * 
+	 * @return array $processed_response an array containing the formatted output and validation results
+	 * formatted_output => string formatted output
+	 * validation_result => array the result of validating the function
+	 *                      is_valid => boolean indicates if the parameters are valid
+	 *                      validation_message => string the validation message if the parameters could not be validated
+     */
+    protected function PostProcessRequest($option, $controller_object, $function_name, $response, $parameters)
+    {
+    	/** The processed response */
+    	$processed_response                      = array();        
+        /** The custom validation callback */
+    	$custom_validation_callback              = array($this, "ValidateFunctionParameter");
+    	/** The reflection object is fetched */
+    	$reflection                              = $this->GetComponent("reflection");
+		/** The result of validating the return value. The return value is validated against the information in the Doc Block comments */
+		$validation_result                       = $reflection->ValidateMethodReturnValue($controller_object, $function_name, $response, $custom_validation_callback, $parameters);
+        /** The validation result */		
+		$processed_response['validation_result'] = $validation_result;	
+		/** If the response format is set in the function parameters then the output is formatted according to the response format parameter */
+		if (isset($parameters['response_format'])) {
+			/** If the required response format is an array */
+		    if ($parameters['response_format'] == "array") {
+		    	/** The response is converted to an array. Success string is added to response */
+		        $response                        = array("result"=>"success","data"=>$response);
+			}
+			/** If the required response format is json or encrypted json */
+			else if ($parameters['response_format'] == "json" || $parameters['response_format'] == "encrypted json") {
+				/** The response is converted to an array. Success string is added to response */
+		        $response                        = array("result"=>"success","data"=>$response);				
+		        /** The response is json encoded */
+		        $response                        = json_encode($response);
+				/** If the response format is encrypted json */
+				if ($parameters['response_format'] == "encrypted json") {
+					/** The json string is encrypted */
+					$response                    = $this->GetComponent("encryption")->EncryptText($response);
+				}
+			}						
+		}
+			
+		$processed_response['formatted_output']  = $response;
+			
+		return $processed_response;
+    }
+
+	/**
+     * Used to validate certain function parameters
+     * 
+     * It checks if the given function parameter is valid
+     * 	 
+     * @since 1.0.0
+	 * @internal
+	 * @param string $parameter_name the name of the parameter
+	 * @param string $parameter_value the value of the parameter
+	 * @param array $all_parameter_values the value of all the method parameters
+	 * @param array $all_parsed_parameters details of all the method parameters
+	 * @param array $all_return_values the return value of the function
+	 * @param array $all_return_parameters details of all the return value parameters
+	 * @param bool $is_return if set to true then the return value needs to be validated
+	 * 
+	 * @return array $validation_result the result of validating the method parameters
+	 *    is_valid => boolean indicates if the parameters are valid
+	 *    validation_message => string the validation message if the parameters could not be validated
+     */
+    public function ValidateFunctionParameter($parameter_name, $parameter_value, $all_parameter_values, $all_parsed_parameters, $all_return_values, $all_return_parameters, $is_return)
+	{
+		/** The result of validating the parameter */
+    	$validation_result    = array("is_valid"=>true,"validation_message"=>"");
+		
+		return $validation_result;
+	}
+		
+    /**
+     * Used to save the error message to database
+	 * 
+     * This function formats the error message and saves it to database
+     * 
+     * @since 1.0.0
+     * @param array $error_parameters the error parameters. it contains following keys:
+     *    error_level => int the error level
+	 *    error_type => int [Error~Exception] the error type. it is either Error or Exception
+     *    error_message => string the error message
+     *    error_file => string the error file name
+     *    error_line => int the error line number
+     *    error_context => array the error context
+	 * @param array $server_data the information about the server that sent the error data	 
+     */
+    final private function LogErrorToDatabase($error_parameters, $server_data, $mysql_query_log)
+    {        
+        /** The line break is fetched from application configuration **/
+        $line_break                                  = $this->GetConfig("general","line_break");
+		/** The error context is encoded */
+		$error_parameters['error_context']           = $this->GetComponent("encryption")->Encode($error_parameters['error_context']);
+		/** The server data is added to the error data */
+		$error_parameters['server_data']             = $server_data;
+		/** The mysql query log is added to the error data */
+		$error_parameters['mysql_query_log']         = $mysql_query_log;
+		
+		/** The timestamp is added to the error message */
+		$error_parameters['created_on']              = time();
+		/** The mysql table name where the error data will be logged */
+		$error_table_name                            = $this->GetConfig("general", "mysql_table_names", "error");
+		/** The logging information */
+		$logging_information                         = array("database_object"=>$this->GetComponent("frameworkdatabase"), "table_name"=>$error_table_name);
+		/** The parameters for saving log data */
+		$parameters                                  = array("logging_information"=>$logging_information,
+														 "logging_data"=>$error_parameters,
+														 "logging_destination"=>"database"
+													    );											
+		/** The error data is saved to database */
+		$this->GetComponent("logging")->SaveLogData($parameters);
     }
 }

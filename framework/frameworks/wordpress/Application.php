@@ -1,6 +1,6 @@
 <?php
 
-namespace Framework\Application\WordPress;
+namespace Framework\Frameworks\WordPress;
 
 use \Framework\Object\WordPressDataObject as WordPressDataObject;
 
@@ -14,11 +14,11 @@ use \Framework\Object\WordPressDataObject as WordPressDataObject;
  * @package    WordPress
  * @author     Nadir Latif <nadir@pakjiddat.com>
  * @license    https://www.gnu.org/licenses/gpl-2.0.html GNU General Public License, version 2
- * @version    Release: 1.0.1
+ * @version    Release: 1.0.2
  * @link       N.A
  */
 class Application extends \Framework\Application\Application
-{   
+{	  
 	/**
 	 * Used to activate the plugin
 	 *
@@ -26,9 +26,10 @@ class Application extends \Framework\Application\Application
 	 *
 	 * @since 1.0.0
 	 */
-	public static function WP_Activate()
-	{
-
+	public function WP_Activate()
+	{        
+		/** The plugin options and meta options are deleted */
+        $this->DeletePluginOptions();
 	}
 	
 	/**
@@ -38,9 +39,10 @@ class Application extends \Framework\Application\Application
 	 *
 	 * @since 1.0.0
 	 */
-	public static function WP_Deactivate()
+	public function WP_Deactivate()
 	{
-
+		/** The plugin options and meta options are deleted */
+        $this->DeletePluginOptions();
 	}
 	
 	/**
@@ -205,16 +207,24 @@ class Application extends \Framework\Application\Application
 	/**
 	 * The WordPress admin page is initialized
 	 *
+	 * It calls the admin init callback registered by the user in the application configuration
+	 * 
 	 * @since 1.0.0
 	 */
 	public function WP_InitAdmin()
-	{		
+	{
+		/** The user id of the logged in user */
+		$user_id                                                        = get_current_user_id();
+		/** The user id is set in the application configuration */
+		$this->SetConfig("wordpress", "user_id", $user_id);
 		/** The wordpress configuration is fetched */
 		$wordpress_configuration                                        = $this->GetConfig("wordpress");
+		/** If the user did not specify the admin init callback, then the function returns */
+		if (!isset($wordpress_configuration['admin_init_callback'][0])) return;
 		/** The object used to set the settings page content is fetched */
 		$object_name                                                    = $wordpress_configuration['admin_init_callback'][0];
 		$object                                                         = $this->GetComponent($object_name);
-		$wordpress_configuration['admin_init_callback'][0]              = $object;		
+		$wordpress_configuration['admin_init_callback'][0]              = $object;
 		/** If the init admin page callback is not callable then an exception is thrown */
 		if(!is_callable($wordpress_configuration['admin_init_callback']))
 		    throw new \Exception("Invalid callback function defined for initializing admin page");
@@ -232,7 +242,10 @@ class Application extends \Framework\Application\Application
 	public function WP_Enqueue($configuration_name,$is_script)
 	{		
 		/** The wordpress configuration is fetched */
-		$wordpress_configuration=$this->GetConfig("wordpress");
+		$wordpress_configuration = $this->GetConfig("wordpress");
+		/** If the configuration is not set then it is returned */
+		if (!isset($wordpress_configuration[$configuration_name])) return;
+		
 		for($count = 0; $count < count($wordpress_configuration[$configuration_name]); $count++) {
 
             if(!$is_script)wp_enqueue_style( 
@@ -260,6 +273,50 @@ class Application extends \Framework\Application\Application
 	}
 	
 	/**
+	 * Used to display admin notices
+	 *
+	 * This function is used to display admin notice messages
+	 * It is called each time an admin page is loaded
+	 * It displays a notifcation message if the plugin has not been configured from the settings page
+	 *
+	 * @since 1.0.0
+	 */
+	public function DisplayAdminNotices()
+	{
+		/** The options id is fetched */
+	    $options_id                                                  = $this->GetComponent("application")->GetOptionsId("options");			           
+		/** The current plugin options are fetched */
+		$options                                                     = $this->GetComponent("application")->GetPluginOptions($options_id);
+		/** If the options are not set then an information message is displayed to the user */
+		if (!is_array($options)) {
+			/** The information message that is displayed to the user */		
+		    $information_message                                     = "You have not configured the settings for the Islam Companion plugin. 
+		                                                                <a href='/wp-admin/options-general.php?page=islam-companion-settings-admin'>Click here</a> to configure the plugin"; 
+		}
+		/** If the current plugin version is not the latest version then an information message is displayed to the user */
+		else if (!$this->IsLatestPluginVersionInstalled()) {
+			/** The information message that is displayed to the user */		
+		    $information_message                                     = "You are running an old version of the Islam Companion plugin. 
+		                                                                Please update the plugin to the latest version. 
+		                                                                <a href='/wp-admin/options-general.php?page=islam-companion-settings-admin'>Click here</a> to update the plugin to the latest version";
+		}
+		/** If no information message needs to be displayed, then the function returns */
+		else return;
+		
+		/** The path to the template folder */
+		$template_folder_path                                       = $this->GetConfig("path","application_template_path");	
+		/** The template parameters for the admin notice html template */
+		$template_parameters                                        = array("admin-notice-class" => "update-nag is-dismissable",
+		                                                                        "admin-notice-message"=>$information_message);																     
+		/** The path to the admin notice html template file */
+		$template_file_path                                         = $template_folder_path . DIRECTORY_SEPARATOR . "admin_notice.html";
+		/** The html template is rendered using the given parameters */
+		$admin_notice_html                                          = $this->GetComponent("template")->RenderTemplateFile($template_file_path, $template_parameters);   
+		/** The admin notice message box is displayed */
+		$this->DisplayOutput($admin_notice_html);			
+	}
+	
+	/**
 	 * The plugin options are fetched
 	 *
 	 * It fetches the plugin options
@@ -278,6 +335,64 @@ class Application extends \Framework\Application\Application
 		    $options              = json_decode($options,true);
 		
 		return $options;		
+	}
+	
+	/**
+	 * The plugin options are deleted
+	 *
+	 * It deletes the plugin options and meta options
+	 * 
+	 * @since 1.0.0
+	 * @param string $option_id id of the option to delete
+	 * @param string $meta_option_id id of the meta option to delete
+	 * 
+	 * @return boolean $is_deleted used to indicate if the option was successfully deleted
+	 */
+	public function DeletePluginOptions($option_id, $meta_option_id)
+	{
+		/** The options id is fetched */
+	    $option_id               = $this->GetComponent("application")->GetOptionsId("options");		
+		/** The meta options id is fetched */
+	    $meta_option_id          = $this->GetComponent("application")->GetOptionsId("meta_options");			
+		/** The current plugin options are deleted from WordPress */
+		$is_deleted              = delete_option( $option_id ) & delete_option( $meta_option_id );
+	
+		return $is_deleted;		
+	}
+	
+	/**
+	 * The rpc function is authenticated
+	 *
+	 * It escapes the rpc arguments
+	 * It also authenticates the rpc function call
+	 * It uses the given user name and password
+	 * And checks if WordPress has a user with this information
+	 * 
+	 * @since 1.0.0
+	 * @param array $args the parameters of the rpc function	 
+	 * 
+	 * @return mixed $rpc_function_parameters the escaped rpc parameters or
+	 * rpc server error if the user login information is not correct
+	 */
+	public function RpcAuthentication($args)
+	{
+		/** The global xmlrpc server object */		
+		global $wp_xmlrpc_server;
+		/** The rpc function parameters */
+		$rpc_function_parameters       = array();
+		/** The rpc arguments are escaped */
+        $wp_xmlrpc_server->escape($args);
+		/** The user name */
+		$username                      = $args[1];
+		/** The password */
+        $password                      = $args[2];
+        /** If the login info is not correct then false is returned */
+        if (! $user = $wp_xmlrpc_server->login($username,$password))
+            $rpc_function_parameters   = $wp_xmlrpc_server->error;
+		else
+			$rpc_function_parameters   = $args;
+		
+		return $rpc_function_parameters;
 	}
 	
 	/**
@@ -307,8 +422,7 @@ class Application extends \Framework\Application\Application
 	 * @return string $option_id the id of the option
 	 */
 	public function GetOptionsId($option_name)
-	{
-		
+	{	
 		/** The user id of the logged in user */
     	$user_id                    = get_current_user_id();
     	/** The wordpress configuration is fetched */
@@ -452,82 +566,54 @@ class Application extends \Framework\Application\Application
 	}
 	
 	/**
-	 * Used to import the contents of an array to WordPress
+	 * Used to check the current plugin version
 	 *
-	 * It creates a new custom post for each element in the array
+	 * It checks the version of the plugin on plugins.svn.wordpress.org
+	 * If the version of the plugin does not match the version of the installed plugin then
+	 * Plugin returns false. Otherwise plugin returns true	 
+	 *
+	 * @since 1.0.0
 	 * 
-	 * @since 1.0.1
-	 * @param string $post_type the name of the post type
-	 * @param array $file_details the details of the file to be imported. it is an array with following keys:
-	 * data => the array contents
-	 * key_field => the name of the key field used to uniquely identify the post
-	 * title_field => the field name that will be used for the post title
-	 * content_field => the field name that will be used for the post content
-	 * fields => the list of field names. all field names except for title and content field names are considered as custom fields
-	 * fields_to_ignore => the list of fields to exlude from the import	 	
-	 * @param int $start_line the line at which to start the import. it should be greater than or equal to 1
-	 * @param int $line_count the line at which to end the import. it should be less than or equal to the size of the data to be imported
+	 * @return boolean $is_latest_version indicates if the latest version of the plugin is installed
 	 */
-	public function ImportFile($post_type,$file_details,$start_line,$line_count)
+	public function IsLatestPluginVersionInstalled()
 	{
-		/** The configuration object is fetched */
-		$configuration_object                               = $this->GetConfigurationObject();
-	    /** The data to be imported */
-		$data                                               = $file_details['data'];	
-		/** The name of the key field */
-		$key_field                                          = $file_details['key_field'];	
-		/** The title field */
-		$title_field                                        = $file_details['title_field'];
-		/** The content field */
-		$content_field                                      = $file_details['content_field'];
-		/** The name of all the fields of the file */
-		$field_list                                         = $file_details['fields'];
-		/** The list of fields to ignore */
-		$fields_to_ignore                                   = $file_details['fields_to_ignore'];		
-		/** The components of each meta data item is extracted using regular expression */
-		for ($count1 = ($start_line-1); $count1 < $line_count; $count1++) {				
-		    /** The data to be saved */
-			$post_data                                      = array();				
-			/** The post author is set to the user id of the logged in user */
-		    $post_data['post_author']                       = $this->GetConfig("wordpress","user_id");
-			/** The concatenation of all the field values */
-			$combined_values                                = "";
-			/** The data to be saved is generated */
-			for ($count2 = 0; $count2 < count($data[$count1]); $count2++) {
-			    /** The field name */
-				$field_name                                 = $field_list[$count2];
-				/** The field value */
-				$field_value                                = $data[$count1][$count2];
-				/** All the field values are combined */
-				$combined_values                            = $combined_values.$field_value;
-				/** If the field name is not in list of fields to ignore */
-				if (!in_array($field_name, $fields_to_ignore)) {
-				    /** If the field name does not match the title field then the field is added to custom field list */
-					if ($field_name == $title_field) {
-				        /** The title for custom post */
-					    $post_data['post_title']            = $field_value;
-                    }
-				    /** The field name and value are added as custom field */
-				    $post_data["custom_".$field_name]       = $field_value;					    
-				}
-			}
-            /** The md5 checksum of all the field values. It is used to ensure data has not been updated */
-            $post_data['custom_checksum']                   = md5($combined_values);				
-			/** The parameters for the WordPress object. It indicates the type of object to be created */
-			$parameters                                     = array("type"=>"post","type_name"=>$post_type);
-			/** WordPress data object is created */
-			$wordpress_data_object                          = new WordPressDataObject($configuration_object,$parameters);
-			/** The WordPress data object is set to read/write */
-			$wordpress_data_object->SetReadOnly(false);
-			/** The data is set to the WordPress data object */
-			$wordpress_data_object->SetData($post_data);
-			/** The key field for the object is set */
-			$wordpress_data_object->SetKeyField($key_field);
-			/** The WordPress data is saved */
-			$wordpress_data_object->Save();
-		}
-	}
+		/** Indicates if the current plugin version is the latest version */
+		$is_latest_version                              = true;
+		/** The options id for the plugin meta options is fetched */
+	    $meta_options_id                                = $this->GetComponent("application")->GetOptionsId("meta_options");
+		/** The plugin meta options are fetched */
+		$meta_options                                   = $this->GetComponent("application")->GetPluginOptions($meta_options_id);
+		/** If the plugin version was not saved in the meta options */
+		if (!isset($meta_options['plugin_version_check_date']) || (isset($meta_options['plugin_version_check_date']) && (time() - $meta_options['plugin_version_check_date']) > (2*7*3600*24))) {				
+		    /** The url of the readme.txt file */
+		    $readme_file_url                            = $this->GetConfig("path","readme_file_url");
+            /** The readme.txt file of the plugin is fetched from the WordPress plugin repository */
+            $file_contents                              = $this->GetComponent("filesystem")->GetFileContent($readme_file_url);
+		    /** The stable tag value is extracted */
+		    preg_match_all("/Stable tag: (.+)/i", $file_contents, $matches);
+		    /** The latest plugin version */
+		    $latest_plugin_version                      = $matches[1][0];
+		    /** The plugin file path */
+		    $plugin_file_path                           = $this->GetConfig("path","base_path") . DIRECTORY_SEPARATOR . "index.php";
+		    /** The plugin meta data is fetched */		
+		    $plugin_data                                = get_plugin_data($plugin_file_path);
+		    /** The current plugin version */
+		    $current_plugin_version                     = $plugin_data['Version'];
+		    /** If the latest plugin version is installed */
+		    if (str_replace(".", "", $latest_plugin_version) > str_replace(".", "", $current_plugin_version))
+   		        $is_latest_version                      = false;
+			
+			/** The plugin version check date is updated */
+			$meta_options['plugin_version_check_date']  = time();		
+		    /** The plugin meta options are updated */
+		    $this->GetComponent("application")->SavePluginOptions($meta_options, $meta_options_id);
+		
+   	    }
 
+		return $is_latest_version;
+	}
+	
     /**
      * Register the filters and actions with WordPress.
      *
@@ -553,9 +639,9 @@ class Application extends \Framework\Application\Application
         }
         /** The actions are registered with WordPress */
         foreach ($actions as $hook) {
-            \add_filter($hook['hook'], array($hook['component'],$hook['callback']), $hook['priority'], $hook['accepted_args']);
+            \add_action($hook['hook'], array($hook['component'],$hook['callback']), $hook['priority'], $hook['accepted_args']);
         }
-		
+	
 		$output = false;
 		
 		return ($output);

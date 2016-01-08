@@ -1,5 +1,24 @@
 Changelog:
 
+1.1.0 (January 8, 2016)    
+    1) Added DeleteCustomPosts function to WordPress Application file 
+    2) Corrected minor bugs in RenderHtmlTable function in BasicSiteTemplate.php
+    3) Renamed the object property is_browser_application to context in the class ErrorHandler
+    4) Moved the WordPress package from application namespace to frameworks namespace
+    5) Added two empty functions PreProcessRequest and PostProcessRequest to Application.php
+    6) Added a new class Api which derives from Application class
+    7) Added a new class to the Utilities Framework package called Reflection
+    8) Added new functions df_create_table, df_drop_column and df_rename_column to DatabaseFunctions class
+    9) Added a new class to the object package called DataObjectBackupRestore. It allows the user to backup and restore data. It can be used to create backup and restore scripts
+    10) Added call to session_regenerate_id function in Configuration.php. It reduces chances of session hijacking       
+    11) Updated SaveTestData function in Testing.php file so it saves the test data to database    
+    12) Added a new class called Logging to utilities package. It allows logging test data, variable data, error data and access data
+    13) Removed email, log file and web hooks from ErrorHandler class file
+    14) Added a new class called Profiling to utilities package. It provides profiling information about functions. e.g execution time, stack trace etc
+    15) Added LogErrorToDatabase function to Application.php. It allows saves errors and exceptions to database
+    16) Added the function IsLatestPluginVersionInstalled to Application.php file in wordpress package. It checks if current wordpress plugin is the latest version
+    17) Updated Application.php file in wordpress package, so it deletes plugin options when the plugin is activated or deactivated  
+    
 1.0.14 (December 7, 2015)    
     1) Corrected bug in Wordpress Application file
     2) Added user_id configuration option to WordPress DefaultConfiguration.php

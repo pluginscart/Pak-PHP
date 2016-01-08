@@ -1,10 +1,10 @@
 <?php
-error_reporting(1);
-ini_set("display_errors", "1");
-
-use Framework\Utilities\DatabaseFunctions as DatabaseFunctions;
-
+namespace Framework\Utilities;
+error_reporting(E_ALL);
+ini_set("display_errors",1);
 include('../DatabaseFunctions.php');
+
+echo "<h2>Testing DatabaseFunctions class</h2>";
 /* Enter your database connection information. You should first import the sql file given in data folder */
 $connection_information            = array("host"=>"localhost","user"=>"nadir","password"=>"kcbW5eFSCbPXbJGLHvUGG8T8","database"=>"dev_pakphp","debug"=>"2","charset"=>"utf8");
 
@@ -32,7 +32,7 @@ function SelectQuery($connection_information)
     /** The DatabaseFunctions object is created */
 	$database                     = new DatabaseFunctions($parameters);
 	/** The database table name */
-	$table_name                   = "example_cached_data";
+	$table_name                   = "cached_data";
 	/** The table name is set */
 	$database->df_set_table($table_name);
 	/** The database field names are fetched */
@@ -44,7 +44,7 @@ function SelectQuery($connection_information)
 	/** The select fields */
 	$main_query                   = array();		
 	/** Optional table name. Useful for multiple tables */
-	$main_query[0]['table']       = "example_cached_data";
+	$main_query[0]['table']       = "cached_data";
 	/** The select field for the above table */
 	$main_query[0]['field']       = "*";
 		
@@ -55,7 +55,7 @@ function SelectQuery($connection_information)
 	/** The field value */
 	$where_clause[0]['value']     = "InsertQuery";
 	/** The option table name of the above field. Useful for multiple tables */
-	$where_clause[0]['table']     = "example_cached_data";
+	$where_clause[0]['table']     = "cached_data";
 	/** The operation. e.g =,<,>,!= */
 	$where_clause[0]['operation'] = "=";
 	/** The operator. e.g AND, OR, NOT */
@@ -66,15 +66,15 @@ function SelectQuery($connection_information)
 	/** The value of second field */
 	$where_clause[1]['value']     = "1";
 	/** The optional table name */
-	$where_clause[1]['table']     = "example_cached_data";
+	$where_clause[1]['table']     = "cached_data";
 	/** The operation. e.g =,<,>,!= */
 	$where_clause[1]['operation'] = ">=";
 	/** The operator. e.g AND, OR, NOT */
 	$where_clause[1]['operator']  = "";
 	/** The order by clause is set */
-	$database->df_set_order_by("example_cached_data", "id", "DESC");
+	$database->df_set_order_by("cached_data", "id", "DESC");
 	/** The group by clause is set */
-	$database->df_set_group_by("example_cached_data", "created_on");
+	$database->df_set_group_by("cached_data", "created_on");
 	/** The limit clause is set */
 	$database->df_set_limits(0,1);
 	/** The database query is fetched */
@@ -95,7 +95,7 @@ function SelectQuery($connection_information)
 	
 	/** The query log is displayed */
 	echo "<h3>Query Log: </h3>";
-	$database->df_display_query_log();
+	$database->df_display_query_log(false);
 	
 	/** The query log is cleared */
 	$database->df_clear_query_log();
@@ -123,14 +123,14 @@ function UpdateQuery($connection_information)
     /** The DatabaseFunctions object is created */
 	$database                     = new DatabaseFunctions($parameters);
 	/** The database table name */
-	$table_name                   = "example_cached_data";
+	$table_name                   = "cached_data";
 	/** The table name is set */
 	$database->df_set_table($table_name);
 	
 	/** The fields to update */
 	$main_query                   = array();		
 	/** Optional table name. Useful for multiple tables */
-	$main_query[0]['table']       = "example_cached_data";
+	$main_query[0]['table']       = "cached_data";
 	/** The update field for the above table */
 	$main_query[0]['field']       = "created_on";
 	/** The new value for the field */
@@ -143,7 +143,7 @@ function UpdateQuery($connection_information)
 	/** The field value */
 	$where_clause[0]['value']     = "TestFunction";
 	/** The option table name of the above field. Useful for multiple tables */
-	$where_clause[0]['table']     = "example_cached_data";
+	$where_clause[0]['table']     = "cached_data";
 	/** The operation. e.g =,<,>,!= */
 	$where_clause[0]['operation'] = "=";
 	/** The operator. e.g AND, OR, NOT */
@@ -165,7 +165,7 @@ function UpdateQuery($connection_information)
 	
 	/** The query log is displayed */
 	echo "<h3>Query Log: </h3>";
-	$database->df_display_query_log();
+	$database->df_display_query_log(false);
 	
 	/** The query log is cleared */
 	$database->df_clear_query_log();
@@ -195,7 +195,7 @@ function InsertQuery($connection_information)
 	/** Auto commit is disabled. So the data will only be saved to database when the commit function is called */
 	$database->df_toggle_autocommit(false);
 	/** The database table name */
-	$table_name                   = "example_cached_data";
+	$table_name                   = "cached_data";
 	/** The table name is set */
 	$database->df_set_table($table_name);
 	
@@ -249,7 +249,7 @@ function InsertQuery($connection_information)
 	
 	/** The query log is displayed */
 	echo "<h3>Query Log: </h3>";
-	$database->df_display_query_log();
+	$database->df_display_query_log(false);
 	
 	/** The query log is cleared */
 	$database->df_clear_query_log();
@@ -277,7 +277,7 @@ function DeleteQuery($connection_information)
     /** The DatabaseFunctions object is created */
 	$database                     = new DatabaseFunctions($parameters);
 	/** The database table name */
-	$table_name                   = "example_cached_data";
+	$table_name                   = "cached_data";
 	/** The table name is set */
 	$database->df_set_table($table_name);
 
@@ -308,7 +308,7 @@ function DeleteQuery($connection_information)
 		
 	/** The query log is displayed */
 	echo "<h3>Query Log: </h3>";
-	$database->df_display_query_log();
+	$database->df_display_query_log(false);
 	
 	/** The query log is cleared */
 	$database->df_clear_query_log();
