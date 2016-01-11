@@ -1,4 +1,7 @@
 Changelog:
 
+1.0.1 (January 11, 2016)
+	1) Corrected minor bugs
+	
 1.0.0 (December 19, 2015)
 	1) Initial release

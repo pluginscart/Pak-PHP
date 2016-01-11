@@ -12,7 +12,7 @@ namespace Framework\Utilities;
  * @package    Utilities
  * @author     Nadir Latif <nadir@pakjiddat.com>
  * @license    https://www.gnu.org/licenses/gpl-2.0.html GNU General Public License, version 2
- * @version    1.1.0 
+ * @version    1.1.1
  */
 abstract class UtilitiesFramework
 {
