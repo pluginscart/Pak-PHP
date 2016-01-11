@@ -14,8 +14,7 @@ use \Framework\Configuration\Base as Base;
  * @package    Testing
  * @author     Nadir Latif <nadir@pakjiddat.com>
  * @license    https://www.gnu.org/licenses/gpl-2.0.html GNU General Public License, version 2
- * @version    Release: 1.0.0
- * @link       N.A
+ * @version    Release: 1.0.0 
  */
 class Testing extends Base
 {    
@@ -30,8 +29,7 @@ class Testing extends Base
      * It validates the given output produced by the application for a given url
      * The output is e.g html,array or json encoded string
      * It checks the type of the output and then call the relavant validation function
-     * 
-     * @since 1.0.0
+     *      
      * @param string $output_type the type of output. e.g json or html		 
      * @param string $output the output of the application
      * 
@@ -55,8 +53,7 @@ class Testing extends Base
      * 
      * It checks if given array has valid data
      * The array has valid data if it has a key called result which is equal to success		 
-     * 
-     * @since 1.0.0
+     *      
      * @param array $output the array to validate
      * 
      * @return $array $validation_results the results of validation. the array contains 2 keys. error=> success or error
@@ -84,8 +81,7 @@ class Testing extends Base
      * It checks if given string is valid json
      * It also validates json object
      * Json object is valid if it has a key called result which is equal to success		 
-     * 
-     * @since 1.0.0
+     *      
      * @param string $output_string the json string to validate
      * 
      * @return $array $validation_results the results of validation. the array contains 2 keys. result=> success or error
@@ -113,8 +109,7 @@ class Testing extends Base
      * 
      * It validates the given html string and returns the response from the validation service
      * It uses the validation service given in application configuration file
-     * 
-     * @since 1.0.0		 
+     *      
      * @param $string $html_content the html string to be validated
      * 
      * @return $array $validation_results the results of validation. the array contains 2 keys. result=> success or error
@@ -126,9 +121,11 @@ class Testing extends Base
     	if (strpos($html_content,"<!DOCTYPE html>") === false) {
     		$html_content       = $this->InsertHtmlToTemplate($html_content, "basicsite");			
     	}
-		
-        $filesystem_obj         = \Framework\Utilities\UtilitiesFramework::Factory("filesystem");
+		/** The filesystem object is fetched */
+        $filesystem_obj         = $this->GetComponent("filesystem");
+		/** The application url context */
         $context                = $this->GetConfig("general", "parameters", "context");
+		/** The application test parameters */
         $test_parameters        = $this->GetConfig("testing");
         
         $html_content = str_replace("\r", "", $html_content);
@@ -173,8 +170,7 @@ class Testing extends Base
      * It saves the results of testing to file given in application configuration
 	 * If the test results file does not exist
 	 * Then the function returns without saving the test results
-     * 
-     * @since 1.0.0		 
+     *      		
      * @param string $test_results results of testing		 		 
      */
     final private function SaveTestResults($test_results)
@@ -196,19 +192,30 @@ class Testing extends Base
      * 
      * It fetches the application parameters from application configuration
      * It saves the application parameters to the framework database
-     * 
-     * @since 1.0.0
+     *      
 	 * @param string $object_name The name of the object that has the function
-	 * @param string $function_name The name of the function used to handle the url request 
+	 * @param string $function_name The name of the function used to handle the url request
+	 * @param string $function_type [template, controller, not defined] the type of function 
      */
-    final public function SaveTestData($object_name, $function_name)
+    final public function SaveTestData($object_name, $function_name, $function_type)
     {        
         /** The application parameters are fetched */
-        $test_data                                     = $this->GetConfig('general', 'parameters');
+        $test_data                                     = $this->GetConfig('general', 'parameters');		
+		/** The current option */
+        $option                                        = $this->GetConfig('general', 'option');
 		/** The test data is encoded */
 		$test_data                                     = $this->GetComponent("encryption")->EncodeData($test_data);
+		/** The current module name */
+		$module_name                                   = $this->GetConfig("general", "module");
 		/** The data that needs to be saved to database */
-		$test_data                                     = array("object_name" => $object_name, "function_name" => $function_name, "function_parameters" => $test_data, "created_on" => time());
+		$test_data                                     = array("option_name" => $option,
+                                                               "module_name" => $module_name,
+															   "function_type" => $function_type,
+															   "object_name" => $object_name,
+															   "function_name" => $function_name,
+															   "function_parameters" => $test_data,
+															   "created_on" => time()
+														);
 		/** The mysql table name where the data will be logged */
 		$test_table_name                               = $this->GetConfig("general", "mysql_table_names", "test");
 		/** The logging information */
@@ -222,6 +229,7 @@ class Testing extends Base
 														    array('field_name'=>"object_name",'field_value'=>$object_name,'operation'=>"=",'operator'=>"AND"),
 														    array('field_name'=>'function_name','field_value'=>$function_name,'operation'=>"=",'operator'=>""),														    								     
 														);
+			/** The log data is cleared from database */														
 		    $this->GetComponent("logging")->ClearLogDataFromDatabase($logging_information, $condition);
 		}
 		
@@ -230,6 +238,7 @@ class Testing extends Base
 																"logging_data"=>$test_data,
 																"logging_destination"=>"database",
 														);
+														
 		/** The test data is saved to database */
 		$this->GetComponent("logging")->SaveLogData($parameters);
     }
@@ -239,8 +248,7 @@ class Testing extends Base
      * Used to log variable values to database
      * 
      * It saves the value of the given variable to the framework database
-     * 	 
-     * @since 1.0.0
+     *     
 	 * @internal
 	 * @param string $variable_name the name of the variable
 	 * @param string $variable_value the value of the variable	
@@ -270,8 +278,7 @@ class Testing extends Base
      * 
      * If the function parameter is true then the valid assert count is increased
      * Otherwise the invalid assert count is increased
-     * 
-     * @since 1.0.0
+     *
      * @param boolean $expression an expression that is either true or false
 	 * @param string $description the description of the assert
      */
@@ -289,8 +296,7 @@ class Testing extends Base
      * Used to check if given parameters are equal
      * 
      * It compares value of given function parameters
-     * 
-     * @since 1.0.0
+     *     
      * @param boolean $is_valid indicates if the parameters are equal
 	 * @param string $description the description of the assert
      */
@@ -309,9 +315,7 @@ class Testing extends Base
      * Used to call the given script
      * 
      * It calls the relevant function of the given script
-     * The script name is given in application configuration
-     * 
-     * @since 1.0.0     
+     * The script name is given in application configuration             
      */
     final public function CallScript()
     {
@@ -373,8 +377,7 @@ class Testing extends Base
      * Each function that is tested should return an array with 2 keys:
      * result=> the result of the test. i.e success or error
      * message=> the message from the function. e.g error message
-     * 
-     * @since 1.0.0		 
+     *
      * @throws Exception an object of type Exception if an exception occured
      */
     final public function RunUnitTests()
@@ -419,12 +422,12 @@ class Testing extends Base
                         /** If the callback function is callable then it is called with parameters in test data file */
                         if (is_callable($testing_callback)) {
                             /** The test data */
-                            $test_data           = $this->LoadTestData($object_name, $class_function);
+                            $test_data           = $this->LoadTestData($object_name, $class_function, "unittest");
                             /** The number of test cases of the test function */
                             $test_cases          = 0;						
                             /** The test function is called for each parameter in test data file */
                             for ($count2 = 0; $count2 < count($test_data); $count2++) {
-                                call_user_func_array($testing_callback, $test_data);
+                                call_user_func_array($testing_callback, $test_data[$count]);
                                 $test_cases++;
 								//sleep(2);
                             }
@@ -437,7 +440,7 @@ class Testing extends Base
                         $this->GetConfig('general', 'line_break')."Number of asserts: " . ($this->valid_assert_count - $current_assert_count).
                         $this->GetConfig('general', 'line_break').
                         $this->GetConfig('general', 'line_break');
-						/** The current assert count */
+						/** The current assert count is updated */
                         $current_assert_count = $this->valid_assert_count;
                     }
                     catch (Exception $e) {
@@ -471,87 +474,79 @@ class Testing extends Base
      * 
      * It tests each application url
      * For each url it calls the template functions or controller function for the url   
-     * 
-     * @since 1.0.0		 
+     *     
      * @throws Exception an object of type Exception if an exception occured         
      */
     final public function RunFunctionalTests()
     {
         /** The number of functional tests run */
-        $test_count   = 0;
+        $test_count                         = 0;
         /** The results of testing */
-        $test_results = "";
-        /** The result of testing single function */
-        $test_result  = "";
+        $test_results                       = "";
         /** Start time for the funtional tests */
-        $start_time   = time();
-        foreach ($this->GetConfig('general', 'application_url_mappings') as $option => $option_data) {
-            /** If a testing function is defined for the url then it is called before the function is tested */
-            if (isset($option_data['testing'])) {
-                /** If skip_testing configuration is set to true then the url is not tested */
-                if ($option_data['testing']['skip_testing'])
-                    continue;
-                /** The testing function is run if the test object name and function name are not empty */
-                else if ($option_data['testing']['object_name'] != "" && $option_data['testing']['function_name'] != "") {
-                    /** The testing object is fetched from application configuration */
-                    $testing_object = $this->GetComponent($option_data['testing']['object_name']);
-                    $function_name  = $option_data['testing']['function_name'];
-                    
+        $start_time                         = time();
+		/** The total number of test cases */
+        $total_number_of_test_cases         = 0;
+		/** The application url options to test */
+		$test_options                       = $this->GetConfig("testing", "test_options");
+		/** The application url mapping */
+		$application_url_mappings           = $this->GetConfig('general', 'application_url_mappings');
+		foreach ($application_url_mappings as $option => $option_data) {
+			/** If certain application url options need to be tested */
+			if (count($test_options) > 0 && !in_array("all", $test_options) && !in_array($option, $test_options)) continue;			
+        	/** The current application option is set */        	
+        	$this->SetConfig("general", "option", $option);
+            /** If skip_testing configuration is set to true then the url is not tested */
+            if ($option_data['testing']['skip_testing']) continue;	
+			/** The test data */
+            $test_data                      = $this->LoadTestData("", "", $option);
+			/** The total number of test cases */
+			$number_of_test_cases           = count($test_data);
+			/** The application function is called for each test data item */
+			for ($count = 0; $count < $number_of_test_cases; $count++) {
+				/** The test data is set as the application parameters */
+                $this->SetConfig("general","parameters",$test_data[$count]['function_parameters']);
+				/** The testing function is run if the test object name and function name are not empty */
+                if (isset($option_data['testing']) && $option_data['testing']['object_name'] != "" && $option_data['testing']['function_name'] != "") {
+                    /** The test object */
+                    $testing_object         = $this->GetComponent($option_data['testing']['object_name']);
+					/** The test function name */
+                    $function_name          = $option_data['testing']['function_name'];                    
                     /** The testing callback function is defined */
-                    $testing_callback = array(
-                        $testing_object,
-                        $function_name
-                    );
-                    
-                    $current_assert_count = $this->valid_assert_count;
+                    $testing_callback       = array(
+							                        $testing_object,
+							                        $function_name
+							                    );
+                    /** If the test data preparation function is callable, then it is called */
                     if (is_callable($testing_callback))
-                        call_user_func($testing_callback);
+                        call_user_func_array($testing_callback, array($test_data[$count]));
+					/** If the test data preparation function is not callable, then an exception is thrown */
                     else
-                        throw new \Exception("Testing function : " . $function_name . " was not found for test object: " . $option_data['testing']['object_name']);
-                    
-                }
+                        throw new \Exception("Testing function : " . $function_name . " was not found for test object: " . $option_data['testing']['object_name']);                    
+                }			    
+                /** The application function output */
+                $function_output            = $this->GetComponent("application")->RunApplicationFunction($option);				
+			    /** If the response format is string */			    
+			    if ($test_data[$count]['function_parameters']['response_format'] == 'string') {
+			        $test_result            = $this->ValidateOutput("html", $function_output['data']);
+			    }
+			    /** If the response format is array */
+			    else if ($test_data[$count]['function_parameters']['response_format'] == 'array') {
+ 			        $test_result            = $this->ValidateOutput("array", $function_output['data']);
+			    }
+				/** If the response format is json */
+			    else if ($test_data[$count]['function_parameters']['response_format'] == 'json') {
+ 			        $test_result            = $this->ValidateOutput("json", $function_output['data']);
+			    }
+			    /** If the result of validating the function output is not successfull, then an exception is thrown */
+			    $this->AssertTrue(isset($test_result['result']) && $test_result['result'] == 'success',"Functional test for url: " . $option . " returned invalid response. Details: " . $test_result['message']);
             }
-            /** The full path to the test data file */
-            $test_file_name = $option . "_test_data.json";
-            /** the testing configuration parameters */
-            $testing        = $this->GetConfig('testing');
-            /** If the test data folder path is not defined then an exception is thrown */
-            if (!isset($testing['test_data_folder']))
-                throw new \Exception("Invalid test data folder path");
-            $test_data_file_path = $this->GetConfig('testing', 'test_data_folder') . DIRECTORY_SEPARATOR . $test_file_name;
-			
-            /** If the test data file does not exist then an exception is thrown */
-            if (!is_file($test_data_file_path))
-                throw new \Exception("Invalid test data file path for option: ".$option);
-            /** The contents of the test data file are read */
-            $application_parameters = $this->GetComponent('filesystem')->ReadLocalFile($test_data_file_path);
-            /** The test data is json decoded */
-            $application_parameters = json_decode($application_parameters, true);
-            /** The test data is saved to application configuration */
-            $updated_application_parameters = array_replace_recursive($this->GetConfig("general","parameters"), $application_parameters);			
-            $this->SetConfig("general","parameters",$updated_application_parameters);
-            
-            /** If a controller is defined for the current url option then it is called */
-            if (isset($option_data['controller'])) {
-                /** The controller function is run */
-                $response    = $this->GetComponent("application")->RunControllerFunction($option);
-                $test_result = $this->ValidateOutput("array", $response);
-            }
-            /** If no controller is defined for the current url option and a template is defined then the template is rendered and then displayed in the browser */
-            else if (isset($option_data['templates'])) {
-                /** The application template is rendered */
-                $template_contents = $this->GetComponent("template")->Render("root", array());
-                $test_result       = $this->ValidateOutput("html", $template_contents);
-            }
-            /** If no controller and no template is defined for the current url option then an exception is thrown */
-            else
-                throw new \Exception("No controller or template defined for the current url.");
-            
-            if (!is_array($test_result) || (is_array($test_result) && $test_result['result'] != 'success'))
-                throw new \Exception("Functional test for url: " . $option . " returned invalid response. Details: " . $test_result['message']);
-            
-            $test_results .= ($test_count + 1) . ") Testing url: " . $option . " result: passed" . $this->GetConfig('general', 'line_break');
+            /** The test results is updated */
+            $test_results .= ($test_count + 1) . ") Testing url: " . $option . " result: passed. number of test cases: " . $number_of_test_cases . $this->GetConfig('general', 'line_break');
+			/** The total number of tests is increased */			
             $test_count++;
+			/** The total number of test cases is increased */
+			$total_number_of_test_cases+=$number_of_test_cases;
         }
         
         /** End time for the unit tests */
@@ -561,6 +556,7 @@ class Testing extends Base
         $test_results .= "Result of functional testing: ";
         $test_results .= $this->GetConfig('general', 'line_break') . $this->GetConfig('general', 'line_break');
         $test_results .= "Number of functions tested: " . $test_count . $this->GetConfig('general', 'line_break');
+        $test_results .= "Number of test cases: " . $total_number_of_test_cases . $this->GetConfig('general', 'line_break');
         $test_results .= "Number of asserts: " . $this->valid_assert_count . $this->GetConfig('general', 'line_break');
         $test_results .= "Time taken: " . ($end_time - $start_time) . " sec" . $this->GetConfig('general', 'line_break') . $this->GetConfig('general', 'line_break');
         
@@ -575,45 +571,59 @@ class Testing extends Base
 	 * It may be overriden by child classes
 	 * 
      * It reads the test data from database
-     * 
-     * @since 1.0.0
+     *
 	 * @param string $object_name the name of the object that contains the function to be tested
      * @param string $function_name the name of the function to be tested     
-	 *  
+	 * @param string $option the name of the url option
+	 *   
      * @return $test_data the test data contents
      */
-    protected function LoadTestData($object_name, $function_name)
+    protected function LoadTestData($object_name, $function_name, $option)
     {
     	/** The required test data */
-		$test_data                                     = array(0);
+		$test_data                                     = array();
+		/** The current module name */
+		$module_name                                   = $this->GetConfig("general", "module");
     	/** The mysql table name where the data will be logged */
 		$test_table_name                               = $this->GetConfig("general", "mysql_table_names", "test");
 		/** The logging information */
 		$logging_information                           = array("database_object"=>$this->GetComponent("frameworkdatabase"), "table_name"=>$test_table_name);
 		/** The parameters for saving log data */
-		$parameters                                    = array(
-																array(
-																    "field_name"=>"object_name",
-																    "field_value"=>$object_name
-																),
-																array(
-																    "field_name"=>"function_name",
-																    "field_value"=>$function_name
-																)
-														);
-														
+		$parameters                                    = array();
+		/** If the object name is not empty then it is set */
+		if ($object_name != "") {
+			$parameters[]                              = array("field_name"=>"object_name","field_value"=>$object_name);
+		}
+		/** If the function name is not empty then it is set */		
+		if ($function_name != "") {
+			$parameters[]                              = array("field_name"=>"function_name", "field_value"=>$function_name);
+		}
+		/** If the application url option is not empty then it is set */		
+		if ($option != "") {
+			$parameters[]                              = array("field_name"=>"option_name", "field_value"=>$option);
+		}
+		/** The module name is set */		
+		$parameters[]                                  = array("field_name"=>"module_name", "field_value"=>$module_name);
+	
 		/** The log data is fetched from database */													
-    	$log_data                                      = $this->GetComponent("logging")->FetchLogDataFromDatabase($logging_information, $parameters);		
+    	$log_data                                      = $this->GetComponent("logging")->FetchLogDataFromDatabase($logging_information, $parameters);
+		
 		/** Each log data item is converted to test data item */
 		for ($count = 0; $count < count($log_data); $count++) {
 			/** Log data item */
 			$log_data_item                             = $log_data[$count];
+			/** The id and created_on fieldd are removed from the test data */
+			unset($log_data_item['id']);
+			unset($log_data_item['created_on']);
 			/** The function parameters field which is the test data is decoded */
-			$function_parameters                       = $this->GetComponent("encryption")->DecodeData($log_data_item['function_parameters']);
+			$log_data_item['function_parameters']      = $this->GetComponent("encryption")->DecodeData($log_data_item['function_parameters']);			
 			/** The function parameters are added to the test data */
-			$test_data                                 = array_merge($test_data, array($function_parameters));
+			$test_data                                 = array_merge($test_data, array($log_data_item));
 		}
-
+		
+		/** If there is no test data, then empty test data is used */
+		if (count($test_data) ==0 )$test_data          = array(array(0));
+		
 		return $test_data;
     }
     
@@ -624,7 +634,6 @@ class Testing extends Base
      * The output of this function should be valid html5
      * This function can be used to validate html5 content
      * 
-     * @since 1.0.0
      * @param string $html the html to be added to the html5 template
      * @param string $template_object_name the name of the template object to use. it must support the base_page template
      * 

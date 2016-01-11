@@ -42,7 +42,6 @@ final class Logging
      * If it does not exist then it is created
      * The instance is returned
      * 
-     * @since 1.0.0
      * @return Utilities static::$instance name the instance of the correct child class is returned 
      */
     public static function GetInstance()
@@ -58,8 +57,7 @@ final class Logging
 	 * It is used to log the given data
      * 
      * It logs the data to the given destination     
-     * 
-     * @since 1.0.0		 
+     *  
      * @param array $parameters it contains the data for the logging class object
      * logging_information => array the information needed for logging the data. e.g email address or database information
      * logging_data => array the data that needs to be logged. it should be an associative array with depth of 1		  		
@@ -84,8 +82,7 @@ final class Logging
      * 
      * It saves the given log data to database
 	 * The log data must be an associative array with depth of 1 level     
-     * 
-     * @since 1.0.0
+     *      
 	 * @param array $logging_information the information needed for logging the data. e.g email address or database information
 	 *    database_object => the database object. it is an object of type MysqlDataObject
 	 *    table_name => string the name of the database table where the log data will be stored
@@ -127,8 +124,7 @@ final class Logging
      * 
      * It checks if the log data to be saved already exists in database
 	 * If the data already exists then the function returns true     
-     * 
-     * @since 1.0.0		 
+     *      
 	 * @param array $logging_information the information needed for logging the data. e.g email address or database information
 	 *    database_object => the database object. it is an object of type MysqlDataObject
 	 *    table_name => string the name of the database table where the log data will be stored
@@ -185,8 +181,7 @@ final class Logging
 	 * It is used to fetch log data from database
      * 
      * It reads log data from database and returns the data
-     * 
-     * @since 1.0.0
+     *      
 	 * @param array $logging_information the information needed for logging the data. e.g email address or database information
 	 *    database_object => the database object. it is an object of type MysqlDataObject
 	 *    table_name => the name of the log table
@@ -239,8 +234,7 @@ final class Logging
      * It is used to clear the log data from database
      * 
      * It removes the log files from database using the given field information
-     * 
-     * @since 1.0.0
+     *      
 	 * @param array $logging_information the information needed for logging the data. e.g email address or database information
 	 *    database_object => the database object. it is an object of type MysqlDataObject
 	 *    table_name => the name of the log table

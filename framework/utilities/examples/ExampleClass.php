@@ -57,7 +57,7 @@ final class ExampleClass
         $database_obj        = UtilitiesFramework::Factory("database", $database_parameters);
         $db_link             = $database_obj->df_get_id();
         /** The name of the table where the cached data will be stored */
-        $table_name          = "cached_data";
+        $table_name          = "pakphp_cached_data";
         /** The caching object is fetched with given parameters */
         $caching_parameters  = array(
             "db_link" => $database_obj->df_get_id(),
@@ -107,7 +107,7 @@ final class ExampleClass
     public function DatabaseTest()
     {
     	echo "<h2>Testing function: DatabaseTest </h2>";
-		echo "<h4>Contents of table: example_cached_data</h4>";
+		echo "<h4>Contents of table: pakphp_cached_data</h4>";
 		
         /** The database object is fetched */
 	    $database_parameters      = array(
@@ -128,7 +128,7 @@ final class ExampleClass
         $where_clause             = array();
         $where_clause[0]['field'] = "function_name";
         $where_clause[0]['value'] = "TestFunction";
-        $where_clause[0]['table'] = "example_cached_data";
+        $where_clause[0]['table'] = "pakphp_cached_data";
         
         $query   = $database_obj->df_build_query($main_query, $where_clause, 's');
         $db_rows = $database_obj->df_all_rows($query);

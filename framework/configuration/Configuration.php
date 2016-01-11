@@ -16,8 +16,7 @@ use \Framework\Configuration\Base as Base;
  * @package    Configuration
  * @author     Nadir Latif <nadir@pakjiddat.com>
  * @license    https://www.gnu.org/licenses/gpl-2.0.html GNU General Public License, version 2
- * @version    1.0.0
- * @link       N.A
+ * @version    1.0.0 
  */
 abstract class Configuration extends Base
 {
@@ -33,9 +32,8 @@ abstract class Configuration extends Base
      * 
      * Defines the user configuration
 	 * Updated the user configuration using the user defined application parameters	
-     * Sets the user defined configuration as object property	 
-     * 
-     * @since 2.0.0
+     * Sets the user defined configuration as object property
+	 * 
 	 * @param array $parameters the application parameters given by the user	 	
      */
     public function __construct($parameters){
@@ -55,8 +53,7 @@ abstract class Configuration extends Base
      * Creates the given object
 	 * The object must be mentioned by the user in the application configuration file 		
      * The object is created using GetInstance method if it is supported or new operator if class is not Singleton
-     * 		
-     * @since 1.0.0
+	 * 
 	 * @param array $parameters the optional object parameters
 	 * If not set then then the object parameters specified in the application configuration are used
 	 * 
@@ -64,7 +61,7 @@ abstract class Configuration extends Base
      */
     final protected function InitializeObject($object_name,$parameters=false)
     {
-        $object_information = $this->GetConfig('required_frameworks',$object_name);
+        $object_information = $this->GetConfig('required_frameworks',$object_name);		
         /** The class parameters are initialized */
         if ($parameters)
 			$object_information['parameters'] = $parameters;
@@ -90,6 +87,7 @@ abstract class Configuration extends Base
            $framework_class_name,
            "GetInstance"
        );
+	 
        if (is_callable($callable_singleton_method))
            $framework_class_obj = call_user_func_array($callable_singleton_method, array($object_information['parameters']));
        /** If it is not a Singleton class then an object of the class is created using new operator */
@@ -112,9 +110,7 @@ abstract class Configuration extends Base
      * Used to include required files
      * 
      * It gets list of all files that need to be included
-     * Including the files given in test parameters and url handling parameters
-     * 
-     * @since 1.0.0		  
+     * Including the files given in test parameters and url handling parameters  
      */
     final protected function IncludeRequiredClasses()
     {
@@ -161,9 +157,7 @@ abstract class Configuration extends Base
      * Used to initialize the application
      * 
      * Initializes objects needed by the application
-     * Sets application configuration
-     * 
-     * @since 1.0.0     
+     * Sets application configuration	  
      */
     protected function Initialize()
     {
@@ -189,8 +183,6 @@ abstract class Configuration extends Base
      * This function checks for user defined callbacks
 	 * It replaces callbacks with objects
 	 * If the user has not defined callbacks then the default application callbacks are used
-     * 
-     * @since 1.0.0	
      */
     final protected function EnableAuthenticationAndErrorHandling()
     {
@@ -242,10 +234,8 @@ abstract class Configuration extends Base
                 if (is_callable($this->GetConfig($authentication_method.'_auth','auth_callback')))
                     call_user_func($this->GetConfig($authentication_method.'_auth','auth_callback'));
                 else {
-               	    /** The application object */
-            	    $application_obj = $this->GetComponent("application");
-				    /** The default authentication callback is called */
-				    call_user_func(array($application_obj,ucfirst($authentication_method)."Authentication"));
+               	    /** The default authentication callback is called */
+				    call_user_func(array($this->GetComponent("api"),ucfirst($authentication_method)."Authentication"));
                 }                
             }
         }
@@ -256,8 +246,6 @@ abstract class Configuration extends Base
      * 		 
      * This function fetches parameter attribute given in url
 	 * It decoded the parameter value and saves it to application configuration
-     * 
-     * @since 1.0.0	
      */
     final protected function GetUrlParameters()
     {    	       
@@ -281,8 +269,6 @@ abstract class Configuration extends Base
      * Used to enable php sessions
      * 		 
      * This function enables php sessions
-     * 
-     * @since 1.0.0	
      */
     final protected function EnableSessions()
     {    	       
@@ -304,9 +290,7 @@ abstract class Configuration extends Base
 	/**
      * Used to return the application configuration
      * 		 
-     * This function runs the application configuration     
-     * 
-     * @since 1.0.0
+     * This function runs the application configuration
 	 * 
 	 * @return array $configuration the application configuration
      */
@@ -320,8 +304,6 @@ abstract class Configuration extends Base
      * Used to get the list of component objects
      * 		 
      * This function returns the list of component objects
-     * 
-     * @since 1.0.0
 	 * 
 	 * @return array $components the application components
      */
@@ -334,9 +316,8 @@ abstract class Configuration extends Base
 	/**
      * Used to set the application configuration
      * 		 
-     * This function sets the application configuration     
-     * 
-     * @since 1.0.0	 
+     * This function sets the application configuration
+	 * 
 	 * @param array $configuration the application configuration
      */
     final public function SetConfiguration($configuration)
@@ -350,8 +331,6 @@ abstract class Configuration extends Base
      * This function runs the application
 	 * It first initializes the application configuration
 	 * It then runs the application by calling the Main function of the application
-     * 
-     * @since 1.0.0
 	 * 
 	 * @return string $response the application response
      */

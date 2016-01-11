@@ -787,6 +787,16 @@ body{
 	text-align: left;
 }
 
+.td-60-right{
+	width: 60%;
+	text-align: right;
+}
+
+.td-40-right{
+	width: 40%;
+	text-align: left;
+}
+
 .td-50-left{
 	width: 50%;
 	text-align: left;

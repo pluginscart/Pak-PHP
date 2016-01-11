@@ -489,7 +489,7 @@ final class Reflection
 	    $parsed_comments['parameters']         = $this->ExtractParameters("param",$comments);
 		/** The method return value */
 	    $parsed_comments['return_value']       = $this->ExtractParameters("return",$comments);
-		$parsed_comments['return_value']       = $parsed_comments['return_value'][0];
+		$parsed_comments['return_value']       = (isset($parsed_comments['return_value'][0])) ? $parsed_comments['return_value'][0] : '';
 		
 		return $parsed_comments;
     }

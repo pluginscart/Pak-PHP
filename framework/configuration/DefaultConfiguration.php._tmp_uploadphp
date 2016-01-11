@@ -14,8 +14,7 @@ use \Framework\Configuration\Base as Base;
  * @package    Configuration
  * @author     Nadir Latif <nadir@pakjiddat.com>
  * @license    https://www.gnu.org/licenses/gpl-2.0.html GNU General Public License, version 2
- * @version    1.0.0
- * @link       N.A
+ * @version    1.0.0 
  */
 class DefaultConfiguration extends Base
 {
@@ -23,8 +22,7 @@ class DefaultConfiguration extends Base
      * Used to get default general configuration
      * 
      * It returns configuration containing general parameters
-     * 
-     * @since 1.0.0     	
+     *           
      * @param array $user_configuration the user configuration
      * @throws object Exception an exception is thrown if the application name was not set in the user configuration
      * @throws object Exception an exception is thrown if no option parameter was given in url and no default option was defined
@@ -125,8 +123,7 @@ class DefaultConfiguration extends Base
      * Used to get default authentication configuration
      * 
      * It returns configuration containing api, http and session authentication
-     * 
-     * @since 1.0.0
+     *      
      * @param array $configuration the default configuration
      * @param array $user_configuration the user configuration
      * 
@@ -161,7 +158,6 @@ class DefaultConfiguration extends Base
      * 
      * It returns configuration containing test information
      * 
-     * @since 1.0.0
      * @param array $configuration the default configuration
      * @param array $user_configuration the user configuration
      * 
@@ -226,10 +222,9 @@ class DefaultConfiguration extends Base
      * 
      * It returns configuration containing path information
      * 
-     * @since 1.0.0
      * @param array $configuration the default configuration
      * @param array $user_configuration the user configuration
-     * @throws 
+	 *      
      * @return array $configuration the default configuration information
      */
     private function GetPathConfig($configuration, $user_configuration)
@@ -317,8 +312,7 @@ class DefaultConfiguration extends Base
      * Used to get default required frameworks configuration
      * 
      * It returns configuration containing required frameworks information
-     * 
-     * @since 1.0.0
+     *      
      * @param array $configuration the default configuration
      * @param array $user_configuration the user configuration
      * 
@@ -396,8 +390,7 @@ class DefaultConfiguration extends Base
      * Used to initialize php settings
      * 
      * It sets the php settings
-     * 
-     * @since 1.0.0
+     *      
      * @param array $user_configuration the user configuration
      */
     private function InitializePhpSettings($user_configuration)
@@ -431,8 +424,7 @@ class DefaultConfiguration extends Base
      * If the application is under development then all errors are displayed
      * If the application is not under development then no errors are displayed		
      * It also sets the default time zone     
-     * 
-     * @since 1.0.0     
+     *      
      * @param array $user_configuration user defined application configuration
      * 
      * @return array $configuration the application configuration information

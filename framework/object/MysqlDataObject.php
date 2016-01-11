@@ -13,7 +13,6 @@ namespace Framework\Object;
  * @author     Nadir Latif <nadir@pakjiddat.com>
  * @license    https://www.gnu.org/licenses/gpl-2.0.html GNU General Public License, version 2
  * @version    Release: 1.0.0
- * @link       N.A
  */
 class MysqlDataObject extends DataObject
 {		  
@@ -21,8 +20,7 @@ class MysqlDataObject extends DataObject
      * Used to set the order by field
      * 
      * It sets the order by field
-	 * 
-     * @since 1.0.0
+	 *      
 	 * @param string $table_name name of the MySQL database table
      * @param string $field_name sort field of the MySQL database table
 	 * @param string $order_by_direction sort direction. e.g ASC or DESC
@@ -36,9 +34,7 @@ class MysqlDataObject extends DataObject
 	/**
      * Used to get the table name
      * 
-     * It gets the table name
-	 * 
-     * @since 1.0.0     
+     * It gets the table name	     
 	 * 
 	 * @return string $table_name the table name for the object     
      */
@@ -54,7 +50,6 @@ class MysqlDataObject extends DataObject
      * 
      * It sets the table name
 	 * 
-     * @since 1.0.0
      * @param string $table_name name of the MySQL database table from which the data is loaded     
      */
     final public function SetTableName($table_name)
@@ -68,8 +63,7 @@ class MysqlDataObject extends DataObject
      * It reads data from database and loads it to the $data property of the object
      * It uses the key field value given as parameter
      * The current object corresponds to a single database row
-     * 
-     * @since 1.0.0
+     *      
 	 * @param mixed $parameters the parameters used to fetched the data. for relational data, it should have following keys:
 	 * fields => list of field names to fetch
      * condition => the condition used to fetch the data from database
@@ -216,8 +210,7 @@ class MysqlDataObject extends DataObject
      * Used to delete the object data
      * 
      * It deletes data from database
-     * 
-     * @since 1.0.0		 
+     *      
 	 * @throws object Exception an exception is thrown if the object is read only
      * @throws object Exception an exception is thrown if the object could not be deleted
      */
@@ -256,9 +249,7 @@ class MysqlDataObject extends DataObject
      * It checks if the key field of the record already exists in database
      * If it does then the function returns true
      * Otherwise it returns false
-     * 
-     * @since 1.0.0
-     * 
+	 * 
      * @return boolean $record_exists it is true if the record already exists. it is false otherwise 
      */
     final public function RecordExists()
@@ -301,8 +292,7 @@ class MysqlDataObject extends DataObject
      * 
      * It saves the object data to database. If the key field of the data contains a value
      * Then the data is updated. Otherwise it is added
-     * 
-     * @since 1.0.0
+	 * 
 	 * @throws object Exception an exception is thrown if the object is read only
 	 * 
      * @return int $record_id the value of the key field of the saved row 
@@ -352,7 +342,6 @@ class MysqlDataObject extends DataObject
      * 
      * It returns the data table name from application configuration
      * 
-     * @since 1.0.0
 	 * @param string $data_type the type of the data
 	 * 
 	 * @return string $data_table_name name of the MySQL table for the given data type
@@ -370,8 +359,7 @@ class MysqlDataObject extends DataObject
      * Used to set the meta information for the given data type	 
      * 
      * It sets the table name and field name for the given data type	
-     * 
-     * @since 1.0.0
+     *
 	 * @param mixed $meta_information the meta information to set
 	 * it is an array with following keys:
 	 * data_type => string the type of the data. e.g author

@@ -8,7 +8,7 @@ require("ExampleClass.php");
 $example_obj=new ExampleClass();
 //$example_obj->AuthenticationTest();
 //$example_obj->EncryptionTest();
-//$example_obj->CachingTest();
+$example_obj->CachingTest();
 //$example_obj->DatabaseTest();
 //$example_obj->ExcelTest();
 //$example_obj->EmailTest();
@@ -18,5 +18,5 @@ $example_obj=new ExampleClass();
 //$example_obj->TemplateTest();
 //$example_obj->ReflectionTest();
 //$example_obj->LoggingTest();
-$example_obj->ProfilingTest();
+//$example_obj->ProfilingTest();
 ?>

@@ -15,7 +15,6 @@ use \Framework\Configuration\Base as Base;
  * @author     Nadir Latif <nadir@pakjiddat.com>
  * @license    https://www.gnu.org/licenses/gpl-2.0.html GNU General Public License, version 2
  * @version    Release: 1.0.0
- * @link       N.A
  */
 class Api extends Application
 {		
@@ -24,7 +23,6 @@ class Api extends Application
 	 *
 	 * It calls the HandleRequest
 	 * 
-	 * @since 1.0.0
 	 * @param string $option the url option
 	 * @param string $module_name the name of the module
 	 * @param string $response_format [array~json~string~encrypted string~encrypted json] used to indicate how the output of the function should be formatted by the framework
@@ -66,7 +64,6 @@ class Api extends Application
 	 * If the response contains an error then an exception is thrown
 	 * Otherwise the api response is returned
 	 * 
-	 * @since 1.0.0
 	 * @param string $option the url option
 	 * @param string $module_name the name of the module
 	 * @param string $response_format [array~json~string~encrypted string~encrypted json] used to indicate how the output of the function should be formatted by the framework
@@ -105,7 +102,6 @@ class Api extends Application
 	 *
 	 * It saves the api access data to database log table
 	 * 
-	 * @since 1.0.0
 	 * @param string $request_type [local~remote] the type of api request
 	 * @param string $option request option
 	 * @param array $parameters the api parameters
@@ -157,9 +153,8 @@ class Api extends Application
 	 * It makes an api request to the given module
 	 *
 	 * It makes an api requests to the local api or remote api
-	 * Depending on the request_type parameter	 
+	 * Depending on the request_type parameter
 	 * 
-	 * @since 1.0.0
 	 * @param string [local~remote] $request_type the type of module to call
 	 * @param string $option the url option
 	 * @param string $module_name the name of the module
@@ -213,8 +208,7 @@ class Api extends Application
      *
      * It calls the XML-RPC function given in the function parameters
 	 * It uses the php xmlrpc extension
-     * 
-     * @since 1.0.0
+	 * 
 	 * @param array $parameters it is an array with 2 keys:
 	 * rpc_function => the name of the RPC function
 	 * rpc_function_parameters => the parameters used by rpc function
@@ -250,8 +244,6 @@ class Api extends Application
 	 * 
      * This function checks the api key given in application parameters
      * The api key is checked against the valid api key given in application configuration
-     * 
-     * @since 1.0.0		 	
      */
     final public function ApiAuthentication()
     {        
@@ -260,10 +252,10 @@ class Api extends Application
 		/** The application parameters are fetched */
 		$application_parameters            = $this->GetConfig("general","parameters");
 		/** If the api key is not set in the application parameters then an exception is thrown */
-		if (!isset($application_parameters['parameters']['api_key']))
+		if (!isset($application_parameters['api_key']))
 		    throw new \Exception("API Key was not given in application parameters");
 		
-        if (!isset($api_auth['credentials']) || (isset($api_auth['credentials']) && $api_auth['credentials'] != $application_parameters['parameters']['api_key'])) {
+        if (!isset($api_auth['credentials']) || (isset($api_auth['credentials']) && $api_auth['credentials'] != $application_parameters['api_key'])) {
             die("Invalid API Key");
         }       
     }
@@ -272,8 +264,7 @@ class Api extends Application
      * Custom error handling function
      * 
      * Used to handle an error
-     * 
-     * @since 1.0.0
+	 * 
      * @param string $log_message the error log message
      * @param array $error_parameters the error parameters. it contains following keys:
      *    error_level => int the error level
@@ -295,8 +286,7 @@ class Api extends Application
      * Used to log the given error message using a web hook
 	 * 
      * This function logs the error message to a remote url
-     * 
-     * @since 1.0.0
+	 * 
      * @param array $error_parameters the error parameters. it contains following keys:
      *    error_level => int the error level
 	 *    error_type => int [Error~Exception] the error type. it is either Error or Exception
@@ -340,8 +330,7 @@ class Api extends Application
      * Used to log the given error message sent using a web hook
 	 * 
      * This function logs the error message to sent by a web hook to database
-     * 
-     * @since 1.0.0
+	 * 
      * @param string $log_message the error log message
      * @param array $error_parameters the error parameters. it contains following keys:
      *    error_level => int the error level

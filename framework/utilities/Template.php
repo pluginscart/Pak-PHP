@@ -64,8 +64,10 @@ final class Template
      * the second one is the template tag replacement string
      */
     function ExtractTemplateFileTags($template_path)
-    {                
-        $template_contents = FileSystem::GetInstance(array())->ReadLocalFile($template_path);
+    {
+    	/** The filesystem object */
+    	$filesystem_obj    = new FileSystem(array());                
+        $template_contents = $filesystem_obj->ReadLocalFile($template_path);
         
         /** All template tags of the form {} are extracted from the template file */
         preg_match_all("/\{(.+)\}/iU", $template_contents, $matches);

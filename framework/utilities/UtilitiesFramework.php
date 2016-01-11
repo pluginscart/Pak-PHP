@@ -12,8 +12,7 @@ namespace Framework\Utilities;
  * @package    Utilities
  * @author     Nadir Latif <nadir@pakjiddat.com>
  * @license    https://www.gnu.org/licenses/gpl-2.0.html GNU General Public License, version 2
- * @version    1.1.0
- * @link       N.A
+ * @version    1.1.0 
  */
 abstract class UtilitiesFramework
 {
@@ -38,8 +37,7 @@ abstract class UtilitiesFramework
      * For example an application can request multiple instances of a database abstraction object
      * Each instance has its own parameters. such as one object per datababse
      * The method throws an exception if the requested object type is not supported
-     * 
-     * @since 1.0.0
+     *      
      * @param string $object_type the type of the object that is required. e.g utilities, logging, encrpytion, database etc
      * The $object_type must match the file name of the utility object class. e.g if the file name is authentication.class.php then the $object_type should be authentication
      * The $object_type can also match an alias defined in the $object_alias_list static property
