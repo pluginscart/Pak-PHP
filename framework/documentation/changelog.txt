@@ -1,5 +1,10 @@
 Changelog:
 
+1.1.1 (January 11, 2016)
+    1) Updated functional testing feature so it uses database for storing test data
+    2) Corrected minor bugs in Reflection.php file in utilities package
+    2) Corrected minor bugs in Logging.php file in utilities package 
+    
 1.1.0 (January 8, 2016)    
     1) Added DeleteCustomPosts function to WordPress Application file 
     2) Corrected minor bugs in RenderHtmlTable function in BasicSiteTemplate.php
