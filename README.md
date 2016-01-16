@@ -10,7 +10,7 @@ Depends on: PHP Utilities Framework: General purpose collection of classes (http
 The Pak Php framework is a general purpose PHP framework. It is a component based microframework. The goal of the framework is to make it easier for the developer to write well tested and easy to maintain PHP code. The framework’s goal is also to provide features that are found in Business Process Management and Application Life Cycle Management tools. These features will be added to the framework during the course of its development.
 
 ### Installation
-1. Download the Pak Php files from this website, or from Git Hub using the command: git clone https://github.com/pakjiddat/Pak-PHP.git or download the zip file: https://github.com/pakjiddat/Pak-PHP/archive/master.zip
+1. Download the Pak Php files from Git Hub using the command: git clone https://github.com/pakjiddat/Pak-PHP.git or download the zip file: https://github.com/pakjiddat/Pak-PHP/archive/master.zip
 2. Copy the files to the folder from where they will be read by your web server
 3. The framework includes 2 example applications. wordpressexample, which is a WordPress plugin, and webexample, which is a general Web application. All framework files are in the framework folder.
 4. A single instance of the framework can support multiple applications each in its own folder
@@ -35,4 +35,4 @@ The Pak Php framework is a general purpose PHP framework. It is a component base
 11. The framework provides support for building Application Programming Interfaces (APIs)
 
 ### Tutorials
-[Developing WordPress plugins using Pak Php framework](http://pakjiddat.com/developing-wordpress-plugins-using-pak-php-framework)
+1. [Developing WordPress plugins using Pak Php framework](http://pakjiddat.com/developing-wordpress-plugins-using-pak-php-framework)
