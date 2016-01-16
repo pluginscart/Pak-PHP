@@ -36,3 +36,5 @@ The Pak Php framework is a general purpose PHP framework. It is a component base
 
 ### Tutorials
 1. [Developing WordPress plugins using Pak Php framework](http://pakjiddat.com/developing-wordpress-plugins-using-pak-php-framework)
+2. [How to test Pak Php applications](http://pakjiddat.com/how-to-test-pak-php-applications)
+3. [Writing command line scripts using Pak Php framework](http://pakjiddat.com/writing-command-line-scripts-using-pak-php-framework)
